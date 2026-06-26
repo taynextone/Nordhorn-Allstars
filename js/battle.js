@@ -37,6 +37,14 @@ const Battle = {
   flashTimer: 0,
   flashColor: null,
   
+  // Enhanced animation state
+  swishAnim: null, // { x, y, frame, score }
+  scoreBurst: null, // { x, y, frame, points }
+  hoopShake: 0,
+  netSwing: 0,
+  missBounce: null, // { x, y, vx, vy, frame }
+  ballSpin: 0,
+  
   // Battle intro state
   introTimer: 0,
   introComplete: false,
@@ -70,6 +78,12 @@ const Battle = {
     this.ballAnim = null;
     this.flashTimer = 0;
     this.flashColor = null;
+    this.swishAnim = null;
+    this.scoreBurst = null;
+    this.hoopShake = 0;
+    this.netSwing = 0;
+    this.missBounce = null;
+    this.ballSpin = 0;
     this.introTimer = 0;
     this.introComplete = false;
     gameState = GameState.BATTLE;
@@ -80,6 +94,30 @@ const Battle = {
     if (this.playerShake > 0) this.playerShake -= 0.5;
     if (this.opponentShake > 0) this.opponentShake -= 0.5;
     if (this.flashTimer > 0) this.flashTimer--;
+    if (this.hoopShake > 0) this.hoopShake -= 0.3;
+    if (this.netSwing > 0) this.netSwing -= 0.2;
+    if (this.ballSpin > 0) this.ballSpin -= 0.15;
+    
+    // Update swish animation
+    if (this.swishAnim) {
+      this.swishAnim.frame++;
+      if (this.swishAnim.frame > 30) this.swishAnim = null;
+    }
+    
+    // Update score burst
+    if (this.scoreBurst) {
+      this.scoreBurst.frame++;
+      if (this.scoreBurst.frame > 40) this.scoreBurst = null;
+    }
+    
+    // Update miss bounce
+    if (this.missBounce) {
+      this.missBounce.x += this.missBounce.vx;
+      this.missBounce.y += this.missBounce.vy;
+      this.missBounce.vy += 0.5; // gravity
+      this.missBounce.frame++;
+      if (this.missBounce.frame > 40) this.missBounce = null;
+    }
     
     switch(this.state) {
       case 'intro':
@@ -147,13 +185,15 @@ const Battle = {
     if (move.type === 'attack' || move.type === 'finisher') {
       const startX = side === 'player' ? 100 : canvas.width - 100;
       const startY = side === 'player' ? canvas.height - 200 : 100;
-      const endX = side === 'player' ? canvas.width - 100 : 100;
-      const endY = side === 'player' ? 100 : canvas.height - 200;
+      // Target the hoop position
+      const endX = side === 'player' ? canvas.width - 70 : 70;
+      const endY = side === 'player' ? 50 : canvas.height - 50;
       this.ballAnim = {
         sx: startX, sy: startY,
         ex: endX, ey: endY,
-        frame: 0, maxFrame: 30
+        frame: 0, maxFrame: 25
       };
+      this.ballSpin = 1.0;
     }
   },
   
@@ -168,7 +208,7 @@ const Battle = {
       }
     }
     
-    if (this.animFrame === 30) {
+    if (this.animFrame === 20) {
       const move = this.activeMove;
       const side = this.activeSide;
       
@@ -194,9 +234,13 @@ const Battle = {
               this.opponentShake = 8;
               this.flashTimer = 6;
               this.flashColor = PALETTE.lightest;
+              // Trigger swish animation at the hoop
+              this.swishAnim = { x: canvas.width - 70, y: 50, frame: 0, score: points };
+              this.scoreBurst = { x: canvas.width - 70, y: 70, frame: 0, points: points };
+              this.hoopShake = 6;
+              this.netSwing = 8;
             } else {
               if (this.playerBlocking) { damage = Math.floor(damage * 0.3); this.playerBlocking = false; }
-              // Equipment defense boost reduces damage further
               const defBoost = getEquipmentBoosts().defense;
               if (defBoost > 0) { damage = Math.max(1, Math.floor(damage * (1 - defBoost * 0.05))); }
               this.playerHP -= damage;
@@ -205,6 +249,18 @@ const Battle = {
               this.playerShake = 8;
               this.flashTimer = 6;
               this.flashColor = PALETTE.darkest;
+              // Swish at player's hoop
+              this.swishAnim = { x: 70, y: canvas.height - 50, frame: 0, score: points };
+              this.scoreBurst = { x: 70, y: canvas.height - 30, frame: 0, points: points };
+              this.hoopShake = 6;
+              this.netSwing = 8;
+            }
+          } else {
+            // Miss! Ball bounces away
+            if (side === 'player') {
+              this.missBounce = { x: canvas.width - 70, y: 60, vx: 2, vy: -3, frame: 0 };
+            } else {
+              this.missBounce = { x: 70, y: canvas.height - 60, vx: -2, vy: 3, frame: 0 };
             }
           }
           break;
@@ -251,10 +307,26 @@ const Battle = {
               this.opponentHP -= damage;
               this.playerScore += points;
               this.opponentShake = 12;
+              // Big swish for finisher
+              this.swishAnim = { x: canvas.width - 70, y: 50, frame: 0, score: points };
+              this.scoreBurst = { x: canvas.width - 70, y: 70, frame: 0, points: points };
+              this.hoopShake = 10;
+              this.netSwing = 12;
             } else {
               this.playerHP -= damage;
               this.opponentScore += points;
               this.playerShake = 12;
+              this.swishAnim = { x: 70, y: canvas.height - 50, frame: 0, score: points };
+              this.scoreBurst = { x: 70, y: canvas.height - 30, frame: 0, points: points };
+              this.hoopShake = 10;
+              this.netSwing = 12;
+            }
+          } else {
+            // Finisher miss
+            if (side === 'player') {
+              this.missBounce = { x: canvas.width - 70, y: 60, vx: 3, vy: -2, frame: 0 };
+            } else {
+              this.missBounce = { x: 70, y: canvas.height - 60, vx: -3, vy: 2, frame: 0 };
             }
           }
           hit = damage > 0;
@@ -404,6 +476,21 @@ const Battle = {
       this.renderBallAnim();
     }
     
+    // Miss bounce animation
+    if (this.missBounce) {
+      this.renderMissBounce();
+    }
+    
+    // Swish animation
+    if (this.swishAnim) {
+      this.renderSwish();
+    }
+    
+    // Score burst particles
+    if (this.scoreBurst) {
+      this.renderScoreBurst();
+    }
+    
     // Flash effect
     if (this.flashTimer > 0 && this.flashColor) {
       ctx.globalAlpha = this.flashTimer * 0.08;
@@ -476,6 +563,55 @@ const Battle = {
     ctx.fillStyle = 'rgba(48, 98, 48, 0.15)';
     for (let y = 0; y < canvas.height; y += 20) {
       ctx.fillRect(0, y, canvas.width, 1);
+    }
+    
+    // Draw hoops
+    this.renderHoop(canvas.width - 70, 50, false); // Top-right hoop (player attacks this)
+    this.renderHoop(70, canvas.height - 50, true); // Bottom-left hoop (opponent attacks this)
+  },
+  
+  renderHoop(cx, y, flip) {
+    const shakeX = this.hoopShake > 0 ? Math.sin(this.hoopShake * 4) * 2 : 0;
+    const bx = cx + shakeX;
+    
+    // Backboard
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.fillRect(bx - 18, y - 4, 36, 24);
+    ctx.fillStyle = PALETTE.dark;
+    ctx.fillRect(bx - 16, y - 2, 32, 20);
+    // Backboard square
+    ctx.strokeStyle = PALETTE.lightest;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx - 6, y + 2, 12, 10);
+    
+    // Rim
+    ctx.fillStyle = '#ff3333';
+    ctx.fillRect(bx - 12, y + (flip ? -2 : 20), 24, 3);
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.fillRect(bx - 12, y + (flip ? -2 : 20), 24, 1);
+    
+    // Net (with swing animation)
+    const netSwingOffset = this.netSwing > 0 ? Math.sin(this.netSwing * 3) * 3 : 0;
+    ctx.strokeStyle = PALETTE.lightest;
+    ctx.lineWidth = 1;
+    // Net strings
+    for (let i = -10; i <= 10; i += 4) {
+      const netTop = flip ? y + 20 : y - 2;
+      const netBot = flip ? y + 32 : y - 14;
+      ctx.beginPath();
+      ctx.moveTo(bx + i, netTop);
+      ctx.quadraticCurveTo(bx + i + netSwingOffset, (netTop + netBot) / 2, bx + i, netBot);
+      ctx.stroke();
+    }
+    // Horizontal net lines
+    const netTop2 = flip ? y + 20 : y - 2;
+    const netBot2 = flip ? y + 32 : y - 14;
+    for (let j = 0; j < 3; j++) {
+      const ny = netTop2 + (netBot2 - netTop2) * (j + 1) / 4;
+      ctx.beginPath();
+      ctx.moveTo(bx - 10 + netSwingOffset * 0.5, ny);
+      ctx.lineTo(bx + 10 + netSwingOffset * 0.5, ny);
+      ctx.stroke();
     }
   },
   
@@ -650,22 +786,136 @@ const Battle = {
     const progress = this.ballAnim.frame / this.ballAnim.maxFrame;
     const bx = this.ballAnim.sx + (this.ballAnim.ex - this.ballAnim.sx) * progress;
     const by = this.ballAnim.sy + (this.ballAnim.ey - this.ballAnim.sy) * progress 
-               - Math.sin(progress * Math.PI) * 60; // Arc
+               - Math.sin(progress * Math.PI) * 80; // Arc (higher)
     
-    // Draw basketball sprite
-    const ballSprite = Sprites.basketball;
-    if (ballSprite) {
-      drawSprite(ballSprite, bx - 8, by - 8, 1);
-    } else {
-      // Fallback: circle
-      ctx.fillStyle = '#306230';
-      ctx.beginPath();
-      ctx.arc(bx, by, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = PALETTE.lightest;
-      ctx.lineWidth = 1;
-      ctx.stroke();
+    // Ball shadow on court
+    ctx.fillStyle = 'rgba(15, 56, 15, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(bx, this.ballAnim.sy + (this.ballAnim.ey - this.ballAnim.sy) * progress + 4, 6, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw basketball with spin effect
+    this.drawBasketball(bx, by, progress);
+  },
+  
+  drawBasketball(cx, cy, spin) {
+    const r = 8;
+    // Ball base
+    ctx.fillStyle = '#cc6600';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Ball lines (spin effect)
+    ctx.strokeStyle = '#884400';
+    ctx.lineWidth = 1;
+    const spinOffset = spin * Math.PI * 2;
+    // Vertical line
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(spinOffset) * r, cy - r);
+    ctx.lineTo(cx - Math.cos(spinOffset) * r, cy + r);
+    ctx.stroke();
+    // Horizontal line
+    ctx.beginPath();
+    ctx.moveTo(cx - r, cy + Math.sin(spinOffset) * r);
+    ctx.lineTo(cx + r, cy - Math.sin(spinOffset) * r);
+    ctx.stroke();
+    // Center vertical
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r);
+    ctx.lineTo(cx, cy + r);
+    ctx.stroke();
+    // Center horizontal
+    ctx.beginPath();
+    ctx.moveTo(cx - r, cy);
+    ctx.lineTo(cx + r, cy);
+    ctx.stroke();
+    
+    // Highlight
+    ctx.fillStyle = 'rgba(255, 200, 100, 0.4)';
+    ctx.beginPath();
+    ctx.arc(cx - 2, cy - 3, 3, 0, Math.PI * 2);
+    ctx.fill();
+  },
+  
+  renderSwish() {
+    if (!this.swishAnim) return;
+    const { x, y, frame, score } = this.swishAnim;
+    const progress = frame / 30;
+    
+    // "SWISH!" text with scale animation
+    const scale = progress < 0.3 ? progress / 0.3 : 1;
+    const alpha = progress > 0.7 ? 1 - (progress - 0.7) / 0.3 : 1;
+    
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = `bold ${Math.floor(16 * scale)}px "Courier New", monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText('SWISH!', x, y - 10);
+    
+    // Net ripple lines
+    ctx.strokeStyle = PALETTE.lightest;
+    ctx.lineWidth = 1;
+    const rippleSize = progress * 20;
+    ctx.beginPath();
+    ctx.moveTo(x - rippleSize, y);
+    ctx.lineTo(x + rippleSize, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - rippleSize * 0.7, y + 5);
+    ctx.lineTo(x + rippleSize * 0.7, y + 5);
+    ctx.stroke();
+    
+    ctx.restore();
+  },
+  
+  renderScoreBurst() {
+    if (!this.scoreBurst) return;
+    const { x, y, frame, points } = this.scoreBurst;
+    const progress = frame / 40;
+    
+    // Points floating up
+    const floatY = y - progress * 30;
+    const alpha = 1 - progress;
+    
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = 'bold 18px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('+' + points, x, floatY);
+    
+    // Sparkle particles
+    const sparkleCount = 6;
+    for (let i = 0; i < sparkleCount; i++) {
+      const angle = (i / sparkleCount) * Math.PI * 2 + progress * 3;
+      const dist = progress * 25;
+      const sx = x + Math.cos(angle) * dist;
+      const sy = floatY + Math.sin(angle) * dist * 0.5;
+      const size = 2 * (1 - progress);
+      ctx.fillStyle = i % 2 === 0 ? PALETTE.lightest : PALETTE.light;
+      ctx.fillRect(sx - size/2, sy - size/2, size, size);
     }
+    
+    ctx.restore();
+  },
+  
+  renderMissBounce() {
+    if (!this.missBounce) return;
+    const { x, y, frame } = this.missBounce;
+    const alpha = 1 - frame / 40;
+    
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    this.drawBasketball(x, y, frame * 0.2);
+    
+    // "MISS!" text
+    ctx.fillStyle = '#ff3333';
+    ctx.font = 'bold 12px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('VERFEHLT!', x, y - 14);
+    ctx.restore();
   },
   
   renderPlayerPanel() {
