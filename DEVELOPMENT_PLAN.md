@@ -36,7 +36,7 @@
 - [ ] Bessere Pixel-Art (Aseprite-Qualität)
 - [x] Screen-Transitions (Fade, Wipe)
 - [x] Battle-Animationen (Ball fliegt, Korb-Swish)
-- [ ] Sound-Effekte (Chiptune via Web Audio)
+- [x] Sound-Effekte (Chiptune via Web Audio) — 20+ SFX: Kampf, Menü, Dialog, Item, Warp, Victory, Defeat, Level-Up, Badge
 - [ ] Hintergrundmusik (Chiptune-Tracks)
 - [ ] Speicher-System (LocalStorage)
 - [ ] Pause-Menü
