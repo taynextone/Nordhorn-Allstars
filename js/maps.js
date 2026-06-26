@@ -22,34 +22,67 @@ const Maps = {
       return ![2, 4, 5, 6, 7, 12].includes(tile);
     },
     
+    courts: [
+      { id: 1, name: 'Wohnhof-Court', badge: 'ANFÄNGER', badgeColor: '#9bbc0f',
+        pos: { x: 8, y: 16 }, trainerName: 'Tim', requiredBadges: 0 },
+      { id: 2, name: 'Schulhof-Court', badge: 'SCHÜLER', badgeColor: '#8bac0f',
+        pos: { x: 23, y: 10 }, trainerName: 'Lisa', requiredBadges: 1 },
+      { id: 3, name: 'Park-Court', badge: 'NATUR', badgeColor: '#306230',
+        pos: { x: 19, y: 16 }, trainerName: 'Mohammed', requiredBadges: 2 },
+      { id: 4, name: 'Stadion-Court', badge: 'PROFI', badgeColor: '#0f380f',
+        pos: { x: 44, y: 37 }, trainerName: 'Coach Müller', requiredBadges: 3 },
+      { id: 5, name: 'Spielplatz-Court', badge: 'KAMPF', badgeColor: '#c4944a',
+        pos: { x: 6, y: 33 }, trainerName: 'Erik', requiredBadges: 4 },
+      { id: 6, name: 'Bücherei-Court', badge: 'WEISHEIT', badgeColor: '#6b5335',
+        pos: { x: 38, y: 26 }, trainerName: null, requiredBadges: 5 },
+      { id: 7, name: 'Hausberg-Court', badge: 'STÄRKE', badgeColor: '#aa3333',
+        pos: { x: 7, y: 28 }, trainerName: null, requiredBadges: 6 },
+      { id: 8, name: 'Meister-Court', badge: 'MEISTER', badgeColor: '#aaaa33',
+        pos: { x: 44, y: 35 }, trainerName: null, requiredBadges: 7 }
+    ],
+
     trainers: [
       { x: 14, y: 10, defeated: false, name: 'Tim',
         dialog: ['Hey! Bist du der neue in der Stadt?', 'Ich bin Tim! Schulfreund von dir, erinnerst du dich?', 'Zeig mal was du kannst!'],
         build: 'SHOOTER', level: 3, sprite: 'trainerTim',
-        victoryDialog: ['Wow, du bist gut!', 'Ich habe mein Bestes gegeben.', 'Viel Erfolg auf den anderen Courts!'] },
+        victoryDialog: ['Wow, du bist gut!', 'Ich habe mein Bestes gegeben.', 'Viel Erfolg auf den anderen Courts!'],
+        badge: 'ANFÄNGER', badgeColor: '#9bbc0f' },
       { x: 30, y: 14, defeated: false, name: 'Lisa',
         dialog: ['Hello! Ich bin Lisa.', 'Tim sagt, du willst Basketball spielen?', 'Dann zeig mir was du drauf hast!'],
         build: 'ALLROUNDER', level: 4, sprite: 'trainerLisa',
-        victoryDialog: ['Du hast mich besiegt!', 'Du wirst noch weit kommen.', 'Geh zu Coach Müller, der ist der Nächste.'] },
+        victoryDialog: ['Du hast mich besiegt!', 'Du wirst noch weit kommen.', 'Geh zu Coach Müller, der ist der Nächste.'],
+        badge: 'SCHÜLER', badgeColor: '#8bac0f' },
       { x: 10, y: 22, defeated: false, name: 'Coach Müller',
         dialog: ['Du willst in der Bundesliga spielen?', 'Dann musst du mich erst besiegen!', 'Ich bin Coach Müller, der Trainer des Stadions!'],
         build: 'VERTEIDIGER', level: 6, sprite: 'coachMuller',
-        victoryDialog: ['Gut gemacht, mein Junge!', 'Du hast Potenzial.', 'Aber der Weg ist noch lang.'] },
+        victoryDialog: ['Gut gemacht, mein Junge!', 'Du hast Potenzial.', 'Aber der Weg ist noch lang.'],
+        badge: 'PROFI', badgeColor: '#0f380f' },
       { x: 38, y: 8, defeated: false, name: 'Mohammed',
         dialog: ['As-salamu alaikom!', 'Ich bin Mohammed, komme aus dem Stadion.', 'Lass uns ein Spiel machen!'],
         build: 'ALLROUNDER', level: 5, sprite: 'trainerMohammed',
-        victoryDialog: ['Mashallah, du bist stark!', 'Ich habe viel gelernt.', 'Bis zum nächsten Mal!'] },
+        victoryDialog: ['Mashallah, du bist stark!', 'Ich habe viel gelernt.', 'Bis zum nächsten Mal!'],
+        badge: 'NATUR', badgeColor: '#306230' },
       { x: 22, y: 32, defeated: false, name: 'Erik',
         dialog: ['Ich bin der beste in Nordhorn!', 'Oder zumindest... in meinem Viertel.', 'Komm schon, spiel mit mir!'],
         build: 'SHOOTER', level: 7, sprite: 'trainerErik',
-        victoryDialog: ['Okay, du hast gewonnen!', 'Aber ich revanchiere mich!', 'Bis bald!'] }
+        victoryDialog: ['Okay, du hast gewonnen!', 'Aber ich revanchiere mich!', 'Bis bald!'],
+        badge: 'KAMPF', badgeColor: '#c4944a' }
     ],
     
     interactables: [
       { x: 7, y: 6, sprite: 'npcGeneric', dialog: ['Zuhause. Hier ist alles sicher.', 'Dein Zimmer ist oben.', 'Drücke ENTER um zu interagieren.'] },
       { x: 22, y: 5, sprite: 'npcGeneric', dialog: ['Schule "Am Sportplatz"', 'Hier gibt es die besten Trainer der Stadt.', 'Der Hof hinten ist offen für alle.', 'Coach Müller trainiert hier.'] },
       { x: 38, y: 24, sprite: 'npcGeneric', dialog: ['Bücherei Nordhorn', 'Regal 3: "Basketball für Anfänger"', 'Regal 7: "Die Geschichte des Streetballs"', 'Ein guter Ort zum Lernen.'] },
-      { x: 42, y: 36, sprite: 'coachMuller', dialog: ['Stadion Nordhorn', 'Das Finale findet hier statt.', 'Du brauchst 8 Siege, um hier spielen zu dürfen.', 'Der Weg zum Champion beginnt hier.'] },
+      { x: 42, y: 36, sprite: 'coachMuller',
+        getDialog: function() {
+          const badges = (player && player.badges) ? player.badges.length : 0;
+          if (badges >= 8) {
+            return ['Stadion Nordhorn', 'Du hast alle 8 Badges!', 'Der Meister wartet im Inneren.', 'Gehe hinein und werde Champion!'];
+          } else if (badges >= 5) {
+            return ['Stadion Nordhorn', `Du hast schon ${badges} Siege!`, `Noch ${8-badges} bis zum Finale.`, 'Beeile dich, die Saison beginnt!'];
+          }
+          return ['Stadion Nordhorn', 'Das Finale findet hier statt.', `Du brauchst ${8-badges} weitere Siege.`, 'Der Weg zum Champion beginnt hier.'];
+        } },
       { x: 5, y: 30, sprite: 'npcGeneric', dialog: ['Spielplatz', 'Hier haben wir als Kinder immer gespielt.', 'Die alten Körbe sind noch da.', 'Perfekt für ein paar Übungswürfe.'] }
     ],
     
@@ -60,6 +93,15 @@ const Maps = {
         }
       }
       return null;
+    },
+
+    getCourt(index) {
+      return this.courts ? this.courts[index] : null;
+    },
+
+    getBadgeProgress() {
+      if (!player || !player.badges) return 0;
+      return player.badges.length;
     }
   }
 };

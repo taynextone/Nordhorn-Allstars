@@ -307,6 +307,15 @@ const Battle = {
           `+${expGain} EXP!`
         ];
         
+        // Award badge if trainer has one
+        if (this.opponent && this.opponent.badge) {
+          if (!player.badges.find(b => b === this.opponent.badge)) {
+            player.badges.push(this.opponent.badge);
+            dialogLines.push(`BADGE: ${this.opponent.badge}!`);
+            dialogLines.push(`(${player.badges.length}/8 Courts besiegt)`);
+          }
+        }
+        
         if (player.level > prevLevel) {
           dialogLines.push(`LEVEL UP! Du bist jetzt LV ${player.level}!`);
         }

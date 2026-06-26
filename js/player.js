@@ -120,7 +120,8 @@ class Player {
     if (currentMap && currentMap.interactables) {
       for (const obj of currentMap.interactables) {
         if (obj.x === fx && obj.y === fy) {
-          Dialog.show(obj.dialog);
+          const dialogLines = typeof obj.getDialog === 'function' ? obj.getDialog() : obj.dialog;
+          Dialog.show(dialogLines);
           return;
         }
       }

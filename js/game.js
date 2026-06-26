@@ -188,6 +188,43 @@ function renderOverworld() {
     }
   }
 
+  // Court indicators (badge markers on courts)
+  if (currentMap && currentMap.courts) {
+    for (const court of currentMap.courts) {
+      const cx = court.pos.x * 16 - cameraX + 8;
+      const cy = court.pos.y * 16 - cameraY - 4;
+      if (cx > -16 && cx < canvas.width + 16 && cy > -16 && cy < canvas.height + 16) {
+        const hasBadge = player && player.badges && player.badges.find(b => b === court.badge);
+        ctx.fillStyle = hasBadge ? (court.badgeColor || PALETTE.lightest) : PALETTE.dark;
+        ctx.strokeStyle = hasBadge ? PALETTE.lightest : PALETTE.darkest;
+        ctx.lineWidth = 1;
+        // Draw small badge octagon
+        ctx.beginPath();
+        ctx.moveTo(cx - 5, cy - 2);
+        ctx.lineTo(cx - 2, cy - 5);
+        ctx.lineTo(cx + 2, cy - 5);
+        ctx.lineTo(cx + 5, cy - 2);
+        ctx.lineTo(cx + 5, cy + 2);
+        ctx.lineTo(cx + 2, cy + 5);
+        ctx.lineTo(cx - 2, cy + 5);
+        ctx.lineTo(cx - 5, cy + 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // "!" marker if player is near and hasn't beaten this court yet
+        if (player && !hasBadge) {
+          const dist = Math.abs(player.x - court.pos.x) + Math.abs(player.y - court.pos.y);
+          if (dist <= 3) {
+            ctx.fillStyle = hasBadge ? PALETTE.lightest : '#aaaa5a';
+            ctx.font = 'bold 8px "Courier New", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('!', cx, cy - 8);
+          }
+        }
+      }
+    }
+  }
+
   // NPC-Sprites rendern (Interactables)
   if (currentMap && currentMap.interactables) {
     for (const npc of currentMap.interactables) {
@@ -333,6 +370,16 @@ function renderHUD() {
   ctx.font = '10px "Courier New", monospace';
   ctx.textAlign = 'right';
   ctx.fillText('LV:' + (player ? player.level : 1), canvas.width - 8, 16);
+
+  // Badges-Anzeige oben links
+  if (player && player.badges && player.badges.length > 0) {
+    ctx.fillStyle = PALETTE.darkest;
+    ctx.fillRect(0, 0, 72, 20);
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = '8px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('BADGES: ' + player.badges.length + '/8', 4, 14);
+  }
 }
 
 // ============================================
