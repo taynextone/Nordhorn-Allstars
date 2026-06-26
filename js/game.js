@@ -420,6 +420,11 @@ function gameLoop() {
     case GameState.BATTLE:
       Battle.render();
       Battle.update();
+      // Show dialog overlays on top of battle screen
+      if (Dialog.active) {
+        Dialog.render();
+        Dialog.update();
+      }
       break;
   }
   

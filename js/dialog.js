@@ -11,6 +11,7 @@ const Dialog = {
   textSpeed: 2,
   textTimer: 0,
   callback: null,
+  fromState: null,
   
   show(text, callback) {
     if (typeof text === 'string') {
@@ -24,6 +25,13 @@ const Dialog = {
     this.textTimer = 0;
     this.active = true;
     this.callback = callback;
+    // Only switch to DIALOG state if in overworld
+    if (gameState === GameState.OVERWORLD) {
+      this.fromState = GameState.OVERWORLD;
+      gameState = GameState.DIALOG;
+    } else {
+      this.fromState = gameState;
+    }
   },
   
   update() {
@@ -58,7 +66,7 @@ const Dialog = {
           this.callback = null;
         }
         if (gameState === GameState.DIALOG) {
-          gameState = GameState.OVERWORLD;
+          gameState = this.fromState || GameState.OVERWORLD;
         }
       }
     }

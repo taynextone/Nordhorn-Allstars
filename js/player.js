@@ -79,7 +79,7 @@ class Player {
     }
     
     // Interaktion
-    if (wasPressed('Enter') || keys[' ']) {
+    if (wasPressed('Enter') || wasPressed(' ')) {
       this.interact();
     }
   }
@@ -101,7 +101,6 @@ class Player {
             trainer.defeated = true;
             Battle.start(trainer);
           });
-          gameState = GameState.DIALOG;
         }
       }
     }
@@ -122,7 +121,6 @@ class Player {
       for (const obj of currentMap.interactables) {
         if (obj.x === fx && obj.y === fy) {
           Dialog.show(obj.dialog);
-          gameState = GameState.DIALOG;
           return;
         }
       }
@@ -130,11 +128,14 @@ class Player {
   }
   
   gainExp(amount) {
+    let learnedMove = null;
     this.exp += amount;
     while (this.exp >= this.expToNext) {
       this.exp -= this.expToNext;
-      this.levelUp();
+      const newMove = this.levelUp();
+      if (newMove) learnedMove = newMove;
     }
+    return learnedMove;
   }
   
   levelUp() {
@@ -153,9 +154,10 @@ class Player {
     const newMove = MovesData.getMoveForLevel(this.level);
     if (newMove && !this.moves.find(m => m.name === newMove.name)) {
       this.moves.push(newMove);
-      Dialog.show(`Du hast ${newMove.name} gelernt!`);
-      gameState = GameState.DIALOG;
+      // Return the move info so the caller can show the proper dialog
+      return newMove;
     }
+    return null;
   }
 }
 

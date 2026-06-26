@@ -16,10 +16,10 @@
 - [x] Spieler-Startposition & Karten-Spawn fixen
 - [x] Trainer-Sprites auf Karte rendern
 - [x] NPC-Sprites auf Karte rendern
-- [ ] Battle-Screen verbessern (bessere Sprites, Animationen)
-- [ ] Gewinn/Verlust-Logik testen & fixen
-- [ ] EXP-Balken im Battle-Screen
-- [ ] "Game Over" → zurück zum Zuhause
+- [x] Battle-Screen verbessern (bessere Sprites, Animationen)
+- [x] Gewinn/Verlust-Logik testen & fixen
+- [x] EXP-Balken im Battle-Screen
+- [x] "Game Over" → zurück zum Zuhause
 
 ## Phase 3: Content & Story
 - [ ] Alle 5 Trainer-Duelle spielbar
