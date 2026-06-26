@@ -34,7 +34,7 @@
 
 ## Phase 4: Polish & AAA-Feeling
 - [ ] Bessere Pixel-Art (Aseprite-Qualität)
-- [ ] Screen-Transitions (Fade, Wipe)
+- [x] Screen-Transitions (Fade, Wipe)
 - [ ] Battle-Animationen (Ball fliegt, Korb-Swish)
 - [ ] Sound-Effekte (Chiptune via Web Audio)
 - [ ] Hintergrundmusik (Chiptune-Tracks)
