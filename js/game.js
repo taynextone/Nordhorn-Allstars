@@ -22,7 +22,8 @@ const GameState = {
   OVERWORLD: 'overworld',
   DIALOG: 'dialog',
   BATTLE: 'battle',
-  MENU: 'menu'
+  MENU: 'menu',
+  CREDITS: 'credits'
 };
 
 let gameState = GameState.TITLE;
@@ -163,7 +164,10 @@ function renderOverworld() {
   
   // Trainer-Sprites rendern
   if (currentMap && currentMap.trainers) {
+    const badgeCount = (player && player.badges) ? player.badges.length : 0;
     for (const trainer of currentMap.trainers) {
+      // Final boss only visible when player has enough badges
+      if (trainer.isFinalBoss && badgeCount < (trainer.requiredBadges || 12)) continue;
       const tx = trainer.x * 16 - cameraX;
       const ty = trainer.y * 16 - cameraY;
       if (tx > -32 && tx < canvas.width + 32 && ty > -32 && ty < canvas.height + 32) {
@@ -178,7 +182,7 @@ function renderOverworld() {
         if (player && !trainer.defeated) {
           const dist = Math.abs(player.x - trainer.x) + Math.abs(player.y - trainer.y);
           if (dist <= 2) {
-            ctx.fillStyle = PALETTE.lightest;
+            ctx.fillStyle = trainer.isFinalBoss ? '#ff44ff' : PALETTE.lightest;
             ctx.font = 'bold 8px "Courier New", monospace';
             ctx.textAlign = 'center';
             ctx.fillText('!', tx + 8, ty - 14);
@@ -394,6 +398,96 @@ function renderHUD() {
 }
 
 // ============================================
+// CREDITS SCREEN (Endgame)
+// ============================================
+
+let creditsFrame = 0;
+let creditsScrollY = 0;
+
+const CREDITS_LINES = [
+  '',
+  'NORDHORN ALLSTARS',
+  '',
+  'DU BIST DER',
+  'BASKETBALL-KÖNIG!',
+  '',
+  '---',
+  '',
+  'GRATULATION!',
+  '',
+  'Du hast alle 12 Courts besiegt',
+  'und König bezwungen.',
+  'Nordhorn gehört dir!',
+  '',
+  '---',
+  '',
+  'TEAM:',
+  '  Code & Design: Jurica',
+  '  AI-Agent: Homer',
+  '  Engine: Canvas + JS',
+  '',
+  '---',
+  '',
+  'Danke fürs Spielen!',
+  '',
+  'Drücke ENTER für Neustart',
+  ''
+];
+
+function renderCredits() {
+  ctx.fillStyle = PALETTE.darkest;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  creditsScrollY = Math.min(creditsFrame * 0.4, CREDITS_LINES.length * 18 + 60 - canvas.height / 2);
+
+  ctx.textAlign = 'center';
+  const centerX = canvas.width / 2;
+  const startY = 60;
+
+  for (let i = 0; i < CREDITS_LINES.length; i++) {
+    const line = CREDITS_LINES[i];
+    const y = startY + i * 18 - creditsScrollY;
+    if (y < -20 || y > canvas.height + 20) continue;
+
+    if (line.includes('NORDHORN') || line.includes('KÖNIG')) {
+      ctx.fillStyle = PALETTE.lightest;
+      ctx.font = 'bold 16px "Courier New", monospace';
+    } else if (line.startsWith('---')) {
+      ctx.fillStyle = PALETTE.dark;
+      ctx.font = '10px "Courier New", monospace';
+    } else if (line === 'GRATULATION!') {
+      ctx.fillStyle = '#aaaa5a';
+      ctx.font = 'bold 14px "Courier New", monospace';
+    } else {
+      ctx.fillStyle = PALETTE.light;
+      ctx.font = '11px "Courier New", monospace';
+    }
+    ctx.fillText(line, centerX, y);
+  }
+
+  // Basketball animation at top
+  const ballY = 30 + Math.sin(creditsFrame * 0.05) * 8;
+  ctx.fillStyle = PALETTE.light;
+  ctx.beginPath();
+  ctx.arc(30, ballY, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = PALETTE.lightest;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Restart prompt at bottom
+  if (creditsFrame > 120) {
+    if (Math.floor(creditsFrame / 30) % 2 === 0) {
+      ctx.fillStyle = PALETTE.lightest;
+      ctx.font = '11px "Courier New", monospace';
+      ctx.fillText('ENTER = Neustart', centerX, canvas.height - 20);
+    }
+  }
+
+  creditsFrame++;
+}
+
+// ============================================
 // KAMERA
 // ============================================
 
@@ -482,6 +576,18 @@ function gameLoop() {
       if (Dialog.active) {
         Dialog.render();
         Dialog.update();
+      }
+      break;
+
+    case GameState.CREDITS:
+      renderCredits();
+      if (creditsFrame > 120 && (wasPressed('Enter') || wasPressed(' '))) {
+        // Reset game
+        gameState = GameState.TITLE;
+        creditsFrame = 0;
+        creditsScrollY = 0;
+        player = null;
+        currentMap = null;
       }
       break;
   }

@@ -38,7 +38,9 @@ const Maps = {
       { id: 7, name: 'Hausberg-Court', badge: 'STÄRKE', badgeColor: '#aa3333',
         pos: { x: 7, y: 28 }, trainerName: null, requiredBadges: 6 },
       { id: 8, name: 'Meister-Court', badge: 'MEISTER', badgeColor: '#aaaa33',
-        pos: { x: 44, y: 35 }, trainerName: null, requiredBadges: 7 }
+        pos: { x: 44, y: 35 }, trainerName: null, requiredBadges: 7 },
+      { id: 13, name: 'Königs-Court', badge: 'KÖNIG', badgeColor: '#ff44ff',
+        pos: { x: 44, y: 36 }, trainerName: 'König', requiredBadges: 12 }
     ],
 
     trainers: [
@@ -66,7 +68,19 @@ const Maps = {
         dialog: ['Ich bin der beste in Nordhorn!', 'Oder zumindest... in meinem Viertel.', 'Komm schon, spiel mit mir!'],
         build: 'SHOOTER', level: 7, sprite: 'trainerErik',
         victoryDialog: ['Okay, du hast gewonnen!', 'Aber ich revanchiere mich!', 'Bis bald!'],
-        badge: 'KAMPF', badgeColor: '#c4944a' }
+        badge: 'KAMPF', badgeColor: '#c4944a' },
+      { x: 44, y: 36, defeated: false, name: 'König',
+        dialog: ['Du hast alle 12 Courts besiegt...',
+        'Ich bin König, der unangefochtene Meister!',
+        'Nur der Stärkste darf mich herausfordern.',
+        'Zeig mir, was du gelernt hast!'],
+        build: 'ALLROUNDER', level: 20, sprite: 'finalBoss',
+        victoryDialog: ['Unglaublich... du hast mich besiegt!',
+        'Du bist der wahre Champion von Nordhorn!',
+        'Die Stadt gehört dir!',
+        'Dein Name wird in die Geschichte eingehen!'],
+        badge: 'KÖNIG', badgeColor: '#ff44ff',
+        isFinalBoss: true, requiredBadges: 12 }
     ],
     
     interactables: [
@@ -76,10 +90,12 @@ const Maps = {
       { x: 42, y: 36, sprite: 'coachMuller',
         getDialog: function() {
           const badges = (player && player.badges) ? player.badges.length : 0;
-          if (badges >= 8) {
-            return ['Stadion Nordhorn', 'Du hast alle 8 Badges!', 'Der Meister wartet im Inneren.', 'Gehe hinein und werde Champion!'];
+          if (badges >= 12) {
+            return ['Stadion Nordhorn', 'Du hast alle 12 Badges!', 'König wartet im Stadion.', 'Er ist der stärkste Spieler aller Zeiten!', 'Tritt ihm gegenüber und werde Basketball-König!'];
+          } else if (badges >= 8) {
+            return ['Stadion Nordhorn', `Du hast schon ${badges} Siege!`, `Noch ${12-badges} bis zum Finale.`, 'Beeile dich, die Saison beginnt!'];
           } else if (badges >= 5) {
-            return ['Stadion Nordhorn', `Du hast schon ${badges} Siege!`, `Noch ${8-badges} bis zum Finale.`, 'Beeile dich, die Saison beginnt!'];
+            return ['Stadion Nordhorn', `Du hast schon ${badges} Siege!`, `Noch ${12-badges} bis zum Finale.`, 'Beeile dich, die Saison beginnt!'];
           }
           return ['Stadion Nordhorn', 'Das Finale findet hier statt.', `Du brauchst ${8-badges} weitere Siege.`, 'Der Weg zum Champion beginnt hier.'];
         } },
@@ -93,6 +109,11 @@ const Maps = {
     getTrainerAt(x, y) {
       for (const t of this.trainers) {
         if (Math.abs(t.x - x) <= 1 && Math.abs(t.y - y) <= 1 && !t.defeated) {
+          // Final boss only appears when player has enough badges
+          if (t.isFinalBoss) {
+            const badgeCount = (player && player.badges) ? player.badges.length : 0;
+            if (badgeCount < (t.requiredBadges || 12)) continue;
+          }
           return t;
         }
       }
@@ -177,9 +198,9 @@ const Maps = {
         getDialog: function() {
           const badges = (player && player.badges) ? player.badges.length : 0;
           if (badges >= 12) {
-            return ['Arena Lingen', 'Du hast alle 12 Courts besiegt!', 'Du bist der wahre Meister!', 'Geh nach Hause und genieße deinen Ruhm!'];
+            return ['Arena Lingen', 'Du hast alle 12 Courts besiegt!', 'Du bist der wahre Meister!', 'Geh zum Stadion in Nordhorn!', 'König wartet auf dich!'];
           } else if (badges >= 9) {
-            return ['Arena Lingen', `Du hast schon ${badges} Siege!`, `Noch ${12-badges} bis zur Perfektion.`, 'Maxim wartet im Zentrum!'];
+            return ['Arena Lingen', `Du hast schon ${badges} Siege!`, `Noch ${12-badges} bis zum Finale.`, 'Maxim wartet im Zentrum!'];
           }
           return ['Arena Lingen', 'Der Champion von Lingen trainiert hier.', `Du brauchst ${9-badges} weitere Siege für den Zugang.`, 'Bewehe dich erst auf den anderen Courts!'];
         } },

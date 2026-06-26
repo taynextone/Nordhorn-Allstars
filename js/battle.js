@@ -312,7 +312,7 @@ const Battle = {
           if (!player.badges.find(b => b === this.opponent.badge)) {
             player.badges.push(this.opponent.badge);
             dialogLines.push(`BADGE: ${this.opponent.badge}!`);
-            dialogLines.push(`(${player.badges.length}/8 Courts besiegt)`);
+            dialogLines.push(`(${player.badges.length}/12 Courts besiegt)`);
           }
         }
         
@@ -329,7 +329,16 @@ const Battle = {
         
         // Set fromState so dialog returns to OVERWORLD (not back to BATTLE)
         Dialog.fromState = GameState.OVERWORLD;
-        Dialog.show(dialogLines);
+        // If final boss defeated, show credits after dialog
+        if (this.opponent && this.opponent.isFinalBoss) {
+          Dialog.show(dialogLines, () => {
+            gameState = GameState.CREDITS;
+            creditsFrame = 0;
+            creditsScrollY = 0;
+          });
+        } else {
+          Dialog.show(dialogLines);
+        }
         gameState = GameState.DIALOG;
       } else {
         // Game Over: return to home
@@ -350,6 +359,17 @@ const Battle = {
   },
   
   getOpponentMoves() {
+    // Final Boss gets special powerful moves
+    if (this.opponent && this.opponent.isFinalBoss) {
+      return [
+        { name: 'Königs-Wurf', power: 35, energy: 4, type: 'attack' },
+        { name: 'Dunkfeder', power: 45, energy: 6, type: 'attack' },
+        { name: 'Eiserne Verteidigung', power: 0, energy: 3, type: 'defense' },
+        { name: 'Herrscher-Schlag', power: 20, energy: 5, type: 'debuff' },
+        { name: 'Royal Setup', power: 0, energy: 2, type: 'setup' },
+        { name: 'Basketball-König', power: 55, energy: 8, type: 'finisher' }
+      ];
+    }
     const moves = [{ name: 'Layup', power: 15, energy: 0, type: 'attack' }];
     if (this.opponent && this.opponent.level >= 3) moves.push({ name: 'Jump Shot', power: 20, energy: 3, type: 'attack' });
     if (this.opponent && this.opponent.level >= 5) moves.push({ name: 'Block', power: 0, energy: 3, type: 'defense' });
