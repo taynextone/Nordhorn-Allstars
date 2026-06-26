@@ -27,7 +27,7 @@
 - [x] Zug-System mit Energie-Kosten ausgeglichen
 - [x] Spieler-Movepaket gleichgewichtig
 - [x] 8 "Courts" (Gym-Äquivalent) implementieren
-- [ ] Lingen als zweite Karte (Erzfeind-Stadt)
+- [x] Lingen als zweite Karte (Erzfeind-Stadt)
 - [ ] Finale / Endboss
 - [ ] Move-Tutor NPC
 - [ ] Items (Schuhe, Armbänder, Energy-Drinks)
