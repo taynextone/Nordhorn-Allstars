@@ -167,19 +167,18 @@ class Player {
 
 const MovesData = {
   moves: [
-    { name: 'Layup', power: 15, energy: 0, type: 'attack', level: 1, desc: 'Basis-Layup' },
-    { name: 'Jump Shot', power: 20, energy: 3, type: 'attack', level: 3, desc: 'Standard-Wurf' },
-    { name: 'Crossover', power: 10, energy: 2, type: 'debuff', level: 4, desc: 'Verfehlt Gegner-Steal' },
-    { name: 'Block', power: 0, energy: 3, type: 'defense', level: 5, desc: 'Blockt nächsten Angriff' },
-    { name: 'Steal', power: 12, energy: 4, type: 'attack', level: 7, desc: 'Chance auf Ballgewinn' },
-    { name: 'No-Look Pass', power: 8, energy: 2, type: 'setup', level: 9, desc: 'Combo-Setup' },
-    { name: 'Alley-Oop', power: 25, energy: 5, type: 'attack', level: 10, desc: 'Combo-Move' },
-    { name: 'Three Pointer', power: 30, energy: 6, type: 'attack', level: 12, desc: 'Drei-Punkte-Wurf' },
-    { name: 'Slam Dunk', power: 35, energy: 7, type: 'attack', level: 12, desc: 'Stark aber riskant' },
-    { name: 'Ankle Breaker', power: 15, energy: 6, type: 'debuff', level: 15, desc: 'Gegner verliert Runde' },
-    { name: 'Buzzer Beater', power: 40, energy: 8, type: 'finisher', level: 20, desc: 'Finisher bei wenig Zeit' }
+    { name: 'Layup', power: 18, energy: 0, type: 'attack', level: 1, desc: 'Sicherer Layup (2 PKT)' },
+    { name: 'Jump Shot', power: 22, energy: 3, type: 'attack', level: 2, description:'Standard-Wurf (2 PKT)' },
+    { name: 'Block', power: 0, energy: 3, type: 'defense', level: 3, desc: 'Blockt nächsten Angriff (-70% Schaden)' },
+    { name: 'Crossover', power: 10, energy: 2, type: 'debuff', level: 5, desc: 'Gegner bleibt verwirrt stehen (-1 Zug)' },
+    { name: 'Steal', power: 14, energy: 4, type: 'attack', level: 7, desc: 'Stiehlt Ball und würfelt 2 PKT' },
+    { name: 'No-Look Pass', power: 8, energy: 2, type: 'setup', level: 9, desc: 'Nächster Angriff +10 Schaden' },
+    { name: 'Alley-Oop', power: 28, energy: 5, type: 'attack', level: 11, desc: 'Spektakulärer Wurf (3 PKT)' },
+    { name: 'Three Pointer', power: 32, energy: 6, type: 'attack', level: 13, desc: 'Drei-Punkte-Wurf (3 PKT)' },
+    { name: 'Slam Dunk', power: 38, energy: 7, type: 'attack', level: 15, desc: 'Starker Dunk (2 PKT, aber hoher Schaden)' },
+    { name: 'Ankle Breaker', power: 16, energy: 6, type: 'debuff', level: 18, desc: 'Gegler kann nächsten Zug nicht ziehen' }
   ],
-  
+
   getMoveForLevel(level) {
     const move = this.moves.find(m => m.level === level);
     return move ? { ...move } : null;

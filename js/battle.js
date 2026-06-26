@@ -314,6 +314,10 @@ const Battle = {
           dialogLines.push(`Neuer Move: ${newMove.name}!`);
         }
         
+        if (this.opponent && this.opponent.victoryDialog) {
+          dialogLines.push(...this.opponent.victoryDialog);
+        }
+        
         // Set fromState so dialog returns to OVERWORLD (not back to BATTLE)
         Dialog.fromState = GameState.OVERWORLD;
         Dialog.show(dialogLines);

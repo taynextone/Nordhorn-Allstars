@@ -12,7 +12,7 @@
 - [x] Pixel-Art Sprites (Basis)
 - [x] Detaillierte Karte
 
-## Phase 2: Spielbar machen (NÄCHSTER SCHRITT)
+## Phase 2: Spielbar machen ✅ ERLEDIGT
 - [x] Spieler-Startposition & Karten-Spawn fixen
 - [x] Trainer-Sprites auf Karte rendern
 - [x] NPC-Sprites auf Karte rendern
@@ -22,8 +22,10 @@
 - [x] "Game Over" → zurück zum Zuhause
 
 ## Phase 3: Content & Story
-- [ ] Alle 5 Trainer-Duelle spielbar
-- [ ] Story-Dialoge für alle NPCs
+- [x] Alle 5 Trainer-Duelle spielbar
+- [x] Story-Dialoge für alle NPCs
+- [x] Zug-System mit Energie-Kosten ausgeglichen
+- [x] Spieler-Movepaket gleichgewichtig
 - [ ] 8 "Courts" (Gym-Äquivalent) implementieren
 - [ ] Lingen als zweite Karte (Erzfeind-Stadt)
 - [ ] Finale / Endboss
@@ -52,5 +54,5 @@
 
 ## Technische Schulden
 - [ ] Code-Refactoring (saubere Module)
-- [ ] Fehlerbehandling (Edge Cases)
+- [ ] Fehlerbehandlung (Edge Cases)
 - [ ] Kommentare im Code
