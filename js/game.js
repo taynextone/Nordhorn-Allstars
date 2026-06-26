@@ -174,10 +174,42 @@ function renderOverworld() {
         const sprite = Sprites[trainer.sprite] || Sprites.trainerTim;
         drawSprite(sprite, tx, ty - 8, 1);
         ctx.globalAlpha = 1.0;
+        // "!"-Indikator wenn Spieler in der Nähe ist (nur wenn nicht besiegt)
+        if (player && !trainer.defeated) {
+          const dist = Math.abs(player.x - trainer.x) + Math.abs(player.y - trainer.y);
+          if (dist <= 2) {
+            ctx.fillStyle = PALETTE.lightest;
+            ctx.font = 'bold 8px "Courier New", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('!', tx + 8, ty - 14);
+          }
+        }
       }
     }
   }
-  
+
+  // NPC-Sprites rendern (Interactables)
+  if (currentMap && currentMap.interactables) {
+    for (const npc of currentMap.interactables) {
+      const nx = npc.x * 16 - cameraX;
+      const ny = npc.y * 16 - cameraY;
+      if (nx > -32 && nx < canvas.width + 32 && ny > -32 && ny < canvas.height + 32) {
+        const sprite = Sprites[npc.sprite] || Sprites.npcGeneric;
+        drawSprite(sprite, nx, ny - 8, 1);
+        // "!"-Indikator wenn Spieler in der Nähe ist
+        if (player) {
+          const dist = Math.abs(player.x - npc.x) + Math.abs(player.y - npc.y);
+          if (dist <= 2) {
+            ctx.fillStyle = PALETTE.lightest;
+            ctx.font = 'bold 8px "Courier New", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('!', nx + 8, ny - 14);
+          }
+        }
+      }
+    }
+  }
+
   // Spieler-Sprite
   if (player) {
     const px = player.x * 16 - cameraX;

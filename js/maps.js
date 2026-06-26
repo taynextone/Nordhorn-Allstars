@@ -34,18 +34,18 @@ const Maps = {
         build: 'VERTEIDIGER', level: 6, sprite: 'coachMuller' },
       { x: 38, y: 8, defeated: false, name: 'Mohammed', 
         dialog: ['As-salamu alaikom!', 'Ich bin Mohammed, komme aus dem Stadion.', 'Lass uns ein Spiel machen!'], 
-        build: 'ALLROUNDER', level: 5, sprite: 'trainerTim' },
+        build: 'ALLROUNDER', level: 5, sprite: 'trainerMohammed' },
       { x: 22, y: 32, defeated: false, name: 'Erik', 
         dialog: ['Ich bin der beste in Nordhorn!', 'Oder zumindest... in meinem Viertel.', 'Komm schon, spiel mit mir!'], 
-        build: 'SHOOTER', level: 7, sprite: 'trainerTim' }
+        build: 'SHOOTER', level: 7, sprite: 'trainerErik' }
     ],
     
     interactables: [
-      { x: 7, y: 6, dialog: ['Zuhause. Hier ist alles sicher.', 'Dein Zimmer ist oben.'] },
-      { x: 22, y: 5, dialog: ['Schule "Am Sportplatz"', 'Hier gibt es die besten Trainer der Stadt.', 'Der Hof hinten ist offen für alle.'] },
-      { x: 38, y: 24, dialog: ['Bücherei Nordhorn', 'Regal 3: "Basketball für Anfänger"', 'Regal 7: "Die Geschichte des Streetballs"'] },
-      { x: 42, y: 36, dialog: ['Stadion Nordhorn', 'Das Finale findet hier statt.', 'Du brauchst 8 Siege, um hier spielen zu dürfen.'] },
-      { x: 5, y: 30, dialog: ['Spielplatz', 'Hier haben wir als Kinder immer gespielt.', 'Die alten Körbe sind noch da.'] }
+      { x: 7, y: 6, sprite: 'npcGeneric', dialog: ['Zuhause. Hier ist alles sicher.', 'Dein Zimmer ist oben.'] },
+      { x: 22, y: 5, sprite: 'npcGeneric', dialog: ['Schule "Am Sportplatz"', 'Hier gibt es die besten Trainer der Stadt.', 'Der Hof hinten ist offen für alle.'] },
+      { x: 38, y: 24, sprite: 'npcGeneric', dialog: ['Bücherei Nordhorn', 'Regal 3: "Basketball für Anfänger"', 'Regal 7: "Die Geschichte des Streetballs"'] },
+      { x: 42, y: 36, sprite: 'coachMuller', dialog: ['Stadion Nordhorn', 'Das Finale findet hier statt.', 'Du brauchst 8 Siege, um hier spielen zu dürfen.'] },
+      { x: 5, y: 30, sprite: 'npcGeneric', dialog: ['Spielplatz', 'Hier haben wir als Kinder immer gespielt.', 'Die alten Körbe sind noch da.'] }
     ],
     
     getTrainerAt(x, y) {

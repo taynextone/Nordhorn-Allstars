@@ -13,8 +13,8 @@
 - [x] Detaillierte Karte
 
 ## Phase 2: Spielbar machen (NÄCHSTER SCHRITT)
-- [ ] Spieler-Startposition & Karten-Spawn fixen
-- [ ] Trainer-Sprites auf Karte rendern
+- [x] Spieler-Startposition & Karten-Spawn fixen
+- [x] Trainer-Sprites auf Karte rendern
 - [ ] NPC-Sprites auf Karte rendern
 - [ ] Battle-Screen verbessern (bessere Sprites, Animationen)
 - [ ] Gewinn/Verlust-Logik testen & fixen
