@@ -39,7 +39,7 @@
 - [x] Sound-Effekte (Chiptune via Web Audio) — 20+ SFX: Kampf, Menü, Dialog, Item, Warp, Victory, Defeat, Level-Up, Badge
 - [x] Hintergrundmusik (Chiptune-Tracks) — 5 Tracks: Title, Overworld, Battle, Victory, Credits (Bass+Lead Sequencer)
 - [x] Speicher-System (LocalStorage) — Auto-Save nach Kämpfen/Reisen/Items, Continue auf Title-Screen, manueller Save im Menü
-- [ ] Pause-Menü
+- [x] Pause-Menü (Status mit Stats, Badges, Moves, Standort)
 - [ ] Pokédex-Äquivalent ("Spieler-Liste")
 - [ ] Mobile Touch-Controls
 - [ ] Minimap
