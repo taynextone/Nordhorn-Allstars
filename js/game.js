@@ -578,6 +578,7 @@ document.addEventListener('keydown', (e) => {
   // Initialize audio on first keypress (browser autoplay policy)
   Audio.init();
   Audio.resume();
+  Music.init();
 });
 
 document.addEventListener('keyup', (e) => {
@@ -604,6 +605,7 @@ function gameLoop() {
   switch(gameState) {
     case GameState.TITLE:
       renderTitle();
+      if (titleFrame === 1) Music.play('title');
       if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
         Audio.titleSelect();
         ScreenTransition.start(() => {
@@ -614,6 +616,7 @@ function gameLoop() {
       
     case GameState.CHARACTER_SELECT:
       renderCharacterSelect();
+      if (charSelectFrame === 1) Music.play('title');
       if (charSelectStep === 0) {
         if (wasPressed('ArrowLeft') || wasPressed('ArrowRight')) {
           charSelectGender = charSelectGender === 0 ? 1 : 0;
@@ -640,6 +643,10 @@ function gameLoop() {
       updateCamera();
       renderOverworld();
       if (player) player.update();
+      // Start overworld music on first frame
+      if (!Music.isPlaying || Music.currentTrack !== 'overworld') {
+        Music.play('overworld');
+      }
       // Open menu with M key
       if (wasPressed('m') || wasPressed('M')) {
         Menu.open();
@@ -665,6 +672,10 @@ function gameLoop() {
     case GameState.BATTLE:
       Battle.render();
       Battle.update();
+      // Start battle music
+      if (!Music.isPlaying || (Music.currentTrack !== 'battle' && Music.currentTrack !== 'victory')) {
+        Music.play('battle');
+      }
       // Show dialog overlays on top of battle screen
       if (Dialog.active) {
         Dialog.render();
@@ -674,7 +685,10 @@ function gameLoop() {
       
     case GameState.CREDITS:
       renderCredits();
-      if (creditsFrame === 1) Audio.credits();
+      if (creditsFrame === 1) {
+        Audio.credits();
+        Music.play('credits');
+      }
       if (creditsFrame > 120 && !ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
         Audio.titleSelect();
         ScreenTransition.start(() => {

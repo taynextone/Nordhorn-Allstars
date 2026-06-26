@@ -271,3 +271,214 @@ const Audio = {
     this.playArpeggio([523, 659, 784, 659, 523, 659], 0.2, 'triangle');
   }
 };
+
+// ============================================
+// NORDHORN ALLSTARS — BACKGROUND MUSIC
+// Chiptune sequencer with per-game-state tracks
+// ============================================
+
+const Music = {
+  ctx: null,
+  masterGain: null,
+  initialized: false,
+  muted: false,
+  currentTrack: null,
+  isPlaying: false,
+  schedulerTimer: null,
+  nextNoteTime: 0,
+  currentStep: 0,
+  bpm: 120,
+  secondsPerBeat: 0.5, // 60 / bpm
+  lookahead: 0.1, // seconds to schedule ahead
+  scheduleInterval: 25, // ms between scheduler calls
+
+  // Track definitions: arrays of {note, duration, type, volume}
+  // note: frequency in Hz, duration: in beats, type: oscillator type
+  tracks: {
+    title: {
+      bpm: 100,
+      // Bass line (triangle) + lead (square)
+      bass: [
+        {note: 131, dur: 2}, {note: 165, dur: 2}, {note: 196, dur: 2}, {note: 165, dur: 2},
+        {note: 131, dur: 2}, {note: 175, dur: 2}, {note: 220, dur: 2}, {note: 175, dur: 2},
+        {note: 147, dur: 2}, {note: 175, dur: 2}, {note: 196, dur: 2}, {note: 175, dur: 2},
+        {note: 131, dur: 2}, {note: 196, dur: 2}, {note: 262, dur: 2}, {note: 196, dur: 2}
+      ],
+      lead: [
+        {note: 523, dur: 1}, {note: 0, dur: 1}, {note: 659, dur: 1}, {note: 0, dur: 1},
+        {note: 784, dur: 2}, {note: 0, dur: 2},
+        {note: 698, dur: 1}, {note: 0, dur: 1}, {note: 659, dur: 1}, {note: 0, dur: 1},
+        {note: 523, dur: 2}, {note: 0, dur: 2},
+        {note: 587, dur: 1}, {note: 0, dur: 1}, {note: 659, dur: 1}, {note: 0, dur: 1},
+        {note: 698, dur: 2}, {note: 0, dur: 2},
+        {note: 784, dur: 1}, {note: 0, dur: 1}, {note: 698, dur: 1}, {note: 0, dur: 1},
+        {note: 523, dur: 2}, {note: 0, dur: 2}
+      ]
+    },
+    overworld: {
+      bpm: 130,
+      bass: [
+        {note: 165, dur: 1}, {note: 165, dur: 1}, {note: 196, dur: 1}, {note: 165, dur: 1},
+        {note: 220, dur: 1}, {note: 220, dur: 1}, {note: 196, dur: 1}, {note: 220, dur: 1},
+        {note: 147, dur: 1}, {note: 147, dur: 1}, {note: 175, dur: 1}, {note: 147, dur: 1},
+        {note: 196, dur: 1}, {note: 196, dur: 1}, {note: 175, dur: 1}, {note: 196, dur: 1}
+      ],
+      lead: [
+        {note: 659, dur: 0.5}, {note: 784, dur: 0.5}, {note: 880, dur: 1}, {note: 784, dur: 0.5}, {note: 659, dur: 0.5},
+        {note: 587, dur: 1}, {note: 659, dur: 1}, {note: 0, dur: 1}, {note: 659, dur: 1},
+        {note: 587, dur: 0.5}, {note: 659, dur: 0.5}, {note: 784, dur: 1}, {note: 659, dur: 0.5}, {note: 587, dur: 0.5},
+        {note: 523, dur: 1}, {note: 587, dur: 1}, {note: 0, dur: 1}, {note: 523, dur: 1}
+      ]
+    },
+    battle: {
+      bpm: 150,
+      bass: [
+        {note: 131, dur: 0.5}, {note: 131, dur: 0.5}, {note: 165, dur: 0.5}, {note: 131, dur: 0.5},
+        {note: 196, dur: 1}, {note: 165, dur: 0.5}, {note: 131, dur: 0.5},
+        {note: 147, dur: 0.5}, {note: 147, dur: 0.5}, {note: 175, dur: 0.5}, {note: 147, dur: 0.5},
+        {note: 196, dur: 1}, {note: 175, dur: 0.5}, {note: 147, dur: 0.5}
+      ],
+      lead: [
+        {note: 523, dur: 0.5}, {note: 659, dur: 0.5}, {note: 784, dur: 0.5}, {note: 1047, dur: 0.5},
+        {note: 880, dur: 0.5}, {note: 784, dur: 0.5}, {note: 659, dur: 0.5}, {note: 523, dur: 0.5},
+        {note: 587, dur: 0.5}, {note: 698, dur: 0.5}, {note: 784, dur: 0.5}, {note: 988, dur: 0.5},
+        {note: 880, dur: 0.5}, {note: 784, dur: 0.5}, {note: 698, dur: 0.5}, {note: 587, dur: 0.5}
+      ]
+    },
+    victory: {
+      bpm: 120,
+      bass: [
+        {note: 131, dur: 1}, {note: 165, dur: 1}, {note: 196, dur: 1}, {note: 262, dur: 2},
+        {note: 196, dur: 1}, {note: 262, dur: 1}, {note: 330, dur: 2}, {note: 0, dur: 2}
+      ],
+      lead: [
+        {note: 523, dur: 1}, {note: 659, dur: 1}, {note: 784, dur: 1}, {note: 1047, dur: 2},
+        {note: 784, dur: 1}, {note: 1047, dur: 1}, {note: 1319, dur: 2}, {note: 0, dur: 2}
+      ]
+    },
+    credits: {
+      bpm: 90,
+      bass: [
+        {note: 131, dur: 2}, {note: 165, dur: 2}, {note: 196, dur: 2}, {note: 131, dur: 2},
+        {note: 147, dur: 2}, {note: 175, dur: 2}, {note: 196, dur: 2}, {note: 262, dur: 2}
+      ],
+      lead: [
+        {note: 523, dur: 1}, {note: 659, dur: 1}, {note: 784, dur: 1}, {note: 659, dur: 1},
+        {note: 523, dur: 2}, {note: 0, dur: 2},
+        {note: 587, dur: 1}, {note: 698, dur: 1}, {note: 784, dur: 1}, {note: 698, dur: 1},
+        {note: 587, dur: 2}, {note: 0, dur: 2},
+        {note: 523, dur: 1}, {note: 659, dur: 1}, {note: 784, dur: 1}, {note: 880, dur: 1},
+        {note: 1047, dur: 4}, {note: 0, dur: 4}
+      ]
+    }
+  },
+
+  init() {
+    if (this.initialized) return;
+    try {
+      this.ctx = Audio.ctx;
+      this.masterGain = Audio.masterGain;
+      this.initialized = true;
+    } catch (e) {
+      console.warn('Music init failed:', e);
+    }
+  },
+
+  play(trackName) {
+    if (!this.initialized) this.init();
+    if (this.currentTrack === trackName && this.isPlaying) return;
+    
+    this.stop();
+    
+    const track = this.tracks[trackName];
+    if (!track) return;
+    
+    this.currentTrack = trackName;
+    this.bpm = track.bpm;
+    this.secondsPerBeat = 60 / this.bpm;
+    this.currentStep = 0;
+    this.isPlaying = true;
+    this.nextNoteTime = this.ctx ? this.ctx.currentTime + 0.1 : 0;
+    
+    this.scheduler();
+  },
+
+  stop() {
+    this.isPlaying = false;
+    this.currentTrack = null;
+    if (this.schedulerTimer) {
+      clearTimeout(this.schedulerTimer);
+      this.schedulerTimer = null;
+    }
+  },
+
+  toggleMute() {
+    this.muted = !this.muted;
+    if (this.masterGain) {
+      this.masterGain.gain.value = this.muted ? 0 : 0.3;
+    }
+  },
+
+  scheduler() {
+    if (!this.isPlaying || !this.ctx) return;
+    
+    while (this.nextNoteTime < this.ctx.currentTime + this.lookahead) {
+      this.scheduleStep(this.currentStep, this.nextNoteTime);
+      this.advanceStep();
+    }
+    
+    this.schedulerTimer = setTimeout(() => this.scheduler(), this.scheduleInterval);
+  },
+
+  scheduleStep(step, time) {
+    const track = this.tracks[this.currentTrack];
+    if (!track) return;
+    
+    const bassNote = track.bass[step % track.bass.length];
+    const leadNote = track.lead[step % track.lead.length];
+    
+    // Schedule bass note
+    if (bassNote && bassNote.note > 0) {
+      this.playMusicNote(bassNote.note, time, bassNote.dur * this.secondsPerBeat, 'triangle', 0.12);
+    }
+    
+    // Schedule lead note
+    if (leadNote && leadNote.note > 0) {
+      this.playMusicNote(leadNote.note, time, leadNote.dur * this.secondsPerBeat, 'square', 0.08);
+    }
+  },
+
+  playMusicNote(frequency, time, duration, type, volume) {
+    if (!this.ctx || this.muted) return;
+    
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = type;
+    osc.frequency.setValueAtTime(frequency, time);
+    
+    const dur = Math.min(duration, 0.5); // Cap note length
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(volume, time + 0.01);
+    gain.gain.setValueAtTime(volume, time + dur * 0.7);
+    gain.gain.linearRampToValueAtTime(0, time + dur);
+    
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    
+    osc.start(time);
+    osc.stop(time + dur + 0.05);
+  },
+
+  advanceStep() {
+    this.currentStep++;
+    const track = this.tracks[this.currentTrack];
+    if (!track) return;
+    
+    // Advance by the shortest note duration in the current step
+    const bassNote = track.bass[this.currentStep % track.bass.length];
+    const leadNote = track.lead[this.currentStep % track.lead.length];
+    const minDur = Math.min(bassNote.dur, leadNote.dur) * this.secondsPerBeat;
+    this.nextNoteTime += minDur;
+  }
+};
