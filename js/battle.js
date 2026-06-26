@@ -140,6 +140,7 @@ const Battle = {
   
   updateIntro() {
     this.introTimer++;
+    if (this.introTimer === 1) Audio.battleStart();
     if (this.introTimer > 90 || wasPressed('Enter') || wasPressed(' ')) {
       this.state = 'select';
       this.introComplete = true;
@@ -148,14 +149,15 @@ const Battle = {
   
   updateSelect() {
     if (this.turn === 'player') {
-      if (wasPressed('ArrowUp')) this.selectedMove = Math.max(0, this.selectedMove - 1);
-      if (wasPressed('ArrowDown')) this.selectedMove = Math.min(player.moves.length - 1, this.selectedMove + 1);
+      if (wasPressed('ArrowUp')) { this.selectedMove = Math.max(0, this.selectedMove - 1); Audio.menuMove(); }
+      if (wasPressed('ArrowDown')) { this.selectedMove = Math.min(player.moves.length - 1, this.selectedMove + 1); Audio.menuMove(); }
       if (wasPressed('Enter') || wasPressed(' ')) {
         const move = player.moves[this.selectedMove];
         if (move.energy > this.playerEnergy) {
           Dialog.show('Nicht genug Energy!');
           return;
         }
+        Audio.menuSelect();
         this.executeMove('player', move);
       }
     } else {
@@ -194,6 +196,8 @@ const Battle = {
         frame: 0, maxFrame: 25
       };
       this.ballSpin = 1.0;
+      Audio.ballWhoosh();
+      if (move.type === 'finisher') Audio.finisher();
     }
   },
   
@@ -226,6 +230,7 @@ const Battle = {
           if (hit) {
             damage = move.power + (side === 'player' ? this.playerBonus : this.opponentBonus);
             points = move.name === 'Three Pointer' ? 3 : 2;
+            Audio.hitSwish();
             
             if (side === 'player') {
               this.opponentHP -= damage;
@@ -239,8 +244,9 @@ const Battle = {
               this.scoreBurst = { x: canvas.width - 70, y: 70, frame: 0, points: points };
               this.hoopShake = 6;
               this.netSwing = 8;
+              Audio.scoreBurst();
             } else {
-              if (this.playerBlocking) { damage = Math.floor(damage * 0.3); this.playerBlocking = false; }
+              if (this.playerBlocking) { damage = Math.floor(damage * 0.3); this.playerBlocking = false; Audio.block(); }
               const defBoost = getEquipmentBoosts().defense;
               if (defBoost > 0) { damage = Math.max(1, Math.floor(damage * (1 - defBoost * 0.05))); }
               this.playerHP -= damage;
@@ -257,6 +263,7 @@ const Battle = {
             }
           } else {
             // Miss! Ball bounces away
+            Audio.missBounce();
             if (side === 'player') {
               this.missBounce = { x: canvas.width - 70, y: 60, vx: 2, vy: -3, frame: 0 };
             } else {
@@ -270,6 +277,7 @@ const Battle = {
             this.playerBlocking = true;
             this.flashTimer = 4;
             this.flashColor = PALETTE.dark;
+            Audio.block();
           } else {
             this.opponentBlocking = true;
           }
@@ -279,9 +287,11 @@ const Battle = {
           if (side === 'player') {
             this.opponentStunned = true;
             this.opponentShake = 4;
+            Audio.stun();
           } else {
             this.playerStunned = true;
             this.playerShake = 4;
+            Audio.stun();
           }
           break;
           
@@ -290,6 +300,7 @@ const Battle = {
           else this.opponentBonus = 10;
           this.flashTimer = 4;
           this.flashColor = PALETTE.light;
+          Audio.setup();
           break;
           
         case 'finisher':
@@ -368,6 +379,7 @@ const Battle = {
       this.active = false;
       
       if (this.resultText === 'GEWONNEN!') {
+        Audio.victory();
         // Mark trainer as defeated
         if (this.opponent && currentMap && currentMap.trainers) {
           const trainer = currentMap.trainers.find(t => t.name === this.opponent.name);
@@ -389,11 +401,13 @@ const Battle = {
             player.badges.push(this.opponent.badge);
             dialogLines.push(`BADGE: ${this.opponent.badge}!`);
             dialogLines.push(`(${player.badges.length}/12 Courts besiegt)`);
+            Audio.badgeEarned();
           }
         }
         
         if (player.level > prevLevel) {
           dialogLines.push(`LEVEL UP! Du bist jetzt LV ${player.level}!`);
+          Audio.levelUp();
         }
         if (newMove) {
           dialogLines.push(`Neuer Move: ${newMove.name}!`);
@@ -418,6 +432,7 @@ const Battle = {
         gameState = GameState.DIALOG;
       } else {
         // Game Over: return to home
+        Audio.defeat();
         // Set fromState so dialog returns to OVERWORLD
         Dialog.fromState = GameState.OVERWORLD;
         Dialog.show([

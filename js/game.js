@@ -575,6 +575,9 @@ function updateCamera() {
 document.addEventListener('keydown', (e) => {
   keys[e.key] = true;
   keysPressed[e.key] = true;
+  // Initialize audio on first keypress (browser autoplay policy)
+  Audio.init();
+  Audio.resume();
 });
 
 document.addEventListener('keyup', (e) => {
@@ -602,6 +605,7 @@ function gameLoop() {
     case GameState.TITLE:
       renderTitle();
       if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+        Audio.titleSelect();
         ScreenTransition.start(() => {
           gameState = GameState.CHARACTER_SELECT;
         });
@@ -611,18 +615,24 @@ function gameLoop() {
     case GameState.CHARACTER_SELECT:
       renderCharacterSelect();
       if (charSelectStep === 0) {
-        if (wasPressed('ArrowLeft')) charSelectGender = 0;
-        if (wasPressed('ArrowRight')) charSelectGender = 1;
-        if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) charSelectStep = 1;
-      } else {
-        if (wasPressed('ArrowUp')) charSelectBuild = Math.max(0, charSelectBuild - 1);
-        if (wasPressed('ArrowDown')) charSelectBuild = Math.min(2, charSelectBuild + 1);
+        if (wasPressed('ArrowLeft') || wasPressed('ArrowRight')) {
+          charSelectGender = charSelectGender === 0 ? 1 : 0;
+          Audio.menuMove();
+        }
         if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+          Audio.menuSelect();
+          charSelectStep = 1;
+        }
+      } else {
+        if (wasPressed('ArrowUp')) { charSelectBuild = Math.max(0, charSelectBuild - 1); Audio.menuMove(); }
+        if (wasPressed('ArrowDown')) { charSelectBuild = Math.min(2, charSelectBuild + 1); Audio.menuMove(); }
+        if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+          Audio.menuSelect();
           ScreenTransition.start(() => {
             startGame(charSelectGender, charSelectBuild);
           });
         }
-        if (wasPressed('Escape')) charSelectStep = 0;
+        if (wasPressed('Escape')) { Audio.menuCancel(); charSelectStep = 0; }
       }
       break;
       
@@ -633,6 +643,10 @@ function gameLoop() {
       // Open menu with M key
       if (wasPressed('m') || wasPressed('M')) {
         Menu.open();
+      }
+      // Toggle mute with X key
+      if (wasPressed('x') || wasPressed('X')) {
+        Audio.toggleMute();
       }
       break;
       
@@ -660,7 +674,9 @@ function gameLoop() {
       
     case GameState.CREDITS:
       renderCredits();
+      if (creditsFrame === 1) Audio.credits();
       if (creditsFrame > 120 && !ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+        Audio.titleSelect();
         ScreenTransition.start(() => {
           gameState = GameState.TITLE;
           creditsFrame = 0;

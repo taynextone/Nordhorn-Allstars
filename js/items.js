@@ -154,6 +154,7 @@ function addItemToInventory(itemId) {
   if (!item) return null;
   if (!player.inventory) initPlayerInventory();
   player.inventory.push({ ...item });
+  Audio.itemPickup();
   return item;
 }
 
@@ -338,20 +339,25 @@ const Menu = {
     if (wasPressed('ArrowUp')) {
       this.selectedIndex = Math.max(0, this.selectedIndex - 1);
       if (this.selectedIndex < this.scrollOffset) this.scrollOffset = this.selectedIndex;
+      Audio.menuMove();
     }
     if (wasPressed('ArrowDown')) {
       this.selectedIndex = Math.min(items.length - 1, this.selectedIndex + 1);
       if (this.selectedIndex >= this.scrollOffset + 6) this.scrollOffset = this.selectedIndex - 5;
+      Audio.menuMove();
     }
     if (wasPressed('ArrowLeft') || wasPressed('ArrowRight')) {
       this.tab = this.tab === 'items' ? 'equipment' : 'items';
       this.selectedIndex = 0;
       this.scrollOffset = 0;
+      Audio.menuMove();
     }
     if (wasPressed('Enter') || wasPressed(' ')) {
+      Audio.menuSelect();
       this.useSelected();
     }
     if (wasPressed('Escape') || wasPressed('m') || wasPressed('M')) {
+      Audio.menuCancel();
       this.close();
     }
   },

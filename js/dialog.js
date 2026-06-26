@@ -45,6 +45,7 @@ const Dialog = {
         this.currentText += fullText[this.textIndex];
         this.textIndex++;
         this.textTimer = 0;
+        Audio.dialogText();
       }
     }
     
@@ -55,11 +56,13 @@ const Dialog = {
         this.textIndex = fullText.length;
       } else if (this.currentLine < this.lines.length - 1) {
         // Nächste Zeile
+        Audio.dialogAdvance();
         this.currentLine++;
         this.currentText = '';
         this.textIndex = 0;
       } else {
         // Dialog beenden
+        Audio.dialogAdvance();
         this.active = false;
         if (this.callback) {
           this.callback();
