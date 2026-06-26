@@ -155,6 +155,7 @@ function addItemToInventory(itemId) {
   if (!player.inventory) initPlayerInventory();
   player.inventory.push({ ...item });
   Audio.itemPickup();
+  autoSave();
   return item;
 }
 
@@ -233,6 +234,7 @@ function equipItem(index) {
   
   // Apply stat boosts
   applyEquipmentBoosts();
+  autoSave();
   
   return { success: true, msg: `${item.name} ausgerüstet!`, unequipped: previousEquip ? previousEquip.name : null };
 }
@@ -243,6 +245,7 @@ function unequipItem(slot) {
   player.inventory.push({ ...item });
   player.equipment[slot] = null;
   applyEquipmentBoosts();
+  autoSave();
   return { success: true, msg: `${item.name} abgelegt.` };
 }
 
@@ -305,7 +308,7 @@ function getEffectiveDefense() {
 
 const Menu = {
   active: false,
-  tab: 'items', // 'items' or 'equipment'
+  tab: 'items', // 'items', 'equipment', or 'save'
   selectedIndex: 0,
   scrollOffset: 0,
   message: '',
@@ -334,6 +337,21 @@ const Menu = {
     
     if (this.messageTimer > 0) this.messageTimer--;
     
+    if (this.tab === 'save') {
+      // Save-Tab: Enter zum manuellen Speichern
+      if (wasPressed('Enter') || wasPressed(' ')) {
+        Audio.menuSelect();
+        autoSave();
+        this.message = 'Spielstand gespeichert!';
+        this.messageTimer = 90;
+      }
+      if (wasPressed('Escape') || wasPressed('m') || wasPressed('M')) {
+        Audio.menuCancel();
+        this.close();
+      }
+      return;
+    }
+    
     const items = this.getCurrentList();
     
     if (wasPressed('ArrowUp')) {
@@ -347,7 +365,9 @@ const Menu = {
       Audio.menuMove();
     }
     if (wasPressed('ArrowLeft') || wasPressed('ArrowRight')) {
-      this.tab = this.tab === 'items' ? 'equipment' : 'items';
+      if (this.tab === 'items') this.tab = 'equipment';
+      else if (this.tab === 'equipment') this.tab = 'save';
+      else this.tab = 'items';
       this.selectedIndex = 0;
       this.scrollOffset = 0;
       Audio.menuMove();
@@ -438,14 +458,33 @@ const Menu = {
     ctx.fillStyle = this.tab === 'items' ? PALETTE.lightest : PALETTE.light;
     ctx.fillText(this.tab === 'items' ? '► Items' : '  Items', mx + 15, my + 40);
     ctx.fillStyle = this.tab === 'equipment' ? PALETTE.lightest : PALETTE.light;
-    ctx.fillText(this.tab === 'equipment' ? '► Ausrüstung' : '  Ausrüstung', mx + 120, my + 40);
+    ctx.fillText(this.tab === 'equipment' ? '► Ausrüstung' : '  Ausrüstung', mx + 100, my + 40);
+    ctx.fillStyle = this.tab === 'save' ? PALETTE.lightest : PALETTE.light;
+    ctx.fillText(this.tab === 'save' ? '► Speichern' : '  Speichern', mx + 220, my + 40);
     
     // Item list
     const items = this.getCurrentList();
     const listY = my + 55;
     const listH = 18;
     
-    if (items.length === 0) {
+    // Save-Tab Content
+    if (this.tab === 'save') {
+      ctx.fillStyle = PALETTE.lightest;
+      ctx.font = '11px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('💾 Spielstand speichern', canvas.width / 2, listY + 20);
+      ctx.fillStyle = PALETTE.light;
+      ctx.font = '10px "Courier New", monospace';
+      ctx.fillText('ENTER = Jetzt speichern', canvas.width / 2, listY + 45);
+      ctx.fillText('Auto-Save nach Kämpfen & Reisen', canvas.width / 2, listY + 65);
+      
+      // Save-Info anzeigen
+      const saveInfo = SaveSystem.getSaveInfo();
+      if (saveInfo) {
+        ctx.fillStyle = PALETTE.dark;
+        ctx.fillText(`Letzter Save: LV ${saveInfo.level} | ${saveInfo.badges}/12 Badges`, canvas.width / 2, listY + 95);
+      }
+    } else if (items.length === 0) {
       ctx.fillStyle = PALETTE.light;
       ctx.font = '11px "Courier New", monospace';
       ctx.textAlign = 'center';

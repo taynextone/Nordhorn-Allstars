@@ -385,6 +385,8 @@ const Battle = {
           const trainer = currentMap.trainers.find(t => t.name === this.opponent.name);
           if (trainer) trainer.defeated = true;
         }
+        // Auto-save nach Sieg
+        autoSave();
         
         const expGain = this.opponent.level * 10;
         const prevLevel = player.level;

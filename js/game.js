@@ -31,6 +31,7 @@ let player = null;
 let currentMap = null;
 let keys = {};
 let keysPressed = {};
+let saveToastTimer = 0; // Anzeige-Timer für Speicher-Bestätigung
 
 // ============================================
 // SCREEN TRANSITIONS (Fade)
@@ -94,6 +95,7 @@ function drawPixelRect(x, y, w, h, color) {
 // ============================================
 
 let titleFrame = 0;
+let titleSelection = 0; // 0 = Neues Spiel, 1 = Continue (if save exists)
 
 function renderTitle() {
   // Hintergrund
@@ -127,16 +129,37 @@ function renderTitle() {
   ctx.lineTo(ballX, ballY + 20);
   ctx.stroke();
   
+  // Menü-Optionen
+  const hasSave = SaveSystem.hasSave();
+  const menuY = 310;
+  
+  // Neues Spiel
+  ctx.fillStyle = titleSelection === 0 ? PALETTE.lightest : PALETTE.light;
+  ctx.font = '13px "Courier New", monospace';
+  ctx.fillText((titleSelection === 0 ? '> ' : '  ') + 'NEUES SPIEL', canvas.width / 2, menuY);
+  
+  // Continue (nur wenn Save existiert)
+  if (hasSave) {
+    const saveInfo = SaveSystem.getSaveInfo();
+    ctx.fillStyle = titleSelection === 1 ? PALETTE.lightest : PALETTE.light;
+    ctx.fillText((titleSelection === 1 ? '> ' : '  ') + 'FORTSETZEN', canvas.width / 2, menuY + 24);
+    // Save-Info anzeigen
+    ctx.fillStyle = PALETTE.dark;
+    ctx.font = '9px "Courier New", monospace';
+    const dateStr = saveInfo.timestamp ? new Date(saveInfo.timestamp).toLocaleDateString('de-DE') : '';
+    ctx.fillText(`LV ${saveInfo.level} | ${saveInfo.badges}/12 Badges | ${dateStr}`, canvas.width / 2, menuY + 42);
+  }
+  
   // "Drücke START"
   if (Math.floor(titleFrame / 30) % 2 === 0) {
     ctx.fillStyle = PALETTE.lightest;
-    ctx.font = '14px "Courier New", monospace';
-    ctx.fillText('DRÜCKE START', canvas.width / 2, 340);
+    ctx.font = '11px "Courier New", monospace';
+    ctx.fillText('ENTER = Auswahl', canvas.width / 2, 390);
   }
   
   ctx.font = '10px "Courier New", monospace';
   ctx.fillStyle = PALETTE.light;
-  ctx.fillText('<C> 2026 Nordhorn Allstars', canvas.width / 2, 400);
+  ctx.fillText('<C> 2026 Nordhorn Allstars', canvas.width / 2, 415);
   
   titleFrame++;
 }
@@ -460,6 +483,22 @@ function renderHUD() {
     ctx.textAlign = 'left';
     ctx.fillText('M=Menu', 2, canvas.height - 4);
   }
+  
+  // Save-Top (erscheint kurz nach dem Speichern)
+  if (saveToastTimer > 0) {
+    saveToastTimer--;
+    const alpha = Math.min(1, saveToastTimer / 20);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = PALETTE.darkest;
+    const saveText = '💾 GESPEICHERT';
+    const tw = ctx.measureText(saveText).width + 8;
+    ctx.fillRect(canvas.width / 2 - tw / 2, canvas.height - 30, tw, 14);
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = '8px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(saveText, canvas.width / 2, canvas.height - 20);
+    ctx.globalAlpha = 1;
+  }
 }
 
 // ============================================
@@ -606,11 +645,31 @@ function gameLoop() {
     case GameState.TITLE:
       renderTitle();
       if (titleFrame === 1) Music.play('title');
-      if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
-        Audio.titleSelect();
-        ScreenTransition.start(() => {
-          gameState = GameState.CHARACTER_SELECT;
-        });
+      // Navigation im Title-Menü
+      if (!ScreenTransition.active) {
+        const hasSave = SaveSystem.hasSave();
+        if (wasPressed('ArrowUp') && hasSave) {
+          titleSelection = Math.max(0, titleSelection - 1);
+          Audio.menuMove();
+        }
+        if (wasPressed('ArrowDown') && hasSave) {
+          titleSelection = Math.min(1, titleSelection + 1);
+          Audio.menuMove();
+        }
+        if (wasPressed('Enter') || wasPressed(' ')) {
+          Audio.titleSelect();
+          if (titleSelection === 1 && hasSave) {
+            // Continue — Spielstand laden
+            ScreenTransition.start(() => {
+              loadGame();
+            });
+          } else {
+            // Neues Spiel
+            ScreenTransition.start(() => {
+              gameState = GameState.CHARACTER_SELECT;
+            });
+          }
+        }
       }
       break;
       
@@ -712,7 +771,55 @@ function gameLoop() {
 function startGame(gender, buildIndex) {
   player = new Player(6, 7, gender, BUILDS[buildIndex]);
   currentMap = Maps.nordhorn;
+  titleSelection = 0;
+  // Bei neuem Spiel alten Save löschen
+  SaveSystem.clear();
   gameState = GameState.OVERWORLD;
+}
+
+function loadGame() {
+  const data = SaveSystem.load();
+  if (!data || !data.player) {
+    // Fallback: neues Spiel starten
+    gameState = GameState.CHARACTER_SELECT;
+    return;
+  }
+  
+  // Spieler aus Save erstellen
+  const p = data.player;
+  player = new Player(p.x, p.y, p.gender, p.build);
+  player.direction = p.direction || 'down';
+  player.level = p.level;
+  player.exp = p.exp;
+  player.expToNext = p.expToNext;
+  player.stats = { ...p.stats };
+  player.moves = p.moves.map(m => ({ ...m }));
+  player.maxEnergy = p.maxEnergy;
+  player.energy = p.energy;
+  player.badges = [...p.badges];
+  player.inventory = p.inventory.map(i => ({ ...i }));
+  player.equipment = {
+    shoes: p.equipment.shoes ? { ...p.equipment.shoes } : null,
+    bracelet: p.equipment.bracelet ? { ...p.equipment.bracelet } : null
+  };
+  player.baseStats = p.baseStats ? { ...p.baseStats } : null;
+  
+  // Karte setzen
+  currentMap = Maps[data.mapName] || Maps.nordhorn;
+  
+  // Besiegte Trainer wiederherstellen
+  SaveSystem.restoreTrainerFlags(Maps, data.defeatedTrainers);
+  
+  gameState = GameState.OVERWORLD;
+}
+
+function autoSave() {
+  if (!player || !currentMap) return;
+  const mapName = currentMap.name === 'Nordhorn' ? 'nordhorn' : 
+                  currentMap.name === 'Lingen' ? 'lingen' : 'nordhorn';
+  const defeatedTrainers = SaveSystem.collectDefeatedTrainers(Maps);
+  const success = SaveSystem.save(player, mapName, defeatedTrainers);
+  if (success) saveToastTimer = 90; // 90 Frames = ~1.5s bei 60fps
 }
 
 // Start

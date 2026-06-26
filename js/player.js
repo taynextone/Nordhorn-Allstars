@@ -108,6 +108,7 @@ class Player {
               this.x = warp.toX;
               this.y = warp.toY;
               Audio.warp();
+              autoSave();
               Dialog.show([
                 'Zugfahrt...',
                 `Ankunft in ${targetMap.name}!`
