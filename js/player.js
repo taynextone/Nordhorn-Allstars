@@ -92,13 +92,15 @@ class Player {
       this.y = newY;
       this.moving = true;
       
-      // Zufallsbegegnung (wie Pokemon)
+      // Trainer-Kampf (wie Pokemon-Trainer)
       if (currentMap.trainers) {
         const trainer = currentMap.getTrainerAt(newX, newY);
         if (trainer && !trainer.defeated) {
-          Dialog.show(trainer.dialog);
+          Dialog.show(trainer.dialog, () => {
+            trainer.defeated = true;
+            Battle.start(trainer);
+          });
           gameState = GameState.DIALOG;
-          this.pendingTrainer = trainer;
         }
       }
     }

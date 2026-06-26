@@ -180,33 +180,78 @@ function drawTile(tile, x, y) {
   switch(tile) {
     case 0: // Gras
       drawPixelRect(x, y, 16, 16, PALETTE.light);
+      // Gras-Details
+      if ((x + y) % 7 === 0) drawPixelRect(x + 3, y + 5, 2, 2, PALETTE.lightest);
+      if ((x + y) % 11 === 0) drawPixelRect(x + 10, y + 8, 2, 2, PALETTE.lightest);
       break;
-    case 1: // Weg
-      drawPixelRect(x, y, 16, 16, PALETTE.lightest);
+    case 1: // Weg (Asphalt)
+      drawPixelRect(x, y, 16, 16, '#6b7a5a');
+      drawPixelRect(x, y, 16, 1, '#5a6a4a');
       break;
-    case 2: // Haus
-      drawPixelRect(x, y, 16, 16, PALETTE.dark);
+    case 2: // Haus-Wand
+      drawPixelRect(x, y, 16, 16, '#8b7355');
+      drawPixelRect(x, y, 16, 2, '#6b5335');
+      drawPixelRect(x, y + 7, 16, 1, '#6b5335');
       break;
-    case 3: // Court (Basketball-Platz)
-      drawPixelRect(x, y, 16, 16, PALETTE.dark);
-      drawPixelRect(x + 4, y + 4, 8, 8, PALETTE.light);
+    case 3: // Basketball-Court
+      drawPixelRect(x, y, 16, 16, '#c4944a');
+      drawPixelRect(x + 1, y + 1, 14, 14, '#b0843a');
+      // Court-Linien
+      if (x % 4 === 0) drawPixelRect(x + 7, y, 2, 16, '#906a28');
       break;
     case 4: // Wasser
       drawPixelRect(x, y, 16, 16, PALETTE.darkest);
+      drawPixelRect(x + 2, y + 3, 4, 2, '#1a4a1a');
+      drawPixelRect(x + 8, y + 9, 4, 2, '#1a4a1a');
       break;
     case 5: // Baum
       drawPixelRect(x, y, 16, 16, PALETTE.light);
-      drawPixelRect(x + 4, y + 2, 8, 6, PALETTE.dark);
-      drawPixelRect(x + 2, y + 8, 12, 8, PALETTE.darkest);
+      drawPixelRect(x + 5, y + 1, 6, 5, PALETTE.dark);
+      drawPixelRect(x + 3, y + 6, 10, 4, PALETTE.dark);
+      drawPixelRect(x + 4, y + 10, 8, 6, PALETTE.darkest);
       break;
-    case 6: // Schule
-      drawPixelRect(x, y, 16, 16, PALETTE.dark);
-      drawPixelRect(x + 2, y + 2, 12, 12, PALETTE.lightest);
+    case 6: // Schule-Wand
+      drawPixelRect(x, y, 16, 16, '#7a6a5a');
+      drawPixelRect(x, y, 16, 2, '#5a4a3a');
+      drawPixelRect(x + 2, y + 4, 4, 4, '#9aaaaa'); // Fenster
+      drawPixelRect(x + 10, y + 4, 4, 4, '#9aaaaa'); // Fenster
       break;
     case 7: // Zaun
       drawPixelRect(x, y, 16, 16, PALETTE.light);
-      drawPixelRect(x, y, 16, 2, PALETTE.dark);
-      drawPixelRect(x, y + 8, 16, 2, PALETTE.dark);
+      drawPixelRect(x, y, 16, 2, '#7a6a4a');
+      drawPixelRect(x, y + 5, 16, 2, '#7a6a4a');
+      drawPixelRect(x, y + 10, 16, 2, '#7a6a4a');
+      drawPixelRect(x + 3, y, 2, 16, '#6a5a3a');
+      drawPixelRect(x + 11, y, 2, 16, '#6a5a3a');
+      break;
+    case 8: // Tür
+      drawPixelRect(x, y, 16, 16, '#5a3a1a');
+      drawPixelRect(x + 2, y + 1, 12, 14, '#4a2a0a');
+      drawPixelRect(x + 10, y + 6, 2, 2, '#aa8a2a'); // Türklinke
+      break;
+    case 9: // Blumenbeet
+      drawPixelRect(x, y, 16, 16, PALETTE.light);
+      drawPixelRect(x + 2, y + 2, 4, 4, '#aa3333'); // rote Blumen
+      drawPixelRect(x + 8, y + 6, 4, 4, '#aaaa33'); // gelbe Blumen
+      drawPixelRect(x + 4, y + 10, 4, 4, '#3333aa'); // blaue Blumen
+      break;
+    case 10: // Straßenmarkierung
+      drawPixelRect(x, y, 16, 16, '#6b7a5a');
+      drawPixelRect(x + 6, y, 4, 16, '#aaaa5a'); // gelbe Mittellinie
+      break;
+    case 11: // Hof (Schulhof)
+      drawPixelRect(x, y, 16, 16, '#8a8a6a');
+      drawPixelRect(x + 1, y + 1, 14, 14, '#7a7a5a');
+      break;
+    case 12: // Tribüne
+      drawPixelRect(x, y, 16, 16, '#6a6a6a');
+      drawPixelRect(x + 1, y + 1, 14, 6, '#5a5a5a');
+      break;
+    case 13: // Basketballkorb
+      drawPixelRect(x, y, 16, 16, PALETTE.light);
+      drawPixelRect(x + 4, y + 2, 8, 6, '#cc6600'); // Brett
+      drawPixelRect(x + 5, y + 8, 6, 4, '#ffffff'); // Netz
+      drawPixelRect(x + 6, y + 1, 4, 2, '#444444'); // Halterung
       break;
     default:
       drawPixelRect(x, y, 16, 16, PALETTE.light);

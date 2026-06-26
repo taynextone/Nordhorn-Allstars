@@ -1,44 +1,56 @@
 // ============================================
-// NORDHORN ALLSTARS — MAPS.JS
+// NORDHORN ALLSTARS — MAPS.JS (Detailliert)
 // ============================================
 
 const Maps = {
   nordhorn: {
-    width: 40,
-    height: 35,
+    width: 50,
+    height: 45,
     name: 'Nordhorn',
     
     // Tile-Legende:
-    // 0 = Gras, 1 = Weg, 2 = Haus, 3 = Court
-    // 4 = Wasser, 5 = Baum, 6 = Schule, 7 = Zaun
+    // 0 = Gras (hell), 1 = Weg (grau), 2 = Haus-Wand, 3 = Basketball-Court
+    // 4 = Wasser, 5 = Baum, 6 = Schule-Wand, 7 = Zaun
+    // 8 = Tür (begehbar), 9 = Blumenbeet, 10 = Straßenmarkierung
+    // 11 = Hof (Schulhof), 12 = Tribüne, 13 = Tor/Basketballkorb
     
     tiles: generateNordhornMap(),
     
     canWalk(x, y) {
       if (x < 0 || y < 0 || x >= this.width || y >= this.height) return false;
       const tile = this.tiles[y][x];
-      return tile !== 2 && tile !== 4 && tile !== 5 && tile !== 6 && tile !== 7;
+      return ![2, 4, 5, 6, 7, 12].includes(tile);
     },
     
     trainers: [
-      { x: 14, y: 8, defeated: false, name: 'Tim', dialog: 'Hey! Bist du der neue? Dann zeig mal was du kannst!', build: 'SHOOTER', level: 3 },
-      { x: 25, y: 12, defeated: false, name: 'Lisa', dialog: 'Hello! Let\'s play! Aber vergiss nicht: Ich bin besser als Tim.', build: 'ALLROUNDER', level: 4 },
-      { x: 8, y: 18, defeated: false, name: 'Coach Müller', dialog: 'Du willst im Stadion spielen? Besiht mich erst!', build: 'VERTEIDIGER', level: 6 },
-      { x: 32, y: 6, defeated: false, name: 'Mohammed', dialog: 'As-salamu alaikom! Lass uns spielen!', build: 'ALLROUNDER', level: 5 },
-      { x: 18, y: 25, defeated: false, name: 'Erik', dialog: 'Ich bin der beste in Nordhorn! Oder?', build: 'SHOOTER', level: 7 }
+      { x: 14, y: 10, defeated: false, name: 'Tim', 
+        dialog: ['Hey! Bist du der neue in der Stadt?', 'Ich bin Tim! Schulfreund von dir, erinnerst du dich?', 'Zeig mal was du kannst!'], 
+        build: 'SHOOTER', level: 3, sprite: 'trainerTim' },
+      { x: 30, y: 14, defeated: false, name: 'Lisa', 
+        dialog: ['Hello! Ich bin Lisa.', 'Tim sagt, du willst Basketball spielen?', 'Dann zeig mir was du drauf hast!'], 
+        build: 'ALLROUNDER', level: 4, sprite: 'trainerLisa' },
+      { x: 10, y: 22, defeated: false, name: 'Coach Müller', 
+        dialog: ['Du willst in der Bundesliga spielen?', 'Dann musst du mich erst besihen!', 'Ich bin Coach Müller, der Trainer des Stadions!'], 
+        build: 'VERTEIDIGER', level: 6, sprite: 'coachMuller' },
+      { x: 38, y: 8, defeated: false, name: 'Mohammed', 
+        dialog: ['As-salamu alaikom!', 'Ich bin Mohammed, komme aus dem Stadion.', 'Lass uns ein Spiel machen!'], 
+        build: 'ALLROUNDER', level: 5, sprite: 'trainerTim' },
+      { x: 22, y: 32, defeated: false, name: 'Erik', 
+        dialog: ['Ich bin der beste in Nordhorn!', 'Oder zumindest... in meinem Viertel.', 'Komm schon, spiel mit mir!'], 
+        build: 'SHOOTER', level: 7, sprite: 'trainerTim' }
     ],
     
     interactables: [
-      { x: 7, y: 5, dialog: 'Zuhause. Hier alles angekommen.' },
-      { x: 20, y: 4, dialog: 'Schule "Am Sportplatz" — Hier gib\'s die besten Trainer.' },
-      { x: 30, y: 20, dialog: 'Bücherei — "Basketball für Anfänger" steht im Regal.' }
+      { x: 7, y: 6, dialog: ['Zuhause. Hier ist alles sicher.', 'Dein Zimmer ist oben.'] },
+      { x: 22, y: 5, dialog: ['Schule "Am Sportplatz"', 'Hier gibt es die besten Trainer der Stadt.', 'Der Hof hinten ist offen für alle.'] },
+      { x: 38, y: 24, dialog: ['Bücherei Nordhorn', 'Regal 3: "Basketball für Anfänger"', 'Regal 7: "Die Geschichte des Streetballs"'] },
+      { x: 42, y: 36, dialog: ['Stadion Nordhorn', 'Das Finale findet hier statt.', 'Du brauchst 8 Siege, um hier spielen zu dürfen.'] },
+      { x: 5, y: 30, dialog: ['Spielplatz', 'Hier haben wir als Kinder immer gespielt.', 'Die alten Körbe sind noch da.'] }
     ],
     
     getTrainerAt(x, y) {
-      // Prüfe 2 Tiles vor dem Spieler
       for (const t of this.trainers) {
-        if ((t.x === x && (t.y === y || t.y === y - 1)) ||
-            (t.y === y && (t.x === x || t.x === x - 1))) {
+        if (Math.abs(t.x - x) <= 1 && Math.abs(t.y - y) <= 1 && !t.defeated) {
           return t;
         }
       }
@@ -48,72 +60,96 @@ const Maps = {
 };
 
 function generateNordhornMap() {
-  const map = [];
+  const W = 50, H = 45;
+  const map = Array.from({ length: H }, () => Array(W).fill(0));
   
-  for (let y = 0; y < 35; y++) {
-    map[y] = [];
-    for (let x = 0; x < 40; x++) {
-      // Standard: Gras
-      map[y][x] = 0;
-      
-      // Ränder = Wasser
-      if (x === 0 || x === 39 || y === 0 || y === 34) {
-        map[y][x] = 4;
-      }
-      
-      // Hauptwege (horizontal & vertikal)
-      if (y === 14 || y === 15 || x === 19 || x === 20) {
-        map[y][x] = 1;
-      }
-      
-      // Basketball Courts
-      if ((x === 12 && y >= 6 && y <= 9) || 
-          (x === 28 && y >= 10 && y <= 13)) {
-        map[y][x] = 1; // Weg um Courts
-      }
-      if (x === 11 && y >= 6 && y <= 8) map[y][x] = 3;
-      if (x === 27 && y >= 10 && y <= 12) map[y][x] = 3;
-      
-      // Zuhause (links oben)
-      if (x >= 6 && x <= 8 && y >= 4 && y <= 6) map[y][x] = 2;
-      if (x === 7 && y === 5) map[y][x] = 1; // Tür
-      
-      // Schule (mitte-oben)
-      if (x >= 18 && x <= 22 && y >= 3 && y <= 6) map[y][x] = 6;
-      if (x === 20 && y === 4) map[y][x] = 1; // Eingang
-      
-      // Häuser
-      if (x >= 10 && x <= 13 && y >= 17 && y <= 19) map[y][x] = 2;
-      if (x >= 22 && x <= 25 && y >= 17 && y <= 19) map[y][x] = 2;
-      if (x >= 14 && x <= 17 && y >= 24 && y <= 26) map[y][x] = 2;
-      if (x >= 28 && x <= 32 && y >= 22 && y <= 24) map[y][x] = 2;
-      
-      // Bäume am Rand
-      if ((x === 5 || x === 34) && y > 2 && y < 32 && y % 3 === 0) {
-        map[y][x] = 5;
-      }
-      if ((x === 6 || x === 33) && y > 3 && y < 30 && y % 4 === 0) {
-        map[y][x] = 5;
-      }
-      
-      // Zaun um Court
-      if (x === 13 && y >= 6 && y <= 8) map[y][x] = 7;
-      if (x === 10 && y >= 6 && y <= 8) map[y][x] = 7;
-      
-      // Bücherei
-      if (x >= 29 && x <= 31 && y >= 19 && y <= 21) map[y][x] = 2;
-      if (x === 30 && y === 20) map[y][x] = 1; // Eingang
-      
-      // Stadion (unten-rechts) — große Fläche
-      if (x >= 30 && x <= 36 && y >= 27 && y <= 32) map[y][x] = 1;
-      if (x >= 31 && x <= 35 && y >= 28 && y <= 31) map[y][x] = 3;
-      
-      // Schulhof
-      if (x >= 17 && x === 22 && y >= 8 && y <= 10) map[y][x] = 3;
-      if (y === 8 && x >= 17 && x <= 22) map[y][x] = 3;
-      if (y === 10 && x >= 17 && x <= 22) map[y][x] = 3;
-    }
+  // Ränder = Wasser
+  for (let x = 0; x < W; x++) { map[0][x] = 4; map[H-1][x] = 4; }
+  for (let y = 0; y < H; y++) { map[y][0] = 4; map[y][W-1] = 4; }
+  
+  // Hauptstraße (horizontal, Mitte)
+  for (let x = 2; x < W-2; x++) { map[20][x] = 1; map[21][x] = 1; }
+  // Hauptstraße (vertikal, Mitte)
+  for (let y = 2; y < H-2; y++) { map[y][24] = 1; map[y][25] = 1; }
+  
+  // Querstraßen
+  for (let x = 2; x < W-2; x++) { map[10][x] = 1; map[11][x] = 1; }
+  for (let x = 2; x < W-2; x++) { map[30][x] = 1; map[31][x] = 1; }
+  for (let y = 2; y < H-2; y++) { map[y][12] = 1; map[y][13] = 1; }
+  for (let y = 2; y < H-2; y++) { map[y][37] = 1; map[y][38] = 1; }
+  
+  // Zuhause (links oben, 5x4)
+  for (let y = 4; y <= 8; y++) for (let x = 4; x <= 8; x++) map[y][x] = 2;
+  map[4][4] = 2; map[4][8] = 2; map[8][4] = 2; map[8][8] = 2; // Ecken
+  map[8][6] = 8; // Tür
+  for (let x = 5; x <= 7; x++) { map[5][x] = 9; } // Blumenbeet
+  
+  // Schule (oben mitte, 6x5)
+  for (let y = 3; y <= 7; y++) for (let x = 20; x <= 26; x++) map[y][x] = 6;
+  map[7][23] = 8; // Eingang
+  // Schulhof (hinter Schule)
+  for (let y = 8; y <= 11; y++) for (let x = 20; x <= 26; x++) map[y][x] = 11;
+  map[9][21] = 13; // Korb links
+  map[9][25] = 13; // Korb rechts
+  
+  // Basketball Court 1 (links mitte, 5x4)
+  for (let y = 14; y <= 17; y++) for (let x = 6; x <= 10; x++) map[y][x] = 3;
+  map[15][7] = 13; // Korb
+  map[15][9] = 13; // Korb
+  for (let y = 14; y <= 17; y++) { map[y][5] = 7; map[y][11] = 7; } // Zaun
+  for (let x = 6; x <= 10; x++) { map[13][x] = 7; map[18][x] = 7; }
+  
+  // Basketball Court 2 (rechts oben, 5x4)
+  for (let y = 12; y <= 15; y++) for (let x = 32; x <= 36; x++) map[y][x] = 3;
+  map[13][33] = 13; map[13][35] = 13;
+  for (let y = 12; y <= 15; y++) { map[y][31] = 7; map[y][37] = 7; }
+  
+  // Bücherei (rechts mitte, 4x4)
+  for (let y = 22; y <= 25; y++) for (let x = 36; x <= 39; x++) map[y][x] = 2;
+  map[25][38] = 8; // Eingang
+  
+  // Stadion (unten rechts, 8x6)
+  for (let y = 34; y <= 40; y++) for (let x = 40; x <= 47; x++) map[y][x] = 3;
+  map[36][42] = 13; map[36][45] = 13; // Körbe
+  for (let y = 34; y <= 40; y++) { map[y][39] = 7; map[y][48] = 7; }
+  for (let x = 40; x <= 47; x++) { map[33][x] = 7; map[41][x] = 7; }
+  map[37][40] = 8; // Eingang Stadion
+  
+  // Häuser-Block (links unten, 6x5)
+  for (let y = 26; y <= 30; y++) for (let x = 4; x <= 9; x++) map[y][x] = 2;
+  map[30][6] = 8; map[30][7] = 8; // Eingang
+  for (let y = 26; y <= 30; y++) for (let x = 10; x <= 15; x++) map[y][x] = 2;
+  map[30][12] = 8;
+  
+  // Häuser-Block (mitte unten, 6x5)
+  for (let y = 34; y <= 38; y++) for (let x = 18; x <= 23; x++) map[y][x] = 2;
+  map[38][20] = 8; map[38][21] = 8;
+  for (let y = 34; y <= 38; y++) for (let x = 26; x <= 31; x++) map[y][x] = 2;
+  map[38][28] = 8;
+  
+  // Spielplatz (links unten, 4x3)
+  for (let y = 32; y <= 34; y++) for (let x = 4; x <= 7; x++) map[y][x] = 11;
+  map[33][5] = 13; // alter Korb
+  
+  // Park (mitte, Bäume & Wege)
+  for (let y = 14; y <= 17; y++) for (let x = 16; x <= 22; x++) map[y][x] = 0;
+  map[14][16] = 5; map[14][18] = 5; map[14][20] = 5; map[14][22] = 5;
+  map[17][16] = 5; map[17][18] = 5; map[17][20] = 5; map[17][22] = 5;
+  map[15][17] = 1; map[15][18] = 1; map[15][19] = 1; map[15][20] = 1; map[15][21] = 1;
+  map[16][17] = 1; map[16][18] = 1; map[16][19] = 1; map[16][20] = 1; map[16][21] = 1;
+  
+  // Bäume entlang der Hauptstraße
+  for (let y = 2; y < H-2; y += 3) {
+    if (y < 20 || y > 21) map[y][23] = 5;
+    if (y < 20 || y > 21) map[y][26] = 5;
   }
+  
+  // Blumenbeete an der Schule
+  for (let x = 20; x <= 26; x++) map[2][x] = 9;
+  
+  // Straßenmarkierungen
+  for (let x = 5; x < W-5; x += 4) { if (map[20][x] === 1) map[20][x] = 10; }
+  for (let y = 5; y < H-5; y += 4) { if (map[y][24] === 1) map[y][24] = 10; }
   
   return map;
 }
