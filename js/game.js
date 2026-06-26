@@ -378,7 +378,18 @@ function renderHUD() {
     ctx.fillStyle = PALETTE.lightest;
     ctx.font = '8px "Courier New", monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('BADGES: ' + player.badges.length + '/8', 4, 14);
+    ctx.fillText('BADGES: ' + player.badges.length + '/12', 4, 14);
+  }
+
+  // Map name display (top center)
+  if (currentMap && currentMap.name) {
+    ctx.fillStyle = PALETTE.darkest;
+    const nameW = ctx.measureText(currentMap.name).width + 8;
+    ctx.fillRect(canvas.width / 2 - nameW / 2, 0, nameW, 14);
+    ctx.fillStyle = PALETTE.light;
+    ctx.font = '8px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(currentMap.name, canvas.width / 2, 10);
   }
 }
 

@@ -83,7 +83,11 @@ const Maps = {
           }
           return ['Stadion Nordhorn', 'Das Finale findet hier statt.', `Du brauchst ${8-badges} weitere Siege.`, 'Der Weg zum Champion beginnt hier.'];
         } },
-      { x: 5, y: 30, sprite: 'npcGeneric', dialog: ['Spielplatz', 'Hier haben wir als Kinder immer gespielt.', 'Die alten Körbe sind noch da.', 'Perfekt für ein paar Übungswürfe.'] }
+      { x: 5, y: 30, sprite: 'npcGeneric', dialog: ['Spielplatz', 'Hier haben wir als Kinder immer gespielt.', 'Die alten Körbe sind noch da.', 'Perfekt für ein paar Übungswürfe.'] },
+      { x: 43, y: 2, sprite: 'npcGeneric',
+        getDialog: function() {
+          return ['Bahnhof Nordhorn', 'Der Zug nach Lingen fährt stündlich.', 'Vorsicht: Die Spieler dort sind stark!', 'Drücke ENTER am Gleis umzureisen.'];
+        } }
     ],
     
     getTrainerAt(x, y) {
@@ -102,7 +106,108 @@ const Maps = {
     getBadgeProgress() {
       if (!player || !player.badges) return 0;
       return player.badges.length;
-    }
+    },
+
+    warps: [
+      { x: 44, y: 3, toMap: 'lingen', toX: 5, toY: 5 }
+    ]
+  },
+
+  lingen: {
+    width: 45,
+    height: 40,
+    name: 'Lingen',
+
+    // Tile-Legende (gleiche wie Nordhorn):
+    // 0 = Gras, 1 = Weg, 2 = Haus-Wand, 3 = Basketball-Court
+    // 4 = Wasser, 5 = Baum, 6 = Schule-Wand, 7 = Zaun
+    // 8 = Tür, 9 = Blumenbeet, 10 = Straßenmarkierung
+    // 11 = Hof, 12 = Tribüne, 13 = Basketballkorb
+
+    tiles: generateLingenMap(),
+
+    canWalk(x, y) {
+      if (x < 0 || y < 0 || x >= this.width || y >= this.height) return false;
+      const tile = this.tiles[y][x];
+      return ![2, 4, 5, 6, 7, 12].includes(tile);
+    },
+
+    courts: [
+      { id: 9, name: 'Bahnhof-Court', badge: 'RIVALE', badgeColor: '#cc4444',
+        pos: { x: 6, y: 6 }, trainerName: 'Klaus', requiredBadges: 0 },
+      { id: 10, name: 'Industrie-Court', badge: 'STAHL', badgeColor: '#888899',
+        pos: { x: 36, y: 8 }, trainerName: 'Sven', requiredBadges: 1 },
+      { id: 11, name: 'Hafen-Court', badge: 'STURM', badgeColor: '#4466aa',
+        pos: { x: 20, y: 33 }, trainerName: 'Rashta', requiredBadges: 2 },
+      { id: 12, name: 'Arena Lingen', badge: 'CHAMPION', badgeColor: '#ddaa22',
+        pos: { x: 22, y: 18 }, trainerName: 'Maxim', requiredBadges: 3 }
+    ],
+
+    trainers: [
+      { x: 6, y: 7, defeated: false, name: 'Klaus',
+        dialog: ['Willkommen in Lingen!', 'Ich bin Klaus, der hier die Regeln aufstellt.', 'Du kommst aus Nordhorn? Zeig was du kannst!'],
+        build: 'SHOOTER', level: 9, sprite: 'trainerKlaus',
+        victoryDialog: ['Du bist stark für einen Anfänger!', 'Aber hier in Lingen sind wir härter.', 'Geh und trainiere weiter!'],
+        badge: 'RIVALE', badgeColor: '#cc4444' },
+      { x: 36, y: 9, defeated: false, name: 'Sven',
+        dialog: ['Ich bin Sven, Fabrikarbeiter und Baller.', 'Nach der Schicht trainiere ich hier.', 'Kein Spielchen — echtes Basketball!'],
+        build: 'VERTEIDIGER', level: 11, sprite: 'trainerSven',
+        victoryDialog: ['Du hast mich besiegt!', 'Deine Offensive ist beeindruckend.', 'Aber Maxim wird dich zerstören.'],
+        badge: 'STAHL', badgeColor: '#888899' },
+      { x: 20, y: 34, defeated: false, name: 'Rashta',
+        dialog: ['Ich bin Rashta, komme aus dem Hafen.', 'Hier windig draußen — wie auf dem Court!', 'Lass uns spielen!'],
+        build: 'ALLROUNDER', level: 13, sprite: 'trainerRashta',
+        victoryDialog: ['Beeindruckend!', 'Du hast den Sturm überstanden.', 'Geh zur Arena — Maxim wartet!'],
+        badge: 'STURM', badgeColor: '#4466aa' },
+      { x: 22, y: 19, defeated: false, name: 'Maxim',
+        dialog: ['Ich bin Maxim, der unangefochtene Champion von Lingen!', 'Du hast es weit geschafft...', 'Aber hier endet deine Reise!'],
+        build: 'ALLROUNDER', level: 16, sprite: 'trainerMaxim',
+        victoryDialog: ['Unglaublich... du hast mich besiegt!', 'Du bist der wahre Champion!', 'Geh zurück nach Nordhorn und feiere deinen Sieg!'],
+        badge: 'CHAMPION', badgeColor: '#ddaa22' }
+    ],
+
+    interactables: [
+      { x: 4, y: 4, sprite: 'npcGeneric',
+        dialog: ['Bahnhof Lingen', 'Hier kommt man aus Nordhorn.', 'Aber Vorsicht — die Spieler hier sind stark!'] },
+      { x: 38, y: 6, sprite: 'npcGeneric',
+        dialog: ['Industriegebiet Lingen', 'Die Fabriken laufen rund um die Uhr.', 'Die Arbeiter spielen nach der Schicht Ball.'] },
+      { x: 18, y: 30, sprite: 'npcGeneric',
+        dialog: ['Hafen Lingen', 'Der Wind vom Kanal ist eisig.', 'Perfekt für harte Trainingseinheiten.'] },
+      { x: 24, y: 16, sprite: 'coachMuller',
+        getDialog: function() {
+          const badges = (player && player.badges) ? player.badges.length : 0;
+          if (badges >= 12) {
+            return ['Arena Lingen', 'Du hast alle 12 Courts besiegt!', 'Du bist der wahre Meister!', 'Geh nach Hause und genieße deinen Ruhm!'];
+          } else if (badges >= 9) {
+            return ['Arena Lingen', `Du hast schon ${badges} Siege!`, `Noch ${12-badges} bis zur Perfektion.`, 'Maxim wartet im Zentrum!'];
+          }
+          return ['Arena Lingen', 'Der Champion von Lingen trainiert hier.', `Du brauchst ${9-badges} weitere Siege für den Zugang.`, 'Bewehe dich erst auf den anderen Courts!'];
+        } },
+      { x: 10, y: 20, sprite: 'npcGeneric',
+        dialog: ['Parkstraße', 'Ruhiger Ort in der Stadt.', 'Hier kann man den Kopf freibekommen.', 'Perfekt vor einem wichtigen Spiel.'] }
+    ],
+
+    getTrainerAt(x, y) {
+      for (const t of this.trainers) {
+        if (Math.abs(t.x - x) <= 1 && Math.abs(t.y - y) <= 1 && !t.defeated) {
+          return t;
+        }
+      }
+      return null;
+    },
+
+    getCourt(index) {
+      return this.courts ? this.courts[index] : null;
+    },
+
+    getBadgeProgress() {
+      if (!player || !player.badges) return 0;
+      return player.badges.length;
+    },
+
+    warps: [
+      { x: 4, y: 6, toMap: 'nordhorn', toX: 43, toY: 3 }
+    ]
   }
 };
 
@@ -193,10 +298,106 @@ function generateNordhornMap() {
   
   // Blumenbeete an der Schule
   for (let x = 20; x <= 26; x++) map[2][x] = 9;
+
+  // Bahnhof Nordhorn (rechts oben — Zug nach Lingen)
+  for (let y = 2; y <= 5; y++) for (let x = 42; x <= 47; x++) map[y][x] = 2;
+  map[5][44] = 8; // Eingang Bahnhof
+  map[3][42] = 10; map[3][43] = 10; map[3][44] = 10; map[3][45] = 10; map[3][46] = 10; map[3][47] = 10;
   
   // Straßenmarkierungen
   for (let x = 5; x < W-5; x += 4) { if (map[20][x] === 1) map[20][x] = 10; }
   for (let y = 5; y < H-5; y += 4) { if (map[y][24] === 1) map[y][24] = 10; }
-  
+
+  return map;
+}
+
+// ============================================
+// LINGEN KARTE — Erzfeind-Stadt
+// ============================================
+
+function generateLingenMap() {
+  const W = 45, H = 40;
+  const map = Array.from({ length: H }, () => Array(W).fill(0));
+
+  // Ränder = Wasser
+  for (let x = 0; x < W; x++) { map[0][x] = 4; map[H-1][x] = 4; }
+  for (let y = 0; y < H; y++) { map[y][0] = 4; map[y][W-1] = 4; }
+
+  // Hauptstraße (horizontal, Mitte)
+  for (let x = 2; x < W-2; x++) { map[16][x] = 1; map[17][x] = 1; }
+  // Hauptstraße (vertikal)
+  for (let y = 2; y < H-2; y++) { map[y][22] = 1; map[y][23] = 1; }
+
+  // Querstraßen
+  for (let x = 2; x < W-2; x++) { map[8][x] = 1; map[9][x] = 1; }
+  for (let x = 2; x < W-2; x++) { map[26][x] = 1; map[27][x] = 1; }
+  for (let y = 2; y < H-2; y++) { map[y][11] = 1; map[y][12] = 1; }
+  for (let y = 2; y < H-2; y++) { map[y][33] = 1; map[y][34] = 1; }
+
+  // Bahnhof (links oben — Verbindung zu Nordhorn)
+  for (let y = 2; y <= 6; y++) for (let x = 2; x <= 7; x++) map[y][x] = 2;
+  map[6][4] = 8; // Eingang Bahnhof
+  map[3][2] = 10; map[3][3] = 10; map[3][4] = 10; // Gleise-Markierung
+  map[3][5] = 10; map[3][6] = 10; map[3][7] = 10;
+
+  // Bahnhof-Court (neben Bahnhof)
+  for (let y = 4; y <= 7; y++) for (let x = 8; x <= 12; x++) map[y][x] = 3;
+  map[5][9] = 13; map[5][11] = 13;
+  for (let y = 4; y <= 7; y++) { map[y][7] = 7; map[y][13] = 7; }
+
+  // Industrie-Gebäude (rechts oben)
+  for (let y = 2; y <= 6; y++) for (let x = 32; x <= 39; x++) map[y][x] = 2;
+  map[6][35] = 8; // Eingang Fabrik
+  for (let y = 2; y <= 6; y++) { map[y][31] = 7; map[y][40] = 7; }
+
+  // Industrierei-Court (rechts oben)
+  for (let y = 6; y <= 10; y++) for (let x = 34; x <= 38; x++) map[y][x] = 3;
+  map[7][35] = 13; map[7][37] = 13;
+  for (let y = 6; y <= 10; y++) { map[y][33] = 7; map[y][39] = 7; }
+
+  // Arena Lingen (Mitte, groß)
+  for (let y = 14; y <= 22; y++) for (let x = 18; x <= 27; x++) map[y][x] = 3;
+  map[16][20] = 13; map[16][25] = 13; // Körbe
+  for (let y = 14; y <= 22; y++) { map[y][17] = 7; map[y][28] = 7; }
+  for (let x = 18; x <= 27; x++) { map[13][x] = 7; map[23][x] = 7; }
+  map[18][18] = 8; // Arena-Eingang
+
+  // Tribüne bei Arena
+  for (let x = 19; x <= 26; x++) { map[13][x] = 12; }
+
+  // Hafen-Bereich (unten, Wasser-Kanal)
+  for (let y = 28; y <= 36; y++) for (let x = 14; x <= 24; x++) map[y][x] = 0;
+  for (let y = 28; y <= 36; y++) { map[y][13] = 4; map[y][25] = 4; } // Kanalwände
+  for (let x = 14; x <= 24; x++) { map[37][x] = 4; } // Kanalboden
+  // Hafen-Court
+  for (let y = 31; y <= 34; y++) for (let x = 16; x <= 22; x++) map[y][x] = 3;
+  map[32][17] = 13; map[32][21] = 13;
+  for (let y = 31; y <= 34; y++) { map[y][15] = 7; map[y][23] = 7; }
+
+  // Wohn-Block (links unten)
+  for (let y = 28; y <= 33; y++) for (let x = 2; x <= 8; x++) map[y][x] = 2;
+  map[33][5] = 8; // Eingang
+  for (let y = 28; y <= 33; y++) for (let x = 9; x <= 12; x++) map[y][x] = 2;
+  map[33][10] = 8;
+
+  // Park (mitte unten)
+  for (let y = 28; y <= 32; y++) for (let x = 28; x <= 38; x++) map[y][x] = 0;
+  map[29][29] = 5; map[29][31] = 5; map[29][33] = 5; map[29][35] = 5; map[29][37] = 5;
+  map[31][29] = 5; map[31][31] = 5; map[31][33] = 5; map[31][35] = 5; map[31][37] = 5;
+  map[30][30] = 1; map[30][32] = 1; map[30][34] = 1; map[30][36] = 1;
+
+  // Bäume entlang der Hauptstraßen
+  for (let y = 2; y < H-2; y += 4) {
+    if (y < 16 || y > 17) map[y][21] = 5;
+    if (y < 16 || y > 17) map[y][24] = 5;
+  }
+
+  // Blumenbeete beim Bahnhof
+  for (let x = 2; x <= 7; x++) map[7][x] = 9;
+
+  // Straßenmarkierungen
+  for (let x = 5; x < W-5; x += 4) { if (map[16][x] === 1) map[16][x] = 10; }
+  for (let y = 5; y < H-5; y += 4) { if (map[y][22] === 1) map[y][22] = 10; }
+
   return map;
 }

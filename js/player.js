@@ -87,12 +87,31 @@ class Player {
   tryMove(dx, dy) {
     const newX = this.x + dx;
     const newY = this.y + dy;
-    
+
     if (currentMap && currentMap.canWalk(newX, newY)) {
       this.x = newX;
       this.y = newY;
       this.moving = true;
-      
+
+      // Map warp check
+      if (currentMap.warps) {
+        for (const warp of currentMap.warps) {
+          if (this.x === warp.x && this.y === warp.y) {
+            const targetMap = Maps[warp.toMap];
+            if (targetMap) {
+              currentMap = targetMap;
+              this.x = warp.toX;
+              this.y = warp.toY;
+              Dialog.show([
+                'Zugfahrt...',
+                `Ankunft in ${targetMap.name}!`
+              ]);
+              return;
+            }
+          }
+        }
+      }
+
       // Trainer-Kampf (wie Pokemon-Trainer)
       if (currentMap.trainers) {
         const trainer = currentMap.getTrainerAt(newX, newY);
