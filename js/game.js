@@ -395,6 +395,23 @@ function renderHUD() {
     ctx.textAlign = 'center';
     ctx.fillText(currentMap.name, canvas.width / 2, 10);
   }
+  
+  // Item count indicator (bottom-left hint)
+  if (player && player.inventory && player.inventory.length > 0) {
+    ctx.fillStyle = PALETTE.darkest;
+    ctx.fillRect(0, canvas.height - 14, 50, 14);
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = '8px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('M=Menu[' + player.inventory.length + ']', 2, canvas.height - 4);
+  } else {
+    ctx.fillStyle = PALETTE.darkest;
+    ctx.fillRect(0, canvas.height - 14, 38, 14);
+    ctx.fillStyle = PALETTE.dark;
+    ctx.font = '8px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('M=Menu', 2, canvas.height - 4);
+  }
 }
 
 // ============================================
@@ -561,6 +578,16 @@ function gameLoop() {
       updateCamera();
       renderOverworld();
       if (player) player.update();
+      // Open menu with M key
+      if (wasPressed('m') || wasPressed('M')) {
+        Menu.open();
+      }
+      break;
+      
+    case GameState.MENU:
+      renderOverworld();
+      Menu.render();
+      Menu.update();
       break;
       
     case GameState.DIALOG:

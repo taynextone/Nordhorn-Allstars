@@ -51,6 +51,11 @@ class Player {
     
     // Siegelfarben (wie Pokemon-Badges)
     this.badges = [];
+    
+    // Inventory & Equipment
+    this.inventory = [];
+    this.equipment = { shoes: null, bracelet: null };
+    this.baseStats = null; // Will be set when first equipping
   }
   
   update() {

@@ -178,8 +178,9 @@ const Battle = {
       
       switch(move.type) {
         case 'attack':
+          const playerShoot = player.stats.shooting + getEquipmentBoosts().shooting + getEquipmentBoosts().athleticism * 0.5;
           const accuracy = side === 'player' ? 
-            0.5 + (player.stats.shooting * 0.03) : 0.6;
+            0.5 + (playerShoot * 0.03) : 0.6;
           hit = Math.random() < accuracy;
           
           if (hit) {
@@ -195,6 +196,9 @@ const Battle = {
               this.flashColor = PALETTE.lightest;
             } else {
               if (this.playerBlocking) { damage = Math.floor(damage * 0.3); this.playerBlocking = false; }
+              // Equipment defense boost reduces damage further
+              const defBoost = getEquipmentBoosts().defense;
+              if (defBoost > 0) { damage = Math.max(1, Math.floor(damage * (1 - defBoost * 0.05))); }
               this.playerHP -= damage;
               this.opponentScore += points;
               this.opponentBonus = 0;
@@ -666,7 +670,7 @@ const Battle = {
   
   renderPlayerPanel() {
     // Panel background
-    const px = 8, py = 8, pw = 195, ph = 72;
+    const px = 8, py = 8, pw = 195, ph = 82;
     ctx.fillStyle = PALETTE.darkest;
     ctx.fillRect(px, py, pw, ph);
     ctx.strokeStyle = PALETTE.lightest;
@@ -719,6 +723,20 @@ const Battle = {
       ctx.fillStyle = PALETTE.lightest;
       ctx.font = '7px "Courier New", monospace';
       ctx.fillText('EXP', px + 85, py + 66);
+    }
+    
+    // Equipment indicators
+    if (player && player.equipment) {
+      ctx.font = '7px "Courier New", monospace';
+      ctx.textAlign = 'left';
+      if (player.equipment.shoes) {
+        ctx.fillStyle = player.equipment.shoes.color || PALETTE.light;
+        ctx.fillText('S:' + player.equipment.shoes.name.substring(0, 10), px + 8, py + 78);
+      }
+      if (player.equipment.bracelet) {
+        ctx.fillStyle = player.equipment.bracelet.color || PALETTE.light;
+        ctx.fillText('A:' + player.equipment.bracelet.name.substring(0, 10), px + 100, py + 78);
+      }
     }
   },
   

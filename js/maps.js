@@ -118,6 +118,37 @@ const Maps = {
             return ['Move-Tutor', 'Ich habe dir was beigebracht!', `Du hast "${learned.name}" gelernt!`, `${learned.desc}`, `Noch ${unlearned.length - 1} Moves übrig.`];
           }
           return ['Move-Tutor', 'Du hast das schon gelernt.', `Noch ${unlearned.length} Moves übrig.`, 'Komm wieder wenn du bereit bist!'];
+        } },
+      // Item pickups (Nordhorn)
+      { x: 15, y: 5, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('runningShoes');
+          if (item) return ['Hey! Schau mal da!', 'Da liegt ein Paar Laufschuhe!', `"${item.name}" erhalten!`, item.desc];
+          return ['Hey! Schau mal da!', 'Da liegt ein Paar Laufschuhe!'];
+        } },
+      { x: 35, y: 24, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('energyDrink');
+          if (item) return ['Im Regal hinten findest du etwas.', 'Ein Energy-Drink!', `"${item.name}" erhalten!`, item.desc];
+          return ['Im Regal hinten findest du etwas.'];
+        } },
+      { x: 3, y: 15, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('leatherBracelet');
+          if (item) return ['Am Zaun hängt ein Armband.', 'Ein Leder-Armband!', `"${item.name}" erhalten!`, item.desc];
+          return ['Am Zaun hängt ein Armband.'];
+        } },
+      { x: 46, y: 38, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('proteinShake');
+          if (item) return ['Im Stadion-Vorraum steht ein Shake.', 'Protein-Shake!', `"${item.name}" erhalten!`, item.desc];
+          return ['Im Stadion-Vorraum steht ein Shake.'];
+        } },
+      { x: 16, y: 28, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('sportsDrink');
+          if (item) return ['Auf dem Parktisch liegt ein Getränk.', 'Sportler-Getränk!', `"${item.name}" erhalten!`, item.desc];
+          return ['Auf dem Parktisch liegt ein Getränk.'];
         } }
     ],
     
@@ -234,6 +265,31 @@ const Maps = {
             return ['Move-Tutor', 'Ich habe dir was beigebracht!', `Du hast "${learned.name}" gelernt!`, `${learned.desc}`, `Noch ${unlearned.length - 1} Moves übrig.`];
           }
           return ['Move-Tutor', 'Du hast das schon gelernt.', `Noch ${unlearned.length} Moves übrig.`, 'Komm wieder wenn du bereit bist!'];
+        } },
+      // Item pickups (Lingen)
+      { x: 14, y: 4, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('proShoes');
+          if (item) return ['Am Bahnhof liegen Schuhe.', 'Pro-Schuhe!', `"${item.name}" erhalten!`, item.desc];
+          return ['Am Bahnhof liegen Schuhe.'];
+        } },
+      { x: 30, y: 5, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('championBracelet');
+          if (item) return ['Am Industriehof liegt ein Armband.', 'Champion-Armband!', `"${item.name}" erhalten!`, item.desc];
+          return ['Am Industriehof liegt ein Armband.'];
+        } },
+      { x: 26, y: 30, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('sportsDrink');
+          if (item) return ['Am Hafen liegt ein Getränk.', 'Sportler-Getränk!', `"${item.name}" erhalten!`, item.desc];
+          return ['Am Hafen liegt ein Getränk.'];
+        } },
+      { x: 30, y: 30, sprite: 'npcGeneric',
+        getDialog: function() {
+          const item = addItemToInventory('energyDrink');
+          if (item) return ['Im Park steht ein Kiosk.', 'Energy-Drink!', `"${item.name}" erhalten!`, item.desc];
+          return ['Im Park steht ein Kiosk.'];
         } }
     ],
 
