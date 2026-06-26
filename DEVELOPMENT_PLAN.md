@@ -28,7 +28,7 @@
 - [x] Spieler-Movepaket gleichgewichtig
 - [x] 8 "Courts" (Gym-Äquivalent) implementieren
 - [x] Lingen als zweite Karte (Erzfeind-Stadt)
-- [ ] Finale / Endboss
+- [x] Finale / Endboss (König, 12-Badge-Gate, Credits-Screen)
 - [ ] Move-Tutor NPC
 - [ ] Items (Schuhe, Armbänder, Energy-Drinks)
 
