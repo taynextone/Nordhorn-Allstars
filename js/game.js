@@ -33,6 +33,54 @@ let keys = {};
 let keysPressed = {};
 
 // ============================================
+// SCREEN TRANSITIONS (Fade)
+// ============================================
+const ScreenTransition = {
+  active: false,
+  phase: 'none', // 'out' | 'in'
+  color: PALETTE.darkest,
+  speed: 0.06,
+  progress: 0,
+  onComplete: null,
+  
+  start(callback) {
+    this.active = true;
+    this.phase = 'out';
+    this.progress = 0;
+    this.onComplete = callback;
+  },
+  
+  update() {
+    if (!this.active) return;
+    this.progress += this.speed;
+    
+    if (this.phase === 'out' && this.progress >= 1) {
+      this.progress = 0;
+      this.phase = 'in';
+      if (this.onComplete) this.onComplete();
+    } else if (this.phase === 'in' && this.progress >= 1) {
+      this.active = false;
+      this.phase = 'none';
+      this.progress = 0;
+    }
+  },
+  
+  render() {
+    if (!this.active) return;
+    let alpha;
+    if (this.phase === 'out') {
+      alpha = this.progress;
+    } else {
+      alpha = 1 - this.progress;
+    }
+    ctx.fillStyle = this.color;
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+  }
+};
+
+// ============================================
 // SPRITE RENDERING
 // ============================================
 
@@ -553,8 +601,10 @@ function gameLoop() {
   switch(gameState) {
     case GameState.TITLE:
       renderTitle();
-      if (wasPressed('Enter') || wasPressed(' ')) {
-        gameState = GameState.CHARACTER_SELECT;
+      if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+        ScreenTransition.start(() => {
+          gameState = GameState.CHARACTER_SELECT;
+        });
       }
       break;
       
@@ -563,12 +613,14 @@ function gameLoop() {
       if (charSelectStep === 0) {
         if (wasPressed('ArrowLeft')) charSelectGender = 0;
         if (wasPressed('ArrowRight')) charSelectGender = 1;
-        if (wasPressed('Enter') || wasPressed(' ')) charSelectStep = 1;
+        if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) charSelectStep = 1;
       } else {
         if (wasPressed('ArrowUp')) charSelectBuild = Math.max(0, charSelectBuild - 1);
         if (wasPressed('ArrowDown')) charSelectBuild = Math.min(2, charSelectBuild + 1);
-        if (wasPressed('Enter') || wasPressed(' ')) {
-          startGame(charSelectGender, charSelectBuild);
+        if (!ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+          ScreenTransition.start(() => {
+            startGame(charSelectGender, charSelectBuild);
+          });
         }
         if (wasPressed('Escape')) charSelectStep = 0;
       }
@@ -605,19 +657,24 @@ function gameLoop() {
         Dialog.update();
       }
       break;
-
+      
     case GameState.CREDITS:
       renderCredits();
-      if (creditsFrame > 120 && (wasPressed('Enter') || wasPressed(' '))) {
-        // Reset game
-        gameState = GameState.TITLE;
-        creditsFrame = 0;
-        creditsScrollY = 0;
-        player = null;
-        currentMap = null;
+      if (creditsFrame > 120 && !ScreenTransition.active && (wasPressed('Enter') || wasPressed(' '))) {
+        ScreenTransition.start(() => {
+          gameState = GameState.TITLE;
+          creditsFrame = 0;
+          creditsScrollY = 0;
+          player = null;
+          currentMap = null;
+        });
       }
       break;
   }
+  
+  // Update and render screen transitions on top of everything
+  ScreenTransition.update();
+  ScreenTransition.render();
   
   requestAnimationFrame(gameLoop);
 }
