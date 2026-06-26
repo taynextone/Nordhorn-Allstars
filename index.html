@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nordhorn Allstars</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+}
+
+#game-container {
+  position: relative;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 4px solid #2a2a4a;
+  border-radius: 4px;
+}
+
+#gameboy-frame {
+  background: #c4b896;
+  padding: 24px 24px 60px 24px;
+  border-radius: 12px 12px 40px 12px;
+  box-shadow: 
+    inset 0 0 20px rgba(0,0,0,0.15),
+    0 8px 30px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+#gameboy-screen {
+  background: #4a5a3a;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+#gameboy-label {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #4a3a2a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-height: 700px) {
+  #gameboy-frame { padding: 12px 12px 40px 12px; }
+  canvas { width: 320px !important; height: 288px !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="gameboy-frame">
+  <div id="gameboy-screen">
+    <div id="game-container">
+      <canvas id="gameCanvas" width="480" height="432"></canvas>
+    </div>
+  </div>
+  <div id="gameboy-label">Nordhorn Allstars</div>
+</div>
+
+<script src="js/sprites.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/dialog.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/player.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
