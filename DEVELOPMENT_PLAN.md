@@ -26,7 +26,7 @@
 - [x] Story-Dialoge für alle NPCs
 - [x] Zug-System mit Energie-Kosten ausgeglichen
 - [x] Spieler-Movepaket gleichgewichtig
-- [ ] 8 "Courts" (Gym-Äquivalent) implementieren
+- [x] 8 "Courts" (Gym-Äquivalent) implementieren
 - [ ] Lingen als zweite Karte (Erzfeind-Stadt)
 - [ ] Finale / Endboss
 - [ ] Move-Tutor NPC
