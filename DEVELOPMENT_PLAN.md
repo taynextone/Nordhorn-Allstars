@@ -30,7 +30,7 @@
 - [x] Lingen als zweite Karte (Erzfeind-Stadt)
 - [x] Finale / Endboss (König, 12-Badge-Gate, Credits-Screen)
 - [x] Move-Tutor NPC
-- [ ] Items (Schuhe, Armbänder, Energy-Drinks)
+- [x] Items (Schuhe, Armbänder, Energy-Drinks)
 
 ## Phase 4: Polish & AAA-Feeling
 - [ ] Bessere Pixel-Art (Aseprite-Qualität)
