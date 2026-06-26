@@ -37,7 +37,7 @@
 - [x] Screen-Transitions (Fade, Wipe)
 - [x] Battle-Animationen (Ball fliegt, Korb-Swish)
 - [x] Sound-Effekte (Chiptune via Web Audio) — 20+ SFX: Kampf, Menü, Dialog, Item, Warp, Victory, Defeat, Level-Up, Badge
-- [ ] Hintergrundmusik (Chiptune-Tracks)
+- [x] Hintergrundmusik (Chiptune-Tracks) — 5 Tracks: Title, Overworld, Battle, Victory, Credits (Bass+Lead Sequencer)
 - [ ] Speicher-System (LocalStorage)
 - [ ] Pause-Menü
 - [ ] Pokédex-Äquivalent ("Spieler-Liste")
