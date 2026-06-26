@@ -29,7 +29,7 @@
 - [x] 8 "Courts" (Gym-Äquivalent) implementieren
 - [x] Lingen als zweite Karte (Erzfeind-Stadt)
 - [x] Finale / Endboss (König, 12-Badge-Gate, Credits-Screen)
-- [ ] Move-Tutor NPC
+- [x] Move-Tutor NPC
 - [ ] Items (Schuhe, Armbänder, Energy-Drinks)
 
 ## Phase 4: Polish & AAA-Feeling
