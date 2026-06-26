@@ -179,6 +179,21 @@ class Player {
     }
     return null;
   }
+
+  // Move-Tutor: Lernt einen bestimmten Move (wenn noch nicht gelernt)
+  learnMove(moveName) {
+    const move = MovesData.moves.find(m => m.name === moveName);
+    if (move && !this.moves.find(m => m.name === moveName)) {
+      this.moves.push({ ...move });
+      return move;
+    }
+    return null;
+  }
+
+  // Gibt alle Moves zurück, die der Spieler noch nicht gelernt hat
+  getUnlearnedMoves() {
+    return MovesData.moves.filter(m => !this.moves.find(pm => pm.name === m.name));
+  }
 }
 
 // ============================================

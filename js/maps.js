@@ -103,6 +103,21 @@ const Maps = {
       { x: 43, y: 2, sprite: 'npcGeneric',
         getDialog: function() {
           return ['Bahnhof Nordhorn', 'Der Zug nach Lingen fährt stündlich.', 'Vorsicht: Die Spieler dort sind stark!', 'Drücke ENTER am Gleis umzureisen.'];
+        } },
+      { x: 27, y: 5, sprite: 'moveTutor',
+        getDialog: function() {
+          if (!player) return ['Move-Tutor', 'Komm wieder wenn du bereit bist.'];
+          const unlearned = player.getUnlearnedMoves();
+          if (unlearned.length === 0) {
+            return ['Move-Tutor', 'Du hast alle Moves gelernt!', 'Du bist ein wahrer Meister!', 'Geh und zeig was du kannst!'];
+          }
+          // Biete den nächsten ungelernten Move an (basierend auf Level)
+          const nextMove = unlearned[0];
+          const learned = player.learnMove(nextMove.name);
+          if (learned) {
+            return ['Move-Tutor', 'Ich habe dir was beigebracht!', `Du hast "${learned.name}" gelernt!`, `${learned.desc}`, `Noch ${unlearned.length - 1} Moves übrig.`];
+          }
+          return ['Move-Tutor', 'Du hast das schon gelernt.', `Noch ${unlearned.length} Moves übrig.`, 'Komm wieder wenn du bereit bist!'];
         } }
     ],
     
@@ -205,7 +220,21 @@ const Maps = {
           return ['Arena Lingen', 'Der Champion von Lingen trainiert hier.', `Du brauchst ${9-badges} weitere Siege für den Zugang.`, 'Bewehe dich erst auf den anderen Courts!'];
         } },
       { x: 10, y: 20, sprite: 'npcGeneric',
-        dialog: ['Parkstraße', 'Ruhiger Ort in der Stadt.', 'Hier kann man den Kopf freibekommen.', 'Perfekt vor einem wichtigen Spiel.'] }
+        dialog: ['Parkstraße', 'Ruhiger Ort in der Stadt.', 'Hier kann man den Kopf freibekommen.', 'Perfekt vor einem wichtigen Spiel.'] },
+      { x: 29, y: 16, sprite: 'moveTutor',
+        getDialog: function() {
+          if (!player) return ['Move-Tutor', 'Komm wieder wenn du bereit bist.'];
+          const unlearned = player.getUnlearnedMoves();
+          if (unlearned.length === 0) {
+            return ['Move-Tutor', 'Du hast alle Moves gelernt!', 'Du bist ein wahrer Meister!', 'Geh und zeig was du kannst!'];
+          }
+          const nextMove = unlearned[0];
+          const learned = player.learnMove(nextMove.name);
+          if (learned) {
+            return ['Move-Tutor', 'Ich habe dir was beigebracht!', `Du hast "${learned.name}" gelernt!`, `${learned.desc}`, `Noch ${unlearned.length - 1} Moves übrig.`];
+          }
+          return ['Move-Tutor', 'Du hast das schon gelernt.', `Noch ${unlearned.length} Moves übrig.`, 'Komm wieder wenn du bereit bist!'];
+        } }
     ],
 
     getTrainerAt(x, y) {
