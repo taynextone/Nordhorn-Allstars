@@ -97,12 +97,14 @@ function renderTitle() {
 // ============================================
 
 let charSelectFrame = 0;
-let charSelectPos = 0;
+let charSelectGender = 0; // 0=Junge, 1=Mädchen
+let charSelectBuild = 0;  // 0-2
+let charSelectStep = 0;   // 0=Gender, 1=Build
 
 const BUILDS = [
-  { name: 'SHOOTER', desc: 'Wurf++', color: PALETTE.lightest },
-  { name: 'ALLROUNDER', desc: 'Ausgewogen', color: PALETTE.light },
-  { name: 'VERTEIDIGER', desc: 'Block++', color: PALETTE.dark }
+  { name: 'SHOOTER', desc: 'Wurf++ / Def--' },
+  { name: 'ALLROUNDER', desc: 'Ausgewogen' },
+  { name: 'VERTEIDIGER', desc: 'Block++ / Wurf--' }
 ];
 
 function renderCharacterSelect() {
@@ -114,25 +116,36 @@ function renderCharacterSelect() {
   ctx.textAlign = 'center';
   ctx.fillText('CHARAKTER WÄHLEN', canvas.width / 2, 50);
   
-  // Junge/Mädchen Auswahl
+  // Schritt 1: Geschlecht
   ctx.font = '13px "Courier New", monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(charSelectPos === 0 ? '>' : ' ', 40, 90);
-  ctx.fillText('JUNGE', 60, 90);
-  ctx.fillText(charSelectPos === 1 ? '>' : ' ', 240, 90);
-  ctx.fillText('MÄDCHEN', 260, 90);
+  ctx.fillStyle = charSelectStep === 0 ? PALETTE.lightest : PALETTE.light;
+  ctx.fillText('GESCHLECHT:', 40, 100);
+  ctx.fillText(charSelectGender === 0 ? '>' : ' ', 180, 100);
+  ctx.fillText('JUNGE', 200, 100);
+  ctx.fillText(charSelectGender === 1 ? '>' : ' ', 320, 100);
+  ctx.fillText('MÄDCHEN', 340, 100);
   
-  // Build-Auswahl
-  ctx.fillText('BUILD:', 40, 140);
+  // Schritt 2: Build
+  ctx.fillStyle = charSelectStep === 1 ? PALETTE.lightest : PALETTE.light;
+  ctx.fillText('BUILD:', 40, 160);
   for (let i = 0; i < 3; i++) {
-    const y = 160 + i * 40;
-    ctx.fillStyle = i === charSelectPos - 2 ? PALETTE.lightest : PALETTE.light;
-    ctx.fillText(i === charSelectPos - 2 ? '>' : ' ', 40, y);
+    const y = 180 + i * 35;
+    ctx.fillStyle = (charSelectStep === 1 && i === charSelectBuild) ? PALETTE.lightest : PALETTE.light;
+    ctx.fillText((charSelectStep === 1 && i === charSelectBuild) ? '>' : ' ', 40, y);
     ctx.fillText(BUILDS[i].name, 60, y);
     ctx.fillStyle = PALETTE.light;
     ctx.font = '11px "Courier New", monospace';
     ctx.fillText(BUILDS[i].desc, 200, y);
     ctx.font = '13px "Courier New", monospace';
+  }
+  
+  // Bestätigung
+  if (charSelectStep === 1) {
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = '11px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ENTER = Start!', canvas.width / 2, 320);
   }
   
   charSelectFrame++;
@@ -146,6 +159,23 @@ function renderOverworld() {
   // Karte rendern
   if (currentMap) {
     renderMap(currentMap);
+  }
+  
+  // Trainer-Sprites rendern
+  if (currentMap && currentMap.trainers) {
+    for (const trainer of currentMap.trainers) {
+      const tx = trainer.x * 16 - cameraX;
+      const ty = trainer.y * 16 - cameraY;
+      if (tx > -32 && tx < canvas.width + 32 && ty > -32 && ty < canvas.height + 32) {
+        if (trainer.defeated) {
+          // Besiegte Trainer grau einfaerben
+          ctx.globalAlpha = 0.5;
+        }
+        const sprite = Sprites[trainer.sprite] || Sprites.trainerTim;
+        drawSprite(sprite, tx, ty - 8, 1);
+        ctx.globalAlpha = 1.0;
+      }
+    }
   }
   
   // Spieler-Sprite
@@ -259,22 +289,8 @@ function drawTile(tile, x, y) {
 }
 
 function drawPlayerSprite(x, y, dir, frame) {
-  // Einfacher 16x16 Sprite
-  const px = Math.floor(x);
-  const py = Math.floor(y);
-  
-  // Kopf
-  drawPixelRect(px + 4, py, 8, 6, PALETTE.lightest);
-  // Körper
-  drawPixelRect(px + 3, py + 6, 10, 6, PALETTE.dark);
-  // Beine (animiert)
-  if (frame % 2 === 0) {
-    drawPixelRect(px + 3, py + 12, 4, 4, PALETTE.darkest);
-    drawPixelRect(px + 9, py + 12, 4, 4, PALETTE.darkest);
-  } else {
-    drawPixelRect(px + 2, py + 12, 4, 4, PALETTE.darkest);
-    drawPixelRect(px + 10, py + 12, 4, 4, PALETTE.darkest);
-  }
+  const sprite = getPlayerSprite(player.gender, dir, frame);
+  drawSprite(sprite, x, y - 8, 1);
 }
 
 function renderHUD() {
@@ -343,10 +359,17 @@ function gameLoop() {
       
     case GameState.CHARACTER_SELECT:
       renderCharacterSelect();
-      if (wasPressed('ArrowUp')) charSelectPos = Math.max(0, charSelectPos - 1);
-      if (wasPressed('ArrowDown')) charSelectPos = Math.min(4, charSelectPos + 1);
-      if (wasPressed('Enter') && charSelectPos >= 2) {
-        startGame(charSelectPos - 2);
+      if (charSelectStep === 0) {
+        if (wasPressed('ArrowLeft')) charSelectGender = 0;
+        if (wasPressed('ArrowRight')) charSelectGender = 1;
+        if (wasPressed('Enter') || wasPressed(' ')) charSelectStep = 1;
+      } else {
+        if (wasPressed('ArrowUp')) charSelectBuild = Math.max(0, charSelectBuild - 1);
+        if (wasPressed('ArrowDown')) charSelectBuild = Math.min(2, charSelectBuild + 1);
+        if (wasPressed('Enter') || wasPressed(' ')) {
+          startGame(charSelectGender, charSelectBuild);
+        }
+        if (wasPressed('Escape')) charSelectStep = 0;
       }
       break;
       
@@ -371,8 +394,8 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-function startGame(buildIndex) {
-  player = new Player(8, 12, BUILDS[buildIndex]);
+function startGame(gender, buildIndex) {
+  player = new Player(6, 7, gender, BUILDS[buildIndex]);
   currentMap = Maps.nordhorn;
   gameState = GameState.OVERWORLD;
 }

@@ -3,10 +3,11 @@
 // ============================================
 
 class Player {
-  constructor(x, y, build) {
+  constructor(x, y, gender, build) {
     this.x = x;
     this.y = y;
-    this.direction = 'down'; // up, down, left, right
+    this.gender = gender; // 'boy' or 'girl'
+    this.direction = 'down';
     this.frame = 0;
     this.moving = false;
     this.moveTimer = 0;
