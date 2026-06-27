@@ -2972,6 +2972,71 @@ const PracticePlan = {
   }
 };
 
+const WarmupCoach = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const stats = player.stats || {};
+    const statList = [
+      { key: 'shooting', label: 'SHOOTING', drill: 'FORM SHOTS', value: stats.shooting || 0 },
+      { key: 'dribbling', label: 'HANDLE', drill: 'CROSSOVER REPS', value: stats.dribbling || 0 },
+      { key: 'defense', label: 'DEFENSE', drill: 'SLIDE DRILL', value: stats.defense || 0 },
+      { key: 'athleticism', label: 'ATHLETIC', drill: 'SPRINT LINES', value: stats.athleticism || 0 },
+      { key: 'courtVision', label: 'VISION', drill: 'PASS READS', value: stats.courtVision || 0 }
+    ];
+    const weakest = statList.reduce((low, stat) => stat.value < low.value ? stat : low, statList[0]);
+    const avg = statList.reduce((sum, stat) => sum + stat.value, 0) / statList.length;
+    const levelGap = next ? (next.level || 1) - (player.level || 1) : 0;
+    const energyPct = player.maxEnergy ? Math.round((player.energy / player.maxEnergy) * 100) : 0;
+    let drillScore = 48 + avg * 5 - Math.max(0, levelGap) * 7 + (energyPct >= 70 ? 8 : -8);
+    drillScore = Math.max(0, Math.min(100, Math.round(drillScore)));
+
+    let label = 'READY WARMUP';
+    let advice = 'LIGHT SHOOTAROUND';
+    if (!next) {
+      label = 'CHAMPION WARMUP';
+      advice = 'ROLL CREDITS';
+    } else if (energyPct < 35) {
+      label = 'LOW GAS';
+      advice = 'REST THEN DRILL';
+    } else if (levelGap >= 2 || weakest.value <= 4) {
+      label = weakest.label + ' FOCUS';
+      advice = weakest.drill;
+    } else if (drillScore >= 82) {
+      label = 'LOCKED IN';
+      advice = 'TAKE THE DUEL';
+    }
+
+    return { label, advice, weakest: weakest.key, weakestLabel: weakest.label, statValue: weakest.value, drillScore, next, levelGap, energyPct };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('WARMUP COACH · STAT-DRILL HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 4;
+    const y = 66;
+    const w = 154;
+    const h = 28;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.label === 'LOW GAS' ? C.MID : C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('WARMUP ' + info.drillScore + '% · ' + info.label.substring(0, 12), x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.weakestLabel + ' ' + info.statValue + ' · ' + info.advice, x + 7, y + 22);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3582,8 +3647,9 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
-  PracticePlan.renderTitleBadge(bx, 18);
-  SpacingCoach.renderTitleBadge(bx, 28);
+  WarmupCoach.renderTitleBadge(bx, 14);
+  PracticePlan.renderTitleBadge(bx, 24);
+  SpacingCoach.renderTitleBadge(bx, 34);
   PickRollCoach.renderTitleBadge(bx, 38);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
   FoulTroubleCoach.renderTitleBadge(bx, 58);
@@ -3975,6 +4041,7 @@ function drawOverworld() {
   DuelRiskMeter.renderHUD();
   RouteCoach.renderHUD();
   PracticePlan.renderHUD();
+  WarmupCoach.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -4690,6 +4757,7 @@ const GameModules = {
     { id: 'pickRollCoach', label: 'Pick-Roll Coach', check: () => !!(PickRollCoach && typeof PickRollCoach.getState === 'function' && typeof PickRollCoach.renderBattleHUD === 'function' && PickRollCoach.getState().screenValue >= 0) },
     { id: 'spacingCoach', label: 'Spacing Coach', check: () => !!(SpacingCoach && typeof SpacingCoach.getState === 'function' && typeof SpacingCoach.renderBattleHUD === 'function' && SpacingCoach.getState().spacing >= 0) },
     { id: 'practicePlan', label: 'Practice Plan', check: () => !!(PracticePlan && typeof PracticePlan.getState === 'function' && typeof PracticePlan.renderHUD === 'function' && PracticePlan.getState().focus >= 0) },
+    { id: 'warmupCoach', label: 'Warmup Coach', check: () => !!(WarmupCoach && typeof WarmupCoach.getState === 'function' && typeof WarmupCoach.renderHUD === 'function' && WarmupCoach.getState().drillScore >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

@@ -87,3 +87,4 @@
 - [x] Pick-Roll-Coach Battle-HUD — sichtbare Screen-Read-Anzeige mit Pick-and-Roll-/Switch-Tipps, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Spacing-Coach Battle-HUD — sichtbare Floor-Balance-/Spacing-Anzeige mit Offense-/Defense-Tipps, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Practice-Plan Overworld-HUD — sichtbare Next-Drill-Empfehlung mit Rest/Training/Duell-Plan, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Warmup-Coach Overworld-HUD — sichtbare Stat-Drill-Empfehlung mit schwächstem Skill, Energiecheck, Title-Screen-Marker und Module-Check ergänzt.
