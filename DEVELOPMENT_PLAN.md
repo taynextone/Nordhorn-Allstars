@@ -53,6 +53,6 @@
 - [x] Deployment (GitHub Pages) — Pages-Actions-Workflow, .nojekyll, README-Link und sichtbarer Title-Screen-Deploy-Marker ergänzt.
 
 ## Technische Schulden
-- [ ] Code-Refactoring (saubere Module)
+- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 12 Boot-Checks und Title-Screen-Status ergänzt
 - [ ] Fehlerbehandlung (Edge Cases)
 - [ ] Kommentare im Code

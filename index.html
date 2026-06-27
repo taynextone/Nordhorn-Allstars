@@ -1483,15 +1483,19 @@ function drawTitleScreen() {
   BrowserCompat.renderBadge(bx, 374);
   BrowserCompat.renderPanel();
 
+  // Refactor health marker: shows that the major game systems are registered and bootable.
+  GameModules.renderBadge(bx, 386);
+  GameModules.renderPanel();
+
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('GITHUB PAGES READY', bx, 396);
+  ctx.fillText('GITHUB PAGES READY', bx, 402);
 
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 412);
+  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 418);
 
   ctx.textAlign = 'left';
 }
@@ -2325,6 +2329,79 @@ const DexData = {
     const all = this.getAllTrainers();
     const defeated = all.filter(t => t.defeated).length;
     return { total: all.length, defeated };
+  }
+};
+
+// ============================================================
+// MODULE REGISTRY (refactor health layer)
+// ============================================================
+
+const GameModules = {
+  modules: [
+    { id: 'canvas', label: 'Canvas', check: () => !!(canvas && ctx) },
+    { id: 'input', label: 'Input', check: () => typeof wasPressed === 'function' && !!(keys && keysPressed) },
+    { id: 'map', label: 'Map', check: () => Array.isArray(worldMap) && worldMap.length === MAP_H && worldMap[0] && worldMap[0].length === MAP_W },
+    { id: 'player', label: 'Player', check: () => !!(player && player.stats && Array.isArray(player.moves)) },
+    { id: 'overworld', label: 'Overworld', check: () => typeof drawOverworld === 'function' && typeof updateOverworld === 'function' },
+    { id: 'dialog', label: 'Dialog', check: () => typeof startDialog === 'function' && typeof updateDialog === 'function' && !!dialog },
+    { id: 'battle', label: 'Battle', check: () => typeof startBattle === 'function' && typeof updateBattle === 'function' && !!battle },
+    { id: 'credits', label: 'Credits', check: () => typeof drawCredits === 'function' },
+    { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
+    { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
+    { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
+    { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
+  ],
+  showPanel: window.location.search.indexOf('modules=1') !== -1,
+
+  getStatus() {
+    return this.modules.map(module => {
+      let ok = false;
+      try {
+        ok = !!module.check();
+      } catch (err) {
+        ok = false;
+      }
+      return { id: module.id, label: module.label, ok };
+    });
+  },
+
+  getSummary() {
+    const status = this.getStatus();
+    const ready = status.filter(module => module.ok).length;
+    return { ready, total: status.length, status };
+  },
+
+  renderBadge(x, y) {
+    const summary = this.getSummary();
+    const allReady = summary.ready === summary.total;
+    ctx.fillStyle = allReady ? C.DARKEST : C.DARK;
+    ctx.fillRect(x - 58, y - 10, 116, 15);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('MODULES: ' + summary.ready + '/' + summary.total + (allReady ? ' OK' : ' WARN'), x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderPanel() {
+    if (!this.showPanel) return;
+    const summary = this.getSummary();
+    const x = 12;
+    const y = 42;
+    const w = 168;
+    const h = 150;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('MODULE REGISTRY', x + 8, y + 14);
+    ctx.font = '6px monospace';
+    summary.status.forEach((module, index) => {
+      ctx.fillText((module.ok ? '✓ ' : '! ') + module.label, x + 8, y + 28 + index * 9);
+    });
   }
 };
 
