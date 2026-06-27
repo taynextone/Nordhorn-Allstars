@@ -2686,6 +2686,80 @@ const ShotClockCoach = {
   }
 };
 
+const FreeThrowCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const energy = battle.playerEnergy ?? player.energy ?? 0;
+    const enPct = Math.round((energy / (player.maxEnergy || 1)) * 100);
+    const selectedMove = (battle.playerMoves || [])[battle.selectedMove || 0] || null;
+    const cost = selectedMove ? (selectedMove.energy || 0) : 0;
+    const playerNeed = Math.max(0, target - playerScore);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const hasBall = !!battle.hasBall;
+
+    let focus = 38 + (player.stats.courtVision || 0) * 4 + (player.stats.shooting || 0) * 3;
+    focus += hasBall ? 8 : -3;
+    focus += Math.max(0, 45 - enPct) * 0.45;
+    if (selectedMove && selectedMove.pts >= playerNeed && playerNeed <= 3) focus += 12;
+    if (!hasBall && enemyNeed <= 3) focus += 14;
+    if (cost > energy) focus += 10;
+    focus = Math.max(0, Math.min(100, Math.round(focus)));
+
+    let label = 'LINE READY';
+    let advice = hasBall ? 'SET FEET' : 'BOX SHOOTER';
+    if (hasBall && cost > energy) {
+      label = 'TIRED FORM';
+      advice = 'BREATHE FIRST';
+    } else if (hasBall && playerNeed <= 3) {
+      label = 'CLINCH FOCUS';
+      advice = 'MAKE IT COUNT';
+    } else if (!hasBall && enemyNeed <= 3) {
+      label = 'NO AND-ONE';
+      advice = 'VERTICAL WALL';
+    } else if (focus >= 78) {
+      label = 'BONUS TOUCH';
+      advice = hasBall ? 'DRAW CONTACT' : 'HANDS HIGH';
+    } else if (lead <= -5 && hasBall) {
+      label = 'EARN POINTS';
+      advice = 'ATTACK RIM';
+    }
+
+    return { focus, label, advice, lead, enPct, hasBall, playerNeed, enemyNeed, move: selectedMove ? selectedMove.name : 'NONE' };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('FREE THROW COACH · CLUTCH-LINE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = VIEW_W - 162;
+    const y = 252;
+    const w = 152;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.focus >= 78 ? '#d4600a' : (info.focus >= 58 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('FT FOCUS ' + info.focus + '%', x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.label + ' · EN ' + info.enPct + '%', x + 7, y + 23);
+    ctx.fillText(info.advice, x + 82, y + 31);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3304,6 +3378,7 @@ function drawTitleScreen() {
   FastbreakCoach.renderTitleBadge(bx, 98);
   MismatchCoach.renderTitleBadge(bx, 108);
   ShotClockCoach.renderTitleBadge(bx, 118);
+  FreeThrowCoach.renderTitleBadge(bx, 128);
   ClutchAlert.renderTitleBadge(bx, 188);
   ctx.fillText('NORDHORN', bx, 200);
   ctx.fillText('ALL STARS', bx, 224);
@@ -3922,6 +3997,7 @@ function drawBattle() {
   FastbreakCoach.renderBattleHUD();
   MismatchCoach.renderBattleHUD();
   ShotClockCoach.renderBattleHUD();
+  FreeThrowCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -4392,6 +4468,7 @@ const GameModules = {
     { id: 'fastbreakCoach', label: 'Fastbreak Coach', check: () => !!(FastbreakCoach && typeof FastbreakCoach.getState === 'function' && typeof FastbreakCoach.renderBattleHUD === 'function' && FastbreakCoach.getState().breakValue >= 0) },
     { id: 'mismatchCoach', label: 'Mismatch Coach', check: () => !!(MismatchCoach && typeof MismatchCoach.getState === 'function' && typeof MismatchCoach.renderBattleHUD === 'function' && MismatchCoach.getState().edge >= 0) },
     { id: 'shotClockCoach', label: 'Shot Clock Coach', check: () => !!(ShotClockCoach && typeof ShotClockCoach.getState === 'function' && typeof ShotClockCoach.renderBattleHUD === 'function' && ShotClockCoach.getState().pressure >= 0) },
+    { id: 'freeThrowCoach', label: 'Free Throw Coach', check: () => !!(FreeThrowCoach && typeof FreeThrowCoach.getState === 'function' && typeof FreeThrowCoach.renderBattleHUD === 'function' && FreeThrowCoach.getState().focus >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

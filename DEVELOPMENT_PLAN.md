@@ -83,3 +83,4 @@
 - [x] Fastbreak-Coach Battle-HUD — sichtbare Transition-Offense-/Defense-Anzeige mit Tempo-Prozent, Laufweg-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Mismatch-Coach Battle-HUD — sichtbare Build-Matchup-Anzeige mit Edge-Prozent, Schwachseiten-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Shot-Clock-Coach Battle-HUD — sichtbare Pace-/Clock-Anzeige mit Pressure-Prozent, Late-Clock-Tipp, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Free-Throw-Coach Battle-HUD — sichtbare Clutch-Line-/Bonus-Fokus-Anzeige mit Energie-, Closeout- und And-One-Tipps, Title-Screen-Marker und Module-Check ergänzt.
