@@ -314,9 +314,9 @@ const Menu = {
   message: '',
   messageTimer: 0,
   
-  TABS: ['status', 'items', 'equipment', 'save'],
-  TAB_LABELS: { status: 'Status', items: 'Items', equipment: 'Ausrüstung', save: 'Speichern' },
-  TAB_ICONS: { status: '♥', items: '◆', equipment: '▲', save: '💾' },
+  TABS: ['status', 'items', 'equipment', 'dex', 'save'],
+  TAB_LABELS: { status: 'Status', items: 'Items', equipment: 'Equip', dex: '♫ Dex', save: 'Save' },
+  TAB_ICONS: { status: '♥', items: '◆', equipment: '▲', dex: '♫', save: '💾' },
   
   open() {
     this.active = true;
@@ -396,6 +396,19 @@ const Menu = {
       if (this.selectedIndex >= this.scrollOffset + 6) this.scrollOffset = this.selectedIndex - 5;
       Audio.menuMove();
     }
+    if (this.tab === 'status') {
+      return;
+    }
+    if (this.tab === 'save') {
+      if (wasPressed('Enter') || wasPressed(' ')) {
+        Audio.menuSelect();
+        autoSave();
+        this.message = 'Spielstand gespeichert!';
+        this.messageTimer = 90;
+      }
+      return;
+    }
+    
     if (wasPressed('Enter') || wasPressed(' ')) {
       Audio.menuSelect();
       this.useSelected();
@@ -412,11 +425,14 @@ const Menu = {
         if (player.equipment.bracelet) list.push({ ...player.equipment.bracelet, _equipped: true, _slot: 'bracelet' });
       }
       return list;
+    } else if (this.tab === 'dex') {
+      return DexData.getAllTrainers();
     }
     return [];
   },
-  
+
   useSelected() {
+    if (this.tab === 'dex') return; // Dex-Liste: keine Aktion bei Enter
     const items = this.getCurrentList();
     if (items.length === 0) {
       this.message = 'Keine Items vorhanden!';
@@ -501,6 +517,8 @@ const Menu = {
     
     if (this.tab === 'status') {
       this.renderStatusTab(mx, contentY, mw, mh - 70);
+    } else if (this.tab === 'dex') {
+      this.renderDexTab(mx, contentY, mw, mh - 70);
     } else if (this.tab === 'save') {
       this.renderSaveTab(mx, contentY, mw);
     } else {
@@ -525,7 +543,11 @@ const Menu = {
     ctx.fillStyle = PALETTE.dark;
     ctx.font = '8px "Courier New", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('←→ = Tab  ↑↓ = Wählen  ENTER = Benutzen  ESC/M = Schließen', canvas.width / 2, my + mh - 3);
+    if (this.tab === 'dex') {
+      ctx.fillText('↑↓ = Wählen  ESC/M = Schließen', canvas.width / 2, my + mh - 3);
+    } else {
+      ctx.fillText('←→ = Tab  ↑↓ = Wählen  ENTER = Benutzen  ESC/M = Schließen', canvas.width / 2, my + mh - 3);
+    }
   },
   
   renderStatusTab(mx, sy, mw, sh) {
@@ -706,6 +728,153 @@ const Menu = {
     }
   },
   
+  renderDexTab(mx, sy, mw, sh) {
+    const centerX = mx + mw / 2;
+    const allTrainers = DexData.getAllTrainers();
+    const progress = DexData.getDexProgress();
+    
+    // Header
+    ctx.fillStyle = PALETTE.lightest;
+    ctx.font = 'bold 11px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('— SPIELER-LISTE —', centerX, sy + 14);
+    
+    // Progress
+    ctx.fillStyle = PALETTE.light;
+    ctx.font = '9px "Courier New", monospace';
+    ctx.fillText(`Besiegt: ${progress.defeated} / ${progress.total}`, centerX, sy + 28);
+    
+    // Progress bar
+    const barX = mx + 20, barW = mw - 40, barH = 6;
+    ctx.fillStyle = PALETTE.darkest;
+    ctx.fillRect(barX, sy + 33, barW, barH);
+    const pct = progress.total > 0 ? progress.defeated / progress.total : 0;
+    ctx.fillStyle = pct === 1 ? '#aaaa5a' : PALETTE.lightest;
+    ctx.fillRect(barX, sy + 33, Math.floor(barW * pct), barH);
+    ctx.strokeStyle = PALETTE.light;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(barX, sy + 33, barW, barH);
+    
+    // List of trainers (scrollable)
+    const listY = sy + 46;
+    const itemH = 28;
+    const visibleItems = Math.floor((sh - 70) / itemH);
+    
+    // Scroll logic for dex
+    if (wasPressed('ArrowUp')) {
+      this.selectedIndex = Math.max(0, this.selectedIndex - 1);
+      if (this.selectedIndex < this.scrollOffset) this.scrollOffset = this.selectedIndex;
+      Audio.menuMove();
+    }
+    if (wasPressed('ArrowDown')) {
+      this.selectedIndex = Math.min(allTrainers.length - 1, this.selectedIndex + 1);
+      if (this.selectedIndex >= this.scrollOffset + visibleItems) this.scrollOffset = this.selectedIndex - visibleItems + 1;
+      Audio.menuMove();
+    }
+    
+    for (let i = this.scrollOffset; i < Math.min(allTrainers.length, this.scrollOffset + visibleItems); i++) {
+      const t = allTrainers[i];
+      const y = listY + (i - this.scrollOffset) * itemH;
+      const isSelected = i === this.selectedIndex;
+      
+      // Selection highlight
+      if (isSelected) {
+        ctx.fillStyle = PALETTE.dark;
+        ctx.fillRect(mx + 8, y - 2, mw - 16, itemH - 2);
+        ctx.strokeStyle = PALETTE.lightest;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(mx + 8, y - 2, mw - 16, itemH - 2);
+      }
+      
+      // Badge octagon
+      const badgeX = mx + 18, badgeY = y + 6;
+      const badgeColor = t.defeated ? t.badgeColor : PALETTE.darkest;
+      ctx.fillStyle = badgeColor;
+      ctx.strokeStyle = t.defeated ? PALETTE.lightest : PALETTE.dark;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(badgeX + 5, badgeY);
+      ctx.lineTo(badgeX + 10, badgeY + 3);
+      ctx.lineTo(badgeX + 10, badgeY + 8);
+      ctx.lineTo(badgeX + 5, badgeY + 11);
+      ctx.lineTo(badgeX, badgeY + 8);
+      ctx.lineTo(badgeX, badgeY + 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Name + Build
+      ctx.font = '10px "Courier New", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = isSelected ? PALETTE.lightest : (t.defeated ? PALETTE.light : PALETTE.dark);
+      const prefix = isSelected ? '► ' : '  ';
+      ctx.fillText(prefix + t.name + (t.isFinalBoss ? ' ♛' : ''), mx + 34, y + 10);
+      
+      // Level + Build
+      ctx.fillStyle = PALETTE.dark;
+      ctx.font = '8px "Courier New", monospace';
+      ctx.fillText(`LV ${t.level} ${t.build}`, mx + 34, y + 20);
+      
+      // Status (defeated or not)
+      ctx.textAlign = 'right';
+      if (t.defeated) {
+        ctx.fillStyle = '#aaaa5a';
+        ctx.font = '8px "Courier New", monospace';
+        ctx.fillText('✓ BESIEGT', mx + mw - 14, y + 10);
+      } else {
+        ctx.fillStyle = PALETTE.dark;
+        ctx.font = '8px "Courier New", monospace';
+        ctx.fillText('???', mx + mw - 14, y + 10);
+      }
+      
+      // Badge name
+      ctx.fillStyle = t.defeated ? PALETTE.light : PALETTE.darkest;
+      ctx.font = '8px "Courier New", monospace';
+      ctx.fillText(t.badge, mx + mw - 14, y + 20);
+    }
+    
+    // Detail box at bottom
+    const detailY = sy + sh - 58;
+    ctx.fillStyle = PALETTE.dark;
+    ctx.fillRect(mx + 10, detailY, mw - 20, 50);
+    ctx.strokeStyle = PALETTE.light;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mx + 10, detailY, mw - 20, 50);
+    
+    const selected = allTrainers[this.selectedIndex];
+    if (selected) {
+      ctx.fillStyle = PALETTE.lightest;
+      ctx.font = 'bold 10px "Courier New", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(selected.name + (selected.defeated ? '' : ' ???'), mx + 16, detailY + 14);
+      
+      if (selected.defeated) {
+        ctx.fillStyle = PALETTE.light;
+        ctx.font = '9px "Courier New", monospace';
+        ctx.fillText(`Standort: ${selected.location}`, mx + 16, detailY + 27);
+        ctx.fillText(`Belohnung: ${selected.reward}`, mx + 16, detailY + 39);
+        // Flavor text (wrapped)
+        ctx.fillStyle = PALETTE.dark;
+        const flavor = selected.flavor;
+        if (flavor.length > 40) {
+          ctx.fillText(flavor.substring(0, 40), mx + 16, detailY + 49);
+          if (flavor.length > 80) {
+            ctx.fillText(flavor.substring(40, 80) + '...', mx + 16, detailY + 58);
+          } else {
+            ctx.fillText(flavor.substring(40), mx + 16, detailY + 58);
+          }
+        } else {
+          ctx.fillText(flavor, mx + 16, detailY + 49);
+        }
+      } else {
+        ctx.fillStyle = PALETTE.dark;
+        ctx.font = '9px "Courier New", monospace';
+        ctx.fillText('Noch nicht besiegt', mx + 16, detailY + 27);
+        ctx.fillText(`Standort: ${selected.location}`, mx + 16, detailY + 39);
+      }
+    }
+  },
+
   renderSaveTab(mx, sy, mw) {
     const centerX = mx + mw / 2;
     ctx.fillStyle = PALETTE.lightest;

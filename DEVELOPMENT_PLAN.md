@@ -40,7 +40,7 @@
 - [x] Hintergrundmusik (Chiptune-Tracks) — 5 Tracks: Title, Overworld, Battle, Victory, Credits (Bass+Lead Sequencer)
 - [x] Speicher-System (LocalStorage) — Auto-Save nach Kämpfen/Reisen/Items, Continue auf Title-Screen, manueller Save im Menü
 - [x] Pause-Menü (Status mit Stats, Badges, Moves, Standort)
-- [ ] Pokédex-Äquivalent ("Spieler-Liste")
+- [x] Pokédex-Äquivalent ("Spieler-Liste") — 13 Trainer scrollbar, Detailansicht, Fortschrittsbalken
 - [ ] Mobile Touch-Controls
 - [ ] Minimap
 

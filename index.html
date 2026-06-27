@@ -1,91 +1,1759 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nordhorn Allstars</title>
+<meta charset="utf-8">
+<title>Nordhorn All Stars</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
-  background: #1a1a2e;
+  background: #0f380f;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  font-family: 'Courier New', monospace;
-  overflow: hidden;
+  font-family: monospace;
+  image-rendering: pixelated;
 }
-
-#game-container {
-  position: relative;
+#gameCanvas {
+  border: 4px solid #0f380f;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-}
-
-canvas {
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  border: 4px solid #2a2a4a;
-  border-radius: 4px;
-}
-
-#gameboy-frame {
-  background: #c4b896;
-  padding: 24px 24px 60px 24px;
-  border-radius: 12px 12px 40px 12px;
-  box-shadow: 
-    inset 0 0 20px rgba(0,0,0,0.15),
-    0 8px 30px rgba(0,0,0,0.5);
-  position: relative;
-}
-
-#gameboy-screen {
-  background: #4a5a3a;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-}
-
-#gameboy-label {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Courier New', monospace;
-  font-size: 10px;
-  color: #4a3a2a;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-/* Responsive */
-@media (max-height: 700px) {
-  #gameboy-frame { padding: 12px 12px 40px 12px; }
-  canvas { width: 320px !important; height: 288px !important; }
+  width: 960px;
+  height: 864px;
+  max-width: 95vw;
+  max-height: 95vh;
 }
 </style>
 </head>
 <body>
+<canvas id="gameCanvas" width="480" height="432"></canvas>
+<script>
+// ============================================================
+// NORDHORN ALL STARS - Basketball RPG (Gameboy DMG style)
+// ============================================================
 
-<div id="gameboy-frame">
-  <div id="gameboy-screen">
-    <div id="game-container">
-      <canvas id="gameCanvas" width="480" height="432"></canvas>
-    </div>
-  </div>
-  <div id="gameboy-label">Nordhorn Allstars</div>
-</div>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
 
-<script src="js/sprites.js"></script>
-<script src="js/maps.js"></script>
-<script src="js/dialog.js"></script>
-<script src="js/battle.js"></script>
-<script src="js/player.js"></script>
-<script src="js/items.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/save.js"></script>
-<script src="js/game.js"></script>
+// Gameboy DMG Green Palette
+const C = {
+  LIGHT: '#9bbc0f',
+  MID: '#8bac0f',
+  DARK: '#306230',
+  DARKEST: '#0f380f',
+  WHITE: '#9bbc0f',
+  BLACK: '#0f380f'
+};
+
+const TILE = 16;
+const VIEW_W = 480;
+const VIEW_H = 432;
+const VIEW_TILES_W = VIEW_W / TILE; // 30
+const VIEW_TILES_H = VIEW_H / TILE; // 27
+
+// Map definition (70x60 tiles)
+// 0=grass, 1=path, 2=water, 3=tree, 4=building, 5=fence, 6=court_floor, 7=door, 8=roof, 9=flower, 10=bench
+const MAP_W = 70;
+const MAP_H = 60;
+
+// Tile types
+const T = {
+  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14
+};
+
+// Generate map procedurally
+let worldMap = [];
+function generateMap() {
+  // Fill with grass
+  for (let y = 0; y < MAP_H; y++) {
+    worldMap[y] = [];
+    for (let x = 0; x < MAP_W; x++) {
+      worldMap[y][x] = T.GRASS;
+    }
+  }
+  
+  // Water border (river Ems on east side)
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 60; x < MAP_W; x++) {
+      worldMap[y][x] = T.WATER;
+    }
+  }
+  // Some water variation
+  for (let y = 10; y < 50; y++) {
+    worldMap[y][59] = T.WATER;
+    if (y > 15 && y < 45) worldMap[y][58] = T.WATER;
+  }
+  
+  // Main path (horizontal through center)
+  for (let x = 0; x < 60; x++) {
+    worldMap[28][x] = T.PATH;
+    worldMap[29][x] = T.PATH;
+  }
+  // Vertical path
+  for (let y = 5; y < 55; y++) {
+    worldMap[y][25] = T.PATH;
+    worldMap[y][26] = T.PATH;
+  }
+  // Path to stadium
+  for (let y = 5; y < 28; y++) {
+    worldMap[y][40] = T.PATH;
+    worldMap[y][41] = T.PATH;
+  }
+  // Path to school
+  for (let x = 26; x < 50; x++) {
+    worldMap[10][x] = T.PATH;
+    worldMap[11][x] = T.PATH;
+  }
+  
+  // Home (player's house) - top-left area
+  // Roof
+  for (let x = 3; x < 9; x++) worldMap[3][x] = T.ROOF;
+  // Walls
+  for (let y = 4; y < 8; y++) {
+    for (let x = 3; x < 9; x++) {
+      worldMap[y][x] = T.BUILD;
+    }
+  }
+  worldMap[7][5] = T.DOOR;
+  worldMap[7][6] = T.DOOR;
+  // Fence around yard
+  for (let x = 2; x < 10; x++) worldMap[8][x] = T.FENCE;
+  for (let y = 3; y < 8; y++) { worldMap[y][2] = T.FENCE; worldMap[y][9] = T.FENCE; }
+  worldMap[2][5] = T.FENCE; worldMap[2][6] = T.FENCE;
+  
+  // School (top-right area for Nordhorn gymnasium)
+  for (let x = 1; x < 22; x++) worldMap[13][x] = T.PATH;
+  for (let x = 42; x < 56; x++) {
+    for (let y = 5; y < 12; y++) {
+      worldMap[y][x] = T.BUILD;
+    }
+  }
+  for (let x = 42; x < 56; x++) worldMap[4][x] = T.ROOF;
+  worldMap[11][48] = T.DOOR;
+  worldMap[11][49] = T.DOOR;
+  worldMap[11][43] = T.DOOR;
+  // School yard
+  for (let x = 52; x < 57; x++) {
+    for (let y = 13; y < 18; y++) {
+      worldMap[y][x] = T.COURT;
+    }
+  }
+  
+  // Basketball courts (community courts)
+  for (let x = 12; x < 21; x++) {
+    for (let y = 40; y < 48; y++) {
+      worldMap[y][x] = T.COURT;
+    }
+  }
+  // Court lines
+  worldMap[40][14] = T.PATH;
+  worldMap[40][15] = T.PATH;
+  worldMap[40][18] = T.PATH;
+  worldMap[40][19] = T.PATH;
+  
+  // Library (near center)
+  for (let x = 35; x < 42; x++) {
+    for (let y = 30; y < 36; y++) {
+      worldMap[y][x] = T.BUILD;
+    }
+  }
+  for (let x = 35; x < 42; x++) worldMap[29][x] = T.ROOF;
+  worldMap[35][38] = T.DOOR;
+  worldMap[35][37] = T.DOOR;
+  
+  // Stadium (big court at bottom)
+  for (let x = 30; x < 52; x++) {
+    for (let y = 45; y < 55; y++) {
+      worldMap[y][x] = T.BUILD;
+    }
+  }
+  for (let x = 30; x < 52; x++) worldMap[44][x] = T.ROOF;
+  for (let x = 30; x < 52; x++) worldMap[54][x] = T.DOOR;
+  // Stadium court inside
+  for (let x = 34; x < 48; x++) {
+    for (let y = 47; y < 53; y++) {
+      worldMap[y][x] = T.COURT;
+    }
+  }
+  
+  // Trees scattered around
+  const treePositions = [
+    [10,3],[11,3],[12,3],[13,3],[14,3],
+    [18,22],[19,22],[20,22],[18,23],[19,23],[20,23],
+    [5,15],[6,15],[5,16],[6,16],
+    [30,15],[31,15],[32,15],[30,16],[31,16],[32,16],
+    [50,25],[51,25],[52,25],[50,26],[51,26],[52,26],
+    [15,5],[16,5],
+    [55,35],[56,35],[57,35],[55,36],[56,36],[57,36],
+    [8,50],[9,50],[10,50],[11,50],[8,51],[9,51],[10,51],[11,51],
+    [20,52],[21,52],[22,52],[23,52],[20,53],[21,53],[22,53],[23,53],
+    // Trees along paths
+    [25,20],[26,20],[25,35],[26,35],
+    [15,28],[16,28],[17,28],
+    [35,28],[36,28],
+    [45,15],[46,15],[45,16],[46,16],
+    // More trees
+    [3,25],[4,25],[3,26],[4,26],
+    [22,55],[23,55],[24,55],
+  ];
+  treePositions.forEach(([x,y]) => {
+    if (y < MAP_H && x < MAP_W && worldMap[y][x] === T.GRASS)
+      worldMap[y][x] = T.TREE;
+  });
+  
+  // Flowers
+  const flowerPositions = [
+    [4,5],[7,5],[2,12],[8,12],[12,55],[18,52],[30,8],[35,50],[42,52],[50,50],
+    [15,7],[22,5],[48,30],[55,8],[6,8],[38,55]
+  ];
+  flowerPositions.forEach(([x,y]) => {
+    if (y < MAP_H && x < MAP_W && worldMap[y][x] === T.GRASS)
+      worldMap[y][x] = T.FLOWER;
+  });
+  
+  // Benches
+  worldMap[37][38] = T.BENCH;
+  worldMap[37][39] = T.BENCH;
+  worldMap[40][16] = T.BENCH;
+  
+  // Bridge over river
+  worldMap[28][57] = T.BRIDGE;
+  worldMap[29][57] = T.BRIDGE;
+  worldMap[28][58] = T.BRIDGE;
+  worldMap[29][58] = T.BRIDGE;
+  
+  // Wall around stadium
+  for (let x = 30; x < 52; x++) { worldMap[45][x] = T.WALL; worldMap[53][x] = T.WALL; }
+  for (let y = 45; y < 55; y++) { worldMap[y][30] = T.WALL; worldMap[y][51] = T.WALL; }
+}
+
+// ============================================================
+// DRAWING FUNCTIONS
+// ============================================================
+
+function drawTile(x, y, tileType, camX, camY) {
+  const sx = (x - camX) * TILE;
+  const sy = (y - camY) * TILE;
+  if (sx < -TILE || sx >= VIEW_W || sy < -TILE || sy >= VIEW_H) return;
+  
+  switch(tileType) {
+    case T.GRASS:
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      // Grass detail
+      ctx.fillStyle = C.MID;
+      if ((x + y) % 3 === 0) ctx.fillRect(sx + 3, sy + 6, 2, 3);
+      if ((x + y) % 4 === 1) ctx.fillRect(sx + 10, sy + 10, 2, 3);
+      if ((x + y) % 5 === 2) ctx.fillRect(sx + 7, sy + 3, 2, 3);
+      break;
+    case T.PATH:
+      ctx.fillStyle = C.MID;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.DARK;
+      if ((x + y) % 4 === 0) ctx.fillRect(sx + 4, sy + 4, 4, 4);
+      if ((x + y) % 5 === 2) ctx.fillRect(sx + 11, sy + 12, 3, 3);
+      break;
+    case T.WATER:
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.MID;
+      // Water wave pattern
+      const wave = (x * 3 + Date.now() / 500) % TILE;
+      ctx.fillRect(sx + Math.floor(wave) % 8, sy + 4, 4, 2);
+      ctx.fillRect(sx + (Math.floor(wave) + 5) % 12, sy + 10, 4, 2);
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx + 2 + Math.floor(wave * 0.7) % 6, sy + 7, 3, 1);
+      break;
+    case T.TREE:
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      // Tree trunk
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 6, sy + 10, 4, 6);
+      // Tree canopy
+      ctx.fillStyle = C.MID;
+      ctx.fillRect(sx + 2, sy + 2, 12, 9);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx + 3, sy + 3, 10, 7);
+      ctx.fillStyle = C.MID;
+      ctx.fillRect(sx + 4, sy + 4, 4, 4);
+      break;
+    case T.BUILD:
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.MID;
+      ctx.fillRect(sx, sy, TILE - 1, TILE - 1);
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx + 1, sy + 1, 3, 3);
+      ctx.fillRect(sx + 8, sy + 1, 3, 3);
+      ctx.fillRect(sx + 1, sy + 8, 3, 3);
+      ctx.fillRect(sx + 8, sy + 8, 3, 3);
+      break;
+    case T.ROOF:
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx + 1, sy + 1, 14, 6);
+      ctx.fillStyle = C.MID;
+      for (let i = 0; i < 4; i++) ctx.fillRect(sx + 2 + i * 4, sy + 4, 3, 3);
+      break;
+    case T.FENCE:
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx + 1, sy + 2, 2, 12);
+      ctx.fillRect(sx + 7, sy + 1, 2, 14);
+      ctx.fillRect(sx + 13, sy + 2, 2, 12);
+      ctx.fillRect(sx + 0, sy + 4, 16, 2);
+      ctx.fillRect(sx + 0, sy + 10, 16, 2);
+      break;
+    case T.COURT:
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#5a5a3a';
+      ctx.fillRect(sx + 1, sy + 1, 14, 14);
+      // Court lines
+      ctx.fillStyle = C.DARK;
+      if (x % 8 === 0 || x % 8 === 7) {
+        ctx.fillRect(sx + 7, sy, 2, TILE);
+      }
+      break;
+    case T.DOOR:
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 2, sy + 1, 12, 15);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx + 3, sy + 2, 10, 13);
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx + 4, sy + 3, 4, 5);
+      break;
+    case T.FLOWER:
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx + 7, sy + 11, 2, 5);
+      ctx.fillStyle = '#9b59b6';
+      if ((x + y) % 2 === 0) {
+        ctx.fillRect(sx + 5, sy + 7, 6, 4);
+      } else {
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillRect(sx + 6, sy + 8, 4, 3);
+      }
+      break;
+    case T.BENCH:
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.MID;
+      ctx.fillRect(sx + 1, sy + 2, 14, 4);
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx + 2, sy + 3, 5, 2);
+      ctx.fillRect(sx + 9, sy + 3, 5, 2);
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 1, sy + 6, 4, 10);
+      ctx.fillRect(sx + 11, sy + 6, 4, 10);
+      break;
+    case T.BRIDGE:
+      ctx.fillStyle = '#5a4a2a';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#6b5b3b';
+      ctx.fillRect(sx + 1, sy + 1, 14, 14);
+      ctx.fillStyle = '#4a3a1a';
+      ctx.fillRect(sx + 0, sy + 6, 16, 1);
+      ctx.fillRect(sx + 0, sy + 11, 16, 1);
+      break;
+    case T.WALL:
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx, sy, TILE, TILE - 1);
+      ctx.fillStyle = C.MID;
+      for (let i = 0; i < 4; i++) ctx.fillRect(sx + i * 4, sy + 4, 3, 2);
+      ctx.fillRect(sx + i * 4 - 2, sy + 8, 3, 2);
+      break;
+  }
+}
+
+function drawPlayer(camX, camY, facing, frame) {
+  const px = Math.floor(player.x - camX) * TILE;
+  const py = Math.floor(player.y - camY) * TILE;
+  const bob = frame ? 1 : 0;
+  
+  // Shadow
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(px + 2, py + 14, 12, 2);
+  
+  // Body
+  const skinColor = player.gender === 'boy' ? '#f0c8a0' : '#f0c8a0';
+  const shirtColor = player.gender === 'boy' ? C.DARK : '#c06060';
+  const hairColor = player.gender === 'boy' ? '#4a3a1a' : '#2a1a0a';
+  const pantsColor = player.gender === 'boy' ? '#2040a0' : '#402060';
+  
+  // Hair
+  ctx.fillStyle = hairColor;
+  ctx.fillRect(px + 3, py + 1 - bob, 10, 4);
+  ctx.fillRect(px + 2, py + 2 - bob, 12, 3);
+  
+  // Head
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(px + 4, py + 5 - bob, 8, 6);
+  
+  // Eyes
+  ctx.fillStyle = C.DARKEST;
+  if (facing === 'down') {
+    ctx.fillRect(px + 6, py + 7 - bob, 2, 2);
+    ctx.fillRect(px + 10, py + 7 - bob, 2, 2);
+  } else if (facing === 'up') {
+    // no eyes visible from behind
+  } else if (facing === 'left') {
+    ctx.fillRect(px + 4, py + 7 - bob, 2, 2);
+  } else {
+    ctx.fillRect(px + 10, py + 7 - bob, 2, 2);
+  }
+  
+  // Shirt
+  ctx.fillStyle = shirtColor;
+  ctx.fillRect(px + 3, py + 11 - bob, 10, 5);
+  
+  // Arms
+  ctx.fillStyle = skinColor;
+  if (frame) {
+    ctx.fillRect(px + 1, py + 11 - bob, 2, 4);
+    ctx.fillRect(px + 13, py + 12 - bob, 2, 3);
+  } else {
+    ctx.fillRect(px + 1, py + 12 - bob, 2, 4);
+    ctx.fillRect(px + 13, py + 11 - bob, 2, 3);
+  }
+  
+  // Pants
+  ctx.fillStyle = pantsColor;
+  ctx.fillRect(px + 3, py + 15 - bob, 10, 4);
+  
+  // Shoes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(px + 3, py + 14, 4, 2);
+  ctx.fillRect(px + 9, py + 14, 4, 2);
+}
+
+function drawTrainerSprite(trainer, camX, camY) {
+  const px = (trainer.x - camX) * TILE;
+  const py = (trainer.y - camY) * TILE;
+  if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+  
+  // Shadow
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(px + 2, py + 14, 12, 2);
+  
+  // Different appearance based on trainer
+  const colors = trainer.colors;
+  
+  // Head
+  ctx.fillStyle = '#f0c8a0';
+  ctx.fillRect(px + 4, py + 2, 8, 6);
+  
+  // Hair/hat
+  ctx.fillStyle = colors.hat;
+  ctx.fillRect(px + 3, py + 0, 10, 3);
+  ctx.fillRect(px + 2, py + 1, 12, 2);
+  
+  // Eyes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(px + 6, py + 4, 2, 2);
+  ctx.fillRect(px + 10, py + 4, 2, 2);
+  
+  // Body
+  ctx.fillStyle = colors.body;
+  ctx.fillRect(px + 3, py + 8, 10, 7);
+  
+  // Arms
+  ctx.fillStyle = '#f0c8a0';
+  ctx.fillRect(px + 1, py + 8, 2, 5);
+  ctx.fillRect(px + 13, py + 8, 2, 5);
+  
+  // Pants
+  ctx.fillStyle = colors.pants;
+  ctx.fillRect(px + 3, py + 14, 10, 4);
+  
+  // Shoes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(px + 3, py + 14, 4, 2);
+  ctx.fillRect(px + 9, py + 14, 4, 2);
+  
+  // Exclamation mark if not beaten
+  if (!trainer.beaten) {
+    const bobY = Math.sin(Date.now() / 300) * 1;
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(px + 6, py - 8 + bobY, 4, 6);
+    ctx.fillStyle = '#ff6666';
+    ctx.fillRect(px + 7, py - 7 + bobY, 2, 4);
+  }
+}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+
+let gameState = 'TITLE'; // TITLE, CHARSELECT, OVERWORLD, BATTLE, DIALOG, LOST
+let frameCount = 0;
+let animFrame = 0;
+
+// Player data
+const player = {
+  x: 5, y: 6,
+  facing: 'down',
+  moving: false,
+  gender: 'boy',
+  build: 'shooter',
+  level: 1,
+  exp: 0,
+  expNext: 20,
+  maxHp: 100,
+  hp: 100,
+  energy: 20,
+  maxEnergy: 20,
+  // Stats based on build
+  stats: { dribbling: 5, shooting: 5, athleticism: 5, defense: 5, courtVision: 5 },
+  moves: ['Layup', 'Jump Shot'],
+  beatenTrainers: [],
+  rivalBeaten: false,
+};
+
+// Build bonuses
+const BUILD_BONUS = {
+  shooter: { dribbling: 0, shooting: 3, athleticism: 0, defense: -1, courtVision: 1 },
+  allrounder: { dribbling: 1, shooting: 1, athleticism: 1, defense: 1, courtVision: 1 },
+  defender: { dribbling: -1, shooting: 0, athleticism: 1, defense: 3, courtVision: 0 }
+};
+
+// Move unlocks by level
+const MOVE_UNLOCKS = {
+  1: { name: 'Layup', energy: 5, type: 'attack', power: 15, pts: 2, desc: 'Quick close-range shot' },
+  2: { name: 'Jump Shot', energy: 8, type: 'attack', power: 20, pts: 2, desc: 'Mid-range jumper' },
+  3: { name: 'Three Pointer', energy: 12, type: 'attack', power: 18, pts: 3, desc: 'Long range - 3 points!' },
+  4: { name: 'Block', energy: 6, type: 'attack', power: 12, pts: 0, desc: 'Block opponent shot', special: true },
+  5: { name: 'Steal', energy: 8, type: 'attack', power: 10, pts: 0, desc: 'Steal ball from opponent', special: true },
+  6: { name: 'Crossover', energy: 7, type: 'attack', power: 25, pts: 2, desc: 'Dribble past defender' },
+  7: { name: 'Dunk', energy: 15, type: 'attack', power: 35, pts: 2, desc: 'Powerful slam dunk!' },
+  8: { name: 'Court Vision', energy: 5, type: 'buff', desc: 'Boost next shot accuracy' },
+};
+
+// Trainers
+const trainers = [
+  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#404040', body: '#404040', pants: '#202020' }, dialogue: "Hey! You think you can handle a basketball? Let's see!", beaten: false, playerHp: 80, playerEnergy: 15, level: 1, ptsToWin: 15 },
+  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#ff6b6b', body: '#ff6b6b', pants: '#402020' }, dialogue: "Hallo! Time for a little one-on-one!", beaten: false, playerHp: 100, playerEnergy: 20, level: 2, ptsToWin: 18 },
+  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#2ecc71', body: '#2ecc71', pants: '#1a3a1a' }, dialogue: "Schalibim! Nobody gets past me!", beaten: false, playerHp: 100, playerEnergy: 20, level: 3, ptsToWin: 21 },
+  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#e67e22', body: '#e67e22', pants: '#3a2a1a' }, dialogue: "Ready for some real competition?", beaten: false, playerHp: 110, playerEnergy: 22, level: 4, ptsToWin: 21 },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#9b59b6', body: '#9b59b6', pants: '#2a1a3a' }, dialogue: "I am Coach Mihler. You have trained hard. Now face me!", beaten: false, playerHp: 130, playerEnergy: 25, level: 5, ptsToWin: 21 },
+];
+
+// Battle state
+let battle = {
+  active: false,
+  playerScore: 0,
+  enemyScore: 0,
+  currentTrainer: null,
+  playerTurn: true,
+  phase: 'select', // select, anim, result
+  selectedMove: 0,
+  playerMoves: [],
+  enemyMoves: [],
+  animTimer: 0,
+  message: '',
+  subMessage: '',
+  playerEnergy: 20,
+  enemyEnergy: 20,
+  playerHp: 100,
+  enemyHp: 100,
+  ballOwner: 'player', // who has the ball
+  hasBall: true,
+  turnCount: 0,
+};
+
+// Dialog state
+let dialog = {
+  active: false,
+  text: '',
+  displayed: '',
+  charIndex: 0,
+  timer: 0,
+  speaker: '',
+  onComplete: null,
+  typing: false,
+};
+
+// Character select
+let charSelect = {
+  phase: 'gender', // gender, build, name
+  gender: 0, // 0=boy, 1=girl
+  build: 0, // 0=shooter, 1=allrounder, 2=defender
+  name: 'NORDHORN KID',
+  nameIndex: 0,
+  blinkTimer: 0,
+};
+
+// Input
+const keys = {};
+const keysPressed = {};
+window.addEventListener('keydown', (e) => {
+  if (!keys[e.key]) keysPressed[e.key] = true;
+  keys[e.key] = true;
+  e.preventDefault();
+});
+window.addEventListener('keyup', (e) => {
+  keys[e.key] = false;
+});
+
+function wasPressed(key) {
+  if (keysPressed[key]) { keysPressed[key] = false; return true; }
+  return false;
+}
+
+// ============================================================
+// BATTLE SYSTEM
+// ============================================================
+
+function getPlayerMoves() {
+  const moves = [];
+  const moveKeys = Object.keys(MOVE_UNLOCKS).filter(k => parseInt(k) <= player.level + 1);
+  moveKeys.forEach(k => moves.push(MOVE_UNLOCKS[k]));
+  return moves;
+}
+
+function getEnemyMoves(enemyLevel) {
+  const moves = [];
+  const maxMove = Math.min(enemyLevel + 1, 8);
+  for (let i = 1; i <= maxMove; i++) {
+    moves.push(MOVE_UNLOCKS[i]);
+  }
+  return moves;
+}
+
+function startBattle(trainer) {
+  gameState = 'BATTLE';
+  battle.active = true;
+  battle.currentTrainer = trainer;
+  battle.playerScore = 0;
+  battle.enemyScore = 0;
+  battle.playerTurn = true;
+  battle.phase = 'select';
+  battle.selectedMove = 0;
+  battle.playerEnergy = player.energy;
+  battle.enemyEnergy = 20;
+  battle.playerHp = player.hp;
+  battle.enemyHp = trainer.playerHp;
+  battle.ballOwner = 'player';
+  battle.hasBall = true;
+  battle.turnCount = 0;
+  battle.playerMoves = getPlayerMoves();
+  battle.enemyMoves = getEnemyMoves(trainer.level);
+  battle.message = trainer.name + ' wants to battle!';
+  battle.subMessage = 'First to ' + trainer.ptsToWin + ' points wins!';
+}
+
+function calculateDamage(move, attacker, defender) {
+  let baseDamage = move.power || 10;
+  let accuracy = 0.7;
+  
+  if (move.type === 'attack') {
+    if (move.pts === 2) {
+      baseDamage += attacker.stats.shooting * 2;
+      accuracy = 0.75 + attacker.stats.shooting * 0.03;
+    } else if (move.pts === 3) {
+      baseDamage += attacker.stats.shooting * 3;
+      accuracy = 0.5 + attacker.stats.shooting * 0.04;
+    } else if (move.special) {
+      baseDamage += attacker.stats.defense * 2;
+      accuracy = 0.65 + attacker.stats.defense * 0.03;
+    }
+  }
+  
+  // Defense reduction
+  let damage = baseDamage - defender.stats.defense;
+  damage = Math.max(5, damage);
+  
+  return { damage: Math.floor(damage), accuracy: Math.min(accuracy, 0.95) };
+}
+
+function executePlayerMove() {
+  const move = battle.playerMoves[battle.selectedMove];
+  if (!move || battle.playerEnergy < (move.energy || 0)) {
+    battle.message = 'Not enough energy!';
+    return;
+  }
+  
+  battle.playerEnergy -= (move.energy || 0);
+  battle.phase = 'anim';
+  battle.animTimer = 60;
+  
+  if (move.special && move.name === 'Block') {
+    // Block reduces next enemy attack
+    battle.playerBlockNext = true;
+    battle.message = 'You prepare to block!';
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  } else if (move.special && move.name === 'Steal') {
+    const success = Math.random() < (0.4 + player.stats.dribbling * 0.05);
+    if (success) {
+      const dmg = 8 + Math.floor(Math.random() * 5);
+      battle.enemyHp -= dmg;
+      battle.message = 'Steal success! -' + dmg + ' HP';
+      battle.ballOwner = 'player';
+      battle.hasBall = true;
+    } else {
+      battle.message = 'Steal failed!';
+    }
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  } else if (move.type === 'buff') {
+    battle.playerBuffed = true;
+    battle.message = 'Analyzing court... Next shot boosted!';
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  } else {
+    // Attack move
+    const calc = calculateDamage(move, player, { stats: { defense: battle.currentTrainer.level * 2 } });
+    
+    let accuracy = calc.accuracy;
+    if (battle.playerBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.playerBuffed = false; }
+    
+    const success = Math.random() < accuracy;
+    
+    if (success) {
+      const points = move.pts;
+      battle.enemyHp -= calc.damage;
+      battle.playerScore += points;
+      battle.message = move.name + '! ' + points + ' pts! -' + calc.damage + ' HP';
+      battle.ballOwner = 'enemy'; // opponent gets ball after scoring
+      battle.hasBall = false;
+    } else {
+      battle.message = move.name + ' missed!';
+      battle.ballOwner = 'enemy';
+      battle.hasBall = false;
+    }
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  }
+}
+
+function executeEnemyMove() {
+  const availableMoves = battle.enemyMoves.filter(m => battle.enemyEnergy >= (m.energy || 0));
+  if (availableMoves.length === 0) {
+    // Skip turn to regain energy
+    battle.enemyEnergy = Math.min(25, battle.enemyEnergy + 5);
+    battle.message = battle.currentTrainer.name + ' rests...';
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+    return;
+  }
+  
+  const move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+  battle.enemyEnergy -= (move.energy || 0);
+  battle.phase = 'anim';
+  battle.animTimer = 60;
+  
+  if (move.special && move.name === 'Block') {
+    battle.enemyBlockNext = true;
+    battle.message = battle.currentTrainer.name + ' prepares to block!';
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  } else if (move.special && move.name === 'Steal') {
+    const success = Math.random() < (0.3 + battle.currentTrainer.level * 0.05);
+    if (success) {
+      const dmg = 8 + Math.floor(Math.random() * 5);
+      if (battle.enemyBlockNext) { dmg = Math.floor(dmg / 2); battle.enemyBlockNext = false; }
+      battle.playerHp -= dmg;
+      battle.message = battle.currentTrainer.name + ' steals! -' + dmg + ' HP';
+      battle.ballOwner = 'enemy';
+      battle.hasBall = false;
+    } else {
+      battle.message = 'Steal failed!';
+    }
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  } else if (move.type === 'buff') {
+    battle.enemyBuffed = true;
+    battle.message = battle.currentTrainer.name + ' analyzes the court...';
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  } else {
+    const calc = calculateDamage(move, { stats: { shooting: battle.currentTrainer.level * 2 } }, { stats: { defense: player.stats.defense } });
+    
+    let accuracy = calc.accuracy;
+    if (battle.enemyBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.enemyBuffed = false; }
+    if (battle.playerBlockNext) { accuracy *= 0.5; battle.playerBlockNext = false; }
+    
+    const success = Math.random() < accuracy;
+    
+    if (success) {
+      const points = move.pts;
+      battle.playerHp -= calc.damage;
+      battle.enemyScore += points;
+      battle.message = battle.currentTrainer.name + ': ' + move.name + '! ' + points + ' pts!';
+      battle.ballOwner = 'player';
+      battle.hasBall = true;
+    } else {
+      battle.message = battle.currentTrainer.name + ' missed!';
+      battle.ballOwner = 'player';
+      battle.hasBall = true;
+    }
+    battle.turnCount++;
+    setTimeout(() => endTurn(), 1000);
+  }
+}
+
+function endTurn() {
+  // Check win/lose
+  const ptsToWin = battle.currentTrainer.ptsToWin;
+  
+  if (battle.playerScore >= ptsToWin) {
+    battle.message = 'YOU WIN!';
+    battle.subMessage = 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    battle.phase = 'result';
+    setTimeout(() => winBattle(), 2500);
+    return;
+  }
+  
+  if (battle.enemyScore >= ptsToWin) {
+    battle.message = 'You lost...';
+    battle.subMessage = 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    battle.phase = 'result';
+    setTimeout(() => loseBattle(), 2500);
+    return;
+  }
+  
+  if (battle.playerHp <= 0) {
+    battle.message = 'You collapsed...';
+    battle.subMessage = 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    battle.phase = 'result';
+    setTimeout(() => loseBattle(), 2500);
+    return;
+  }
+  
+  // Switch turns
+  if (battle.turnCount % 2 === 0) {
+    battle.playerTurn = true;
+    battle.phase = 'select';
+    battle.selectedMove = 0;
+    // Energy regen
+    battle.playerEnergy = Math.min(player.maxEnergy, battle.playerEnergy + 2);
+    battle.enemyEnergy = Math.min(25, battle.enemyEnergy + 2);
+  } else {
+    battle.playerTurn = false;
+    battle.phase = 'anim';
+    battle.message = battle.currentTrainer.name + "'s turn...";
+    setTimeout(() => executeEnemyMove(), 800);
+  }
+}
+
+function winBattle() {
+  const trainer = battle.currentTrainer;
+  if (!trainer.beaten) {
+    trainer.beaten = true;
+    player.beatenTrainers.push(trainer.id);
+  }
+  
+  // EXP gain
+  const expGain = 15 + trainer.level * 10;
+  player.exp += expGain;
+  battle.message = 'Gained ' + expGain + ' EXP!';
+  battle.subMessage = '';
+  
+  // Check level up
+  while (player.exp >= player.expNext) {
+    player.exp -= player.expNext;
+    player.level++;
+    player.expNext = Math.floor(player.expNext * 1.5);
+    player.maxHp += 8;
+    player.maxEnergy += 2;
+    player.hp = player.maxHp;
+    player.energy = player.maxEnergy;
+    // Stat increases
+    player.stats.dribbling += 1;
+    player.stats.shooting += 1;
+    player.stats.athleticism += 1;
+    player.stats.defense += 1;
+    player.stats.courtVision += 1;
+    // Unlock new move
+    if (MOVE_UNLOCKS[player.level + 1]) {
+      const newMove = MOVE_UNLOCKS[player.level + 1];
+      if (!player.moves.includes(newMove.name)) {
+        player.moves.push(newMove.name);
+        battle.subMessage = 'LEARNED ' + newMove.name + '!';
+      }
+    }
+  }
+  
+  battle.phase = 'result';
+  setTimeout(() => endBattle(), 2000);
+}
+
+function loseBattle() {
+  battle.phase = 'result';
+  setTimeout(() => {
+    // Reset to home
+    player.hp = player.maxHp;
+    player.energy = player.maxEnergy;
+    player.x = 5;
+    player.y = 6;
+    gameState = 'OVERWORLD';
+    startDialog("You went home to rest...", "Mom: Feel better soon!");
+  }, 2000);
+}
+
+function endBattle() {
+  battle.active = false;
+  gameState = 'DIALOG';
+  startDialog('Victory!', 'Coach: Great game! Keep training!');
+}
+
+// ============================================================
+// DIALOG SYSTEM
+// ============================================================
+
+function startDialog(text, subText) {
+  dialog.active = true;
+  dialog.text = text;
+  dialog.subText = subText || '';
+  dialog.displayed = '';
+  dialog.charIndex = 0;
+  dialog.timer = 0;
+  dialog.typing = true;
+}
+
+function updateDialog() {
+  if (!dialog.active) return;
+  
+  if (dialog.typing && dialog.charIndex < dialog.text.length) {
+    dialog.timer++;
+    if (dialog.timer >= 2) {
+      dialog.timer = 0;
+      dialog.displayed += dialog.text[dialog.charIndex];
+      dialog.charIndex++;
+    }
+  }
+  
+  if (wasPressed('Enter') || wasPressed(' ')) {
+    if (dialog.typing && dialog.charIndex < dialog.text.length) {
+      dialog.displayed = dialog.text;
+      dialog.charIndex = dialog.text.length;
+      dialog.typing = false;
+    } else {
+      dialog.active = false;
+      if (dialog.onComplete) dialog.onComplete();
+    }
+  }
+  
+  if (wasPressed('Escape')) {
+    dialog.active = false;
+  }
+}
+
+function drawDialog() {
+  // Dialog box
+  const boxY = VIEW_H - 80;
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, boxY, VIEW_W, 80);
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(2, boxY + 2, VIEW_W - 4, 76);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(4, boxY + 4, VIEW_W - 8, 72);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(6, boxY + 6, VIEW_W - 12, 68);
+  
+  // Text
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '10px monospace';
+  ctx.fillText(dialog.displayed, 14, boxY + 24);
+  
+  if (dialog.subText && dialog.charIndex >= dialog.text.length) {
+    ctx.fillText(dialog.subText, 14, boxY + 44);
+  }
+  
+  // Continue prompt
+  if (!dialog.typing) {
+    const blink = Math.floor(Date.now() / 300) % 2;
+    if (blink) {
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillText('▼', VIEW_W - 20, boxY + 60);
+    }
+  }
+}
+
+// ============================================================
+// TITLE SCREEN
+// ============================================================
+
+function drawTitleScreen() {
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  
+  // Background pattern
+  ctx.fillStyle = C.MID;
+  for (let y = 0; y < VIEW_H; y += 4) {
+    for (let x = 0; x < VIEW_W; x += 4) {
+      if ((x + y) % 8 === 0) ctx.fillRect(x, y, 2, 2);
+    }
+  }
+  
+  // Basketball icon
+  const bx = VIEW_W / 2;
+  const by = 120;
+  ctx.fillStyle = '#d400a';
+  ctx.beginPath();
+  ctx.arc(bx, by, 30, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#c0500a';
+  ctx.beginPath();
+  ctx.arc(bx, by, 28, 0, Math.PI * 2);
+  ctx.fill();
+  // Basketball lines
+  ctx.strokeStyle = '#2a1a0a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(bx, by, 28, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bx - 28, by);
+  ctx.lineTo(bx + 28, by);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bx, by - 28);
+  ctx.lineTo(bx, by + 28);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(bx - 14, by, 20, -0.8, 0.8);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(bx + 14, by, -20, -0.8, 0.8);
+  ctx.stroke();
+  
+  // Title
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = 'bold 18px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('NORDHORN', bx, 200);
+  ctx.fillText('ALL STARS', bx, 224);
+  
+  // Subtitle
+  ctx.fillStyle = C.DARK;
+  ctx.font = '10px monospace';
+  ctx.fillText('BASKETBALL RPG', bx, 250);
+  
+  // Press enter
+  const blink = Math.floor(Date.now() / 500) % 2;
+  if (blink) {
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '10px monospace';
+    ctx.fillText('PRESS ENTER', bx, 320);
+  }
+  
+  // Footer
+  ctx.fillStyle = C.DARK;
+  ctx.font = '8px monospace';
+  ctx.fillText('© 2025 NORDHORN ALL STARS', bx, 380);
+  
+  ctx.textAlign = 'left';
+}
+
+// ============================================================
+// CHARACTER SELECT
+// ============================================================
+
+function drawCharSelect() {
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  ctx.fillStyle = C.MID;
+  for (let i = 0; i < VIEW_W; i += 8) {
+    ctx.fillRect(i, 0, 4, VIEW_H);
+  }
+  
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '12px monospace';
+  ctx.textAlign = 'center';
+  
+  if (charSelect.phase === 'gender') {
+    ctx.fillText('CHOOSE YOUR GENDER', VIEW_W / 2, 80);
+    
+    // Boy
+    ctx.fillStyle = charSelect.gender === 0 ? C.DARK : C.MID;
+    ctx.fillRect(VIEW_W / 2 - 80, 130, 60, 80);
+    drawCharPortrait(VIEW_W / 2 - 50, 145, 'boy');
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '10px monospace';
+    ctx.fillText('BOY', VIEW_W / 2 - 50, 225);
+    
+    // Girl
+    ctx.fillStyle = charSelect.gender === 1 ? C.DARK : C.MID;
+    ctx.fillRect(VIEW_W / 2 + 20, 130, 60, 80);
+    drawCharPortrait(VIEW_W / 2 + 50, 145, 'girl');
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '10px monospace';
+    ctx.fillText('GIRL', VIEW_W / 2 + 50, 225);
+    
+    ctx.font = '8px monospace';
+    ctx.fillText('← → to select, ENTER to confirm', VIEW_W / 2, 300);
+  } else if (charSelect.phase === 'build') {
+    ctx.fillText('CHOOSE YOUR BUILD', VIEW_W / 2, 80);
+    
+    const builds = ['SHOOTER', 'ALLROUNDER', 'DEFENDER'];
+    const buildDescs = [
+      'Shooting++  Defense-',
+      'Balanced stats',
+      'Defense++  Drib-'
+    ];
+    
+    builds.forEach((b, i) => {
+      ctx.fillStyle = charSelect.build === i ? C.DARK : C.MID;
+      ctx.fillRect(VIEW_W / 2 - 80, 110 + i * 70, 160, 55);
+      ctx.fillStyle = C.DARKEST;
+      ctx.font = '10px monospace';
+      ctx.fillText(b, VIEW_W / 2, 130 + i * 70);
+      ctx.font = '8px monospace';
+      ctx.fillText(buildDescs[i], VIEW_W / 2, 145 + i * 70);
+    });
+    
+    ctx.font = '8px monospace';
+    ctx.fillText('↑ ↓ to select, ENTER to confirm', VIEW_W / 2, 340);
+  }
+  
+  ctx.textAlign = 'left';
+}
+
+function drawCharPortrait(cx, cy, gender) {
+  const px = cx - 10;
+  const py = cy - 10;
+  
+  // Hair
+  ctx.fillStyle = gender === 'boy' ? '#4a3a1a' : '#2a1a0a';
+  ctx.fillRect(px + 3, py + 1, 10, 4);
+  ctx.fillRect(px + 2, py + 2, 12, 3);
+  
+  // Head
+  ctx.fillStyle = '#f0c8a0';
+  ctx.fillRect(px + 4, py + 5, 8, 6);
+  
+  // Eyes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(px + 6, py + 7, 2, 2);
+  ctx.fillRect(px + 10, py + 7, 2, 2);
+  
+  // Body
+  ctx.fillStyle = gender === 'boy' ? C.DARK : '#c06060';
+  ctx.fillRect(px + 3, py + 11, 10, 5);
+}
+
+function updateCharSelect() {
+  if (charSelect.phase === 'gender') {
+    if (wasPressed('ArrowLeft') || wasPressed('ArrowRight')) {
+      charSelect.gender = charSelect.gender === 0 ? 1 : 0;
+    }
+    if (wasPressed('Enter')) {
+      charSelect.phase = 'build';
+    }
+  } else if (charSelect.phase === 'build') {
+    if (wasPressed('ArrowUp')) {
+      charSelect.build = (charSelect.build + 2) % 3;
+    }
+    if (wasPressed('ArrowDown')) {
+      charSelect.build = (charSelect.build + 1) % 3;
+    }
+    if (wasPressed('Enter')) {
+      applyCharacterCreation();
+      gameState = 'OVERWORLD';
+      startDialog('Welcome to Nordhorn!', 'Mom: Have a sweet time!');
+    }
+  }
+}
+
+function applyCharacterCreation() {
+  player.gender = charSelect.gender === 0 ? 'boy' : 'girl';
+  
+  const buildNames = ['shooter', 'allrounder', 'defender'];
+  const selectedBuild = buildNames[charSelect.build];
+  player.build = selectedBuild;
+  
+  const bonus = BUILD_BONUS[selectedBuild];
+  player.stats.dribbling = 5 + bonus.dribbling;
+  player.stats.shooting = 5 + bonus.shooting;
+  player.stats.athleticism = 5 + bonus.athleticism;
+  player.stats.defense = 5 + bonus.defense;
+  player.stats.courtVision = 5 + bonus.courtVision;
+  
+  player.hp = player.maxHp;
+  player.energy = player.maxEnergy;
+}
+
+// ============================================================
+// OVERWORLD
+// ============================================================
+
+function drawOverworld() {
+  const camX = Math.max(0, Math.min(MAP_W - VIEW_TILES_W / 1, player.x - Math.floor(VIEW_TILES_W / 2)));
+  const camY = Math.max(0, Math.min(MAP_H - VIEW_TILES_H / 1, player.y - Math.floor(VIEW_TILES_H / 2)));
+  
+  // Draw tiles
+  for (let y = Math.floor(camY) - 1; y < Math.ceil(camY) + VIEW_TILES_H + 1; y++) {
+    for (let x = Math.floor(camX) - 1; x < Math.ceil(camX) + VIEW_TILES_W + 1; x++) {
+      if (x >= 0 && x < MAP_W && y >= 0 && y < MAP_H) {
+        drawTile(x, y, worldMap[y][x], camX, camY);
+      }
+    }
+  }
+  
+  // Draw trainers
+  trainers.forEach(t => {
+    if (!t.beaten) drawTrainerSprite(t, camX, camY);
+    else {
+      // Draw beaten trainer faded
+      const px = (t.x - camX) * TILE;
+      const py = (t.y - camY) * TILE;
+      ctx.globalAlpha = 0.5;
+      drawTrainerSprite(t, camX, camY);
+      ctx.globalAlpha = 1;
+    }
+  });
+  
+  // Draw player
+  drawPlayer(camX, camY, player.facing, Math.floor(frameCount / 15) % 2);
+  
+  // Draw area labels
+  ctx.font = '8px monospace';
+Align = 'center';
+  ctx.fillStyle = C.DARKEST;
+  
+  // Home label
+  const homeLabelX = (6 - camX) * TILE;
+  const homeLabelY = (2 - camY) * TILE;
+  if (homeLabelX > 0 && homeLabelX < VIEW_W) {
+    ctx.fillText('HOME', homeLabelX, homeLabelY);
+  }
+  
+  // School label
+  const schoolLabelX = (48 - camX) * TILE;
+  const schoolLabelY = (3 - camY) * TILE;
+  if (schoolLabelX > 0 && schoolLabelX < VIEW_W) {
+    ctx.fillText('GYMNASIUM', schoolLabelX, schoolLabelY);
+  }
+  
+  // Courts label
+  const courtsLabelX = (16 - camX) * TILE;
+  const courtsLabelY = (39 - camY) * TILE;
+  if (courtsLabelX > 0 && courtsLabelX < VIEW_W) {
+    ctx.fillText('COURTS', courtsLabelX, courtsLabelY);
+  }
+  
+  // Library label
+  const libLabelX = (38 - camX) * TILE;
+  const libLabelY = (28 - camY) * TILE;
+  if (libLabelX > 0 && libLabelX < VIEW_W) {
+    ctx.fillText('LIBRARY', libLabelX, libLabelY);
+  }
+  
+  // Stadium label
+  const stadLabelX = (40 - camX) * TILE;
+  const stadLabelY = (43 - camY) * TILE;
+  if (stadLabelX > 0 && stadLabelX < VIEW_W) {
+    ctx.fillText('STADIUM', stadLabelX, stadLabelY);
+  }
+  
+  ctx.textAlign = 'left';
+}
+
+function isWalkable(x, y) {
+  if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
+  const t = worldMap[y][x];
+  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE;
+}
+
+function updateOverworld() {
+  let dx = 0, dy = 0;
+  player.moving = false;
+  
+  if (keysPressed['ArrowLeft'] || keys['ArrowLeft']) { dx = -1; player.facing = 'left'; player.moving = true; }
+  else if (keysPressed['ArrowRight'] || keys['ArrowRight']) { dx = 1; player.facing = 'right'; player.moving = true; }
+  else if (keysPressed['ArrowUp'] || keys['ArrowUp']) { dy = -1; player.facing = 'up'; player.moving = true; }
+  else if (keysPressed['ArrowDown'] || keys['ArrowDown']) { dy = 1; player.facing = 'down'; player.moving = true; }
+  
+  // Movement with frame-based timing
+  if (frameCount % 6 === 0) {
+    if (dx !== 0 || dy !== 0) {
+      const nx = player.x + dx;
+      const ny = player.y + dy;
+      if (isWalkable(nx, ny)) {
+        player.x = nx;
+        player.y = ny;
+        keysPressed['ArrowLeft'] = false;
+        keysPressed['ArrowRight'] = false;
+        keysPressed['ArrowUp'] = false;
+        keysPressed['ArrowDown'] = false;
+        
+        // Check trainer encounter
+        checkTrainerEncounter();
+      }
+    }
+  }
+  
+  // Clear pressed keys each frame
+  if (frameCount % 6 === 0) {
+    keysPressed['ArrowLeft'] = false;
+    keysPressed['ArrowRight'] = false;
+    keysPressed['ArrowUp'] = false;
+    keysPressed['ArrowDown'] = false;
+  }
+}
+
+function checkTrainerEncounter() {
+  for (let t of trainers) {
+    if (!t.beaten && Math.abs(player.x - t.x) < 2 && Math.abs(player.y - t.y) < 2) {
+      // Face the trainer
+      if (player.x < t.x) player.facing = 'right';
+      else if (player.x > t.x) player.facing = 'left';
+      else if (player.y < t.y) player.facing = 'down';
+      else player.facing = 'up';
+      
+      startDialog(t.dialogue, '');
+      dialog.onComplete = () => startBattle(t);
+      gameState = 'DIALOG';
+      return;
+    }
+  }
+}
+
+// ============================================================
+// BATTLE RENDERING
+// ============================================================
+
+function drawBattle() {
+  // Background - court
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  
+  // Court floor
+  ctx.fillStyle = '#5a5a3a';
+  ctx.fillRect(20, 20, VIEW_W - 40, VIEW_H - 100);
+  
+  // Court lines
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(20, 20, VIEW_W - 40, 2);
+  ctx.fillRect(20, VIEW_H - 82, VIEW_W - 40, 2);
+  ctx.fillRect(20, 20, 2, VIEW_H - 102);
+  ctx.fillRect(VIEW_W - 22, 20, 2, VIEW_H - 102);
+  
+  // Half court line
+  ctx.fillRect(VIEW_W / 2, 20, 2, VIEW_H - 102);
+  
+  // Three point arc
+  ctx.fillRect(20, 60, 60, 2);
+  ctx.fillRect(20, VIEW_H - 140, 60, 2);
+  ctx.fillRect(VIEW_W - 80, 60, 60, 2);
+  ctx.fillRect(VIEW_W - 80, VIEW_H - 140, 60, 2);
+  
+  // Hoops
+  ctx.fillStyle = '#d4600a';
+  ctx.fillRect(30, 70, 10, 10);
+  ctx.fillRect(VIEW_W - 40, 70, 10, 10);
+  
+  // Scoreboard
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(140, 22, 200, 30);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(142, 24, 196, 26);
+  ctx.fillStyle = C.DARKEST;
+  
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(battle.currentTrainer.name, 190, 38);
+  ctx.fillText('YOU', 290, 38);
+  ctx.fillText(String(battle.enemyScore), 190, 44);
+  ctx.fillText(String(battle.playerScore), 290, 44);
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(200, 30, 2, 20);
+  
+  // Player side
+  drawBattlePlayer(100, 280);
+  
+  // Enemy side  
+  drawBattleEnemy(320, 80);
+  
+  // Ball
+  if (battle.hasBall) {
+    ctx.fillStyle = '#d4600a';
+    ctx.beginPath();
+    ctx.arc(120, 260, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2a1a0a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#d4600a';
+    ctx.beginPath();
+    ctx.arc(340, 100, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2a1a0a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  
+  // HUD
+  drawBattleHUD();
+  
+  // Dialog/messages
+  drawDialog();
+  
+  // Move selection
+  if (battle.phase === 'select' && battle.playerTurn) {
+    drawMoveSelect();
+  }
+  
+  ctx.textAlign = 'left';
+}
+
+function drawBattlePlayer(x, y) {
+  // Player sprite (larger for battle)
+  const scale = 2;
+  // Shirt
+  ctx.fillStyle = player.gender === 'boy' ? C.DARK : '#c06060';
+  ctx.fillRect(x + 3 * scale, y + 11 * scale, 10 * scale, 5 * scale);
+  // Head
+  ctx.fillStyle = '#f0c8a0';
+  ctx.fillRect(x + 4 * scale, y + 5 * scale, 8 * scale, 6 * scale);
+  // Hair
+  ctx.fillStyle = player.gender === 'boy' ? '#4a3a1a' : '#2a1a0a';
+  ctx.fillRect(x + 3 * scale, y + 1 * scale, 10 * scale, 4 * scale);
+  // Eyes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(x + 6 * scale, y + 7 * scale, 2 * scale, 2 * scale);
+  ctx.fillRect(x + 10 * scale, y + 7 * scale, 2 * scale, 2 * scale);
+  // Pants
+  ctx.fillStyle = player.gender === 'boy' ? '#2040a0' : '#402060';
+  ctx.fillRect(x + 3 * scale, y + 15 * scale, 10 * scale, 4 * scale);
+  // Shoes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(x + 3 * scale, y + 18 * scale, 4 * scale, 2 * scale);
+  ctx.fillRect(x + 9 * scale, y + 18 * scale, 4 * scale, 2 * scale);
+  
+  // "YOU" label
+  ctx.fillStyle = C.DARK;
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('YOU', x + 30, y + 50 * scale);
+  ctx.textAlign = 'left';
+}
+
+function drawBattleEnemy(x, y) {
+  const trainer = battle.currentTrainer;
+  const scale = 2;
+  
+  // Body
+  ctx.fillStyle = trainer.colors.body;
+  ctx.fillRect(x + 3 * scale, y + 11 * scale, 10 * scale, 5 * scale);
+  // Head
+  ctx.fillStyle = '#f0c8a0';
+  ctx.fillRect(x + 4 * scale, y + 5 * scale, 8 * scale, 6 * scale);
+  // Hat
+  ctx.fillStyle = trainer.colors.hat;
+  ctx.fillRect(x + 3 * scale, y + 1 * scale, 10 * scale, 4 * scale);
+  // Eyes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(x + 6 * scale, y + 7 * scale, 2 * scale, 2 * scale);
+  ctx.fillRect(x + 10 * scale, y + 7 * scale, 2 * scale, 2 * scale);
+  // Pants
+  ctx.fillStyle = trainer.colors.pants;
+  ctx.fillRect(x + 3 * scale, y + 15 * scale, 10 * scale, 4 * scale);
+  // Shoes
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(x + 3 * scale, y + 18 * scale, 4 * scale, 2 * scale);
+  ctx.fillRect(x + 9 * scale, y + 18 * scale, 4 * scale, 2 * scale);
+  
+  // Name
+  ctx.fillStyle = C.DARK;
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(trainer.name, x + 30, y + 50 * scale);
+  ctx.textAlign = 'left';
+}
+
+function drawBattleHUD() {
+  // Player stats box (bottom left)
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(4, VIEW_H - 76, 200, 72);
+  ctx.fillStyle = C.MID;
+  ctx.fillRect(5, VIEW_H - 75, 198, 70);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(6, VIEW_H - 74, 196, 68);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(8, VIEW_H - 72, 192, 64);
+  
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '8px monospace';
+  ctx.fillText('LV ' + player.level, 14, VIEW_H - 60);
+  
+  // HP bar
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(60, VIEW_H - 64, 100, 8);
+  const hpWidth = Math.max(0, (battle.playerHp / player.maxHp) * 96);
+  ctx.fillStyle = hpWidth > 30 ? C.DARK : (hpWidth > 15 ? '#d4600a' : '#ff0000');
+  ctx.fillRect(62, VIEW_H - 62, hpWidth, 4);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillText('HP ' + Math.max(0, battle.playerHp) + '/' + player.maxHp, 14, VIEW_H - 68);
+  
+  // Energy bar
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(60, VIEW_H - 48, 100, 8);
+  const enWidth = Math.max(0, (battle.playerEnergy / player.maxEnergy) * 96);
+  ctx.fillStyle = '#2a5a9a';
+  ctx.fillRect(62, VIEW_H - 46, enWidth, 4);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillText('EN ' + battle.playerEnergy + '/' + (player.maxEnergy + 3), 14, VIEW_H - 52);
+  
+  // Enemy stats box (top right or bottom right)
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(VIEW_W - 204, VIEW_H - 76, 200, 72);
+  ctx.fillStyle = C.MID;
+  ctx.fillRect(VIEW_W - 203, VIEW_H - 75, 198, 70);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(VIEW_W - 202, VIEW_H - 74, 196, 68);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(VIEW_W - 200, VIEW_H - 72, 192, 64);
+  
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '8px monospace';
+  ctx.fillText('ENEMY', VIEW_W - 196, VIEW_H - 60);
+  
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(VIEW_W - 140, VIEW_H - 64, 100, 8);
+  const eHpWidth = Math.max(0, (battle.enemyHp / battle.currentTrainer.playerHp) * 96);
+  ctx.fillStyle = eHpWidth > 30 ? C.DARK : (eHpWidth > 15 ? '#d4600a' : '#ff0000');
+  ctx.fillRect(VIEW_W - 138, VIEW_H - 62, eHpWidth, 4);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillText('HP ' + Math.max(0, battle.enemyHp), VIEW_W - 196, VIEW_H - 68);
+  
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(VIEW_W - 140, VIEW_H - 48, 100, 8);
+  const eEnWidth = Math.max(0, (battle.enemyEnergy / 25) * 96);
+  ctx.fillStyle = '#2a5a9a';
+  ctx.fillRect(VIEW_W - 138, VIEW_H - 46, eEnWidth, 4);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillText('EN ' + battle.enemyEnergy, VIEW_W - 196, VIEW_H - 52);
+  
+  // Message area
+  if (battle.message && battle.phase !== 'select') {
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(200, VIEW_H - 76, 80, 72);
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(202, VIEW_H - 74, 76, 68);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(204, VIEW_H - 72, 72, 64);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    // Wrap text
+    const words = battle.message.split(' ');
+    let line = '';
+    let lineY = VIEW_H - 60;
+    for (let w of words) {
+      if ((line + ' ' + w).length > 12) {
+        ctx.fillText(line, 208, lineY);
+        line = w;
+        lineY += 9;
+      } else {
+        line = (line ? line + ' ' : '') + w;
+      }
+    }
+    if (line) ctx.fillText(line, 208, lineY);
+  }
+}
+
+function drawMoveSelect() {
+  // Move selection menu
+  const menuX = 20;
+  const menuY = VIEW_H - 140;
+  const menuW = 200;
+  const menuH = 60;
+  
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(menuX, menuY, menuW, menuH);
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(menuX + 2, menuY + 2, menuW - 4, menuH - 4);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(menuX + 4, menuY + 4, menuW - 8, menuH - 8);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(menuX + 6, menuY + 6, menuW - 12, menuH - 12);
+  
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '8px monospace';
+  
+  const moves = battle.playerMoves;
+  const maxDisplay = 3;
+  const startIdx = Math.max(0, battle.selectedMove - maxDisplay + 1);
+  
+  for (let i = startIdx; i < Math.min(moves.length, startIdx + maxDisplay); i++) {
+    const idx = i - startIdx;
+    const move = moves[i];
+    const hasEnough = battle.playerEnergy >= (move.energy || 0);
+    
+    ctx.fillStyle = hasEnough ? C.DARKEST : C.MID;
+    if (i === battle.selectedMove) {
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(menuX + 8, menuY + 8 + idx * 16, menuW - 16, 14);
+      ctx.fillStyle = C.DARKEST;
+    }
+    
+    const prefix = i === battle.selectedMove ? '▶ ' : '  ';
+    ctx.fillText(prefix + move.name, menuX + 12, menuY + 19 + idx * 16);
+    ctx.fillText('EN: ' + (move.energy || 0), menuX + menuW - 50, menuY + 19 + idx * 16);
+  }
+  
+  // Move description
+  if (moves[battle.selectedMove]) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '7px monospace';
+    ctx.fillText(moves[battle.selectedMove].desc, menuX + 8, menuY + menuH + 10);
+  }
+}
+
+function updateBattle() {
+  if (battle.phase === 'select' && battle.playerTurn) {
+    if (wasPressed('ArrowUp')) {
+      battle.selectedMove = (battle.selectedMove + battle.playerMoves.length - 1) % battle.playerMoves.length;
+    }
+    if (wasPressed('ArrowDown')) {
+      battle.selectedMove = (battle.selectedMove + 1) % battle.playerMoves.length;
+    }
+    if (wasPressed('Enter')) {
+      executePlayerMove();
+    }
+  }
+  
+  if (battle.phase === 'anim') {
+    battle.animTimer--;
+    if (battle.animTimer <= 0) {
+      // Should be handled by setTimeout
+    }
+  }
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+
+function gameLoop() {
+  frameCount++;
+  
+  // Clear
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  
+  switch (gameState) {
+    case 'TITLE':
+      drawTitleScreen();
+      if (wasPressed('Enter')) {
+        gameState = 'CHARSELECT';
+        charSelect.phase = 'gender';
+        charSelect.gender = 0;
+        charSelect.build = 0;
+      }
+      break;
+      
+    case 'CHARSELECT':
+      drawCharSelect();
+      updateCharSelect();
+      break;
+      
+    case 'OVERWORLD':
+      updateOverworld();
+      drawOverworld();
+      break;
+      
+    case 'DIALOG':
+      // Draw underlying overworld
+      drawOverworld();
+      updateDialog();
+      drawDialog();
+      break;
+      
+    case 'BATTLE':
+      updateBattle();
+      drawBattle();
+      break;
+      
+    case 'LOST':
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.fillStyle = C.LIGHT;
+      ctx.font = '14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', VIEW_W / 2, VIEW_H / 2 - 20);
+      ctx.font = '10px monospace';
+      ctx.fillText('You returned home to rest.', VIEW_W / 2, VIEW_H / 2 + 10);
+      ctx.fillText('ENTER to continue', VIEW_W / 2, VIEW_H / 2 + 40);
+      ctx.textAlign = 'left';
+      if (wasPressed('Enter')) {
+        player.hp = player.maxHp;
+        player.energy = player.maxEnergy;
+        player.x = 5;
+        player.y = 6;
+        gameState = 'OVERWORLD';
+      }
+      break;
+  }
+  
+  requestAnimationFrame(gameLoop);
+}
+
+// ============================================
+// NORDHORN ALLSTARS — DEX-DATA (Spieler-Liste)
+// ============================================
+
+const DexData = {
+  allTrainers: [
+    { id: 'tim', name: 'Tim', build: 'SHOOTER', level: 3, location: 'Nordhorn — Wohnhof-Court', badge: 'ANFÄNGER', badgeColor: '#9bbc0f', reward: 'Layup-Verständnis', flavor: 'Dein alter Schulfreund. Schnell, aber nicht stark.' },
+    { id: 'lisa', name: 'Lisa', build: 'ALLROUNDER', level: 4, location: 'Nordhorn — Schulhof-Court', badge: 'SCHÜLER', badgeColor: '#8bac0f', reward: 'Ausgewogene Skills', flavor: 'Tochter des Schulhof-Vorstehens. Sehr ordentlich.' },
+    { id: 'mohammed', name: 'Mohammed', build: 'ALLROUNDER', level: 5, location: 'Nordhorn — Park-Court', badge: 'NATUR', badgeColor: '#306230', reward: 'Stadtkenntnis', flavor: 'Implantat aus dem Stadion. Liebt Pick & Roll.' },
+    { id: 'coach', name: 'Coach Müller', build: 'VERTEIDIGER', level: 6, location: 'Nordhorn — Stadion-Court', badge: 'PROFI', badgeColor: '#0f380f', reward: 'Professionelle Verteidigung', flavor: '30 Jahre am Court. Trainer des Stadion-Teams.' },
+    { id: 'erik', name: 'Erik', build: 'SHOOTER', level: 7, location: 'Nordhorn — Spielplatz-Court', badge: 'KAMPF', badgeColor: '#c4944a', reward: 'Kampfgeist', flavor: 'Punchy. Kann treten UND werfen.' },
+    { id: 'buecherei', name: 'Bibliothekar Klaus', build: 'VERTEIDIGER', level: 8, location: 'Nordhorn — Bücherei-Court', badge: 'WEISHEIT', badgeColor: '#6b5335', reward: 'Gedächtnis & Defense', flavor: 'Ein Bücherwurm mit Block-Finsternis. Kennt jede Spielregel.' },
+    { id: 'hausberg', name: 'Bergsteiger Armin', build: 'VERTEIDIGER', level: 9, location: 'Nordhorn — Hausberg-Court', badge: 'STÄRKE', badgeColor: '#aa3333', reward: 'Krafttraining', flavor: '40 Jahre Bergziege. Arm wie ein Bullenbericht.' },
+    { id: 'meister', name: 'Meister Wu', build: 'ALLROUNDER', level: 10, location: 'Nordhorn — Meister-Court', badge: 'MEISTER', badgeColor: '#aaaa33', reward: 'Meister-Move', flavor: 'Champions-League-Erfahrung. Höchste Anforderungen.' },
+    { id: 'koenig', name: 'KÖNIG', build: 'ALLROUNDER', level: 20, location: 'Nordhorn — Königs-Court', badge: 'KÖNIG', badgeColor: '#ff44ff', reward: 'Champion-Titel', flavor: 'Der unangefochtene Meister von Nordhorn. 12 Jahre unbesiegt.', isFinalBoss: true },
+    { id: 'klaus', name: 'Klaus', build: 'SHOOTER', level: 9, location: 'Lingen — Bahnhof-Court', badge: 'RIVALE', badgeColor: '#cc4444', reward: 'Duell-Erfahrung', flavor: 'Willkommen in Lingen! Direkt am Bahnhof.' },
+    { id: 'sven', name: 'Sven', build: 'VERTEIDIGER', level: 11, location: 'Lingen — Industrie-Court', badge: 'STAHL', badgeColor: '#888899', reward: 'Stahlhart', flavor: 'Fabrikarbeiter. Schichtarbeit und Ballcatch.' },
+    { id: 'rashta', name: 'Rashta', build: 'ALLROUNDER', level: 13, location: 'Lingen — Hafen-Court', badge: 'STURM', badgeColor: '#4466aa', reward: 'Sturm-Basketball', flavor: 'Hafenliebe. Ballspiele auch bei Wind.' },
+    { id: 'maxim', name: 'Maxim', build: 'ALLROUNDER', level: 16, location: 'Lingen — Arena Lingen', badge: 'CHAMPION', badgeColor: '#ddaa22', reward: 'Champion von Lingen', flavor: '6 Jahre unbesiegt. Der stärkste Spieler Lingens.' }
+  ],
+
+  getAllTrainers() {
+    return this.allTrainers.map(t => {
+      const defeated = this.isTrainerDefeated(t.id);
+      return { ...t, defeated };
+    });
+  },
+
+  isTrainerDefeated(trainerId) {
+    // Check all maps' trainers for defeated status
+    for (const mapName in Maps) {
+      const map = Maps[mapName];
+      if (map.trainers) {
+        for (const t of map.trainers) {
+          if (t.id === trainerId && t.defeated) return true;
+        }
+      }
+    }
+    return false;
+  },
+
+  getDexProgress() {
+    const all = this.getAllTrainers();
+    const defeated = all.filter(t => t.defeated).length;
+    return { total: all.length, defeated };
+  }
+};
+
+// ============================================================
+// INIT
+// ============================================================
+
+generateMap();
+gameLoop();
+
+</script>
 </body>
 </html>
