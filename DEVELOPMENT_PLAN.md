@@ -73,3 +73,4 @@
 - [x] Comeback-Coach Battle-HUD — sichtbare Score-Run-Anzeige mit Rückstands-/Lead-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Stamina-Coach Battle-HUD — sichtbare HP/EN-Tankanalyse mit Rivalen-Energie, Tempo-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Route-Coach Overworld-HUD — smarte nächste Route zu Rivalen/Home-Rest mit Pfeil, Distanz, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Win-Condition-Coach Battle-HUD — sichtbare Punkte-bis-Sieg-Anzeige mit Match-/Danger-Point-Tipps, Title-Screen-Marker und Module-Check ergänzt.

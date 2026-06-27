@@ -2009,6 +2009,66 @@ const StaminaCoach = {
   }
 };
 
+const WinConditionCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const playerNeed = Math.max(0, target - playerScore);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const lead = playerScore - enemyScore;
+    let pace = 'OPENING RUN';
+    let advice = battle.hasBall ? 'BUILD FIRST LEAD' : 'GET A STOP';
+    if (playerNeed <= 3) {
+      pace = 'MATCH POINT';
+      advice = battle.hasBall ? 'TAKE WINNER' : 'FORCE TURNOVER';
+    } else if (enemyNeed <= 3) {
+      pace = 'DANGER POINT';
+      advice = battle.hasBall ? 'SCORE NOW' : 'NO EASY SHOT';
+    } else if (lead >= 4) {
+      pace = 'CONTROL LEAD';
+      advice = battle.hasBall ? 'SAFE TWO' : 'TRADE STOPS';
+    } else if (lead <= -4) {
+      pace = 'CHASE RUN';
+      advice = battle.hasBall ? 'FAST THREE' : 'PRESS FULL';
+    } else if (battle.turnCount >= 6) {
+      pace = 'MIDGAME';
+      advice = battle.hasBall ? 'BEST LOOK' : 'CONTEST ARC';
+    }
+    return { target, playerScore, enemyScore, playerNeed, enemyNeed, lead, pace, advice };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('WIN CONDITION COACH · POINTS-TO-WIN HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = VIEW_W - 162;
+    const y = 214;
+    const w = 152;
+    const h = 42;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.playerNeed <= 3 ? '#d4600a' : (info.lead >= 0 ? C.LIGHT : C.MID);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('WIN NEED ' + info.playerNeed + ' · RIVAL ' + info.enemyNeed, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    const leadText = info.lead >= 0 ? '+' + info.lead : String(info.lead);
+    ctx.fillText(info.pace + '  LEAD ' + leadText, x + 7, y + 24);
+    ctx.fillText(info.advice, x + 7, y + 36);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2626,6 +2686,7 @@ function drawTitleScreen() {
   // Subtitle
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
+  WinConditionCoach.renderTitleBadge(bx, 136);
   StaminaCoach.renderTitleBadge(bx, 156);
   RouteCoach.renderTitleBadge(bx, 146);
   ComebackCoach.renderTitleBadge(bx, 168);
@@ -3225,6 +3286,7 @@ function drawBattle() {
   ClutchAlert.renderBattleHUD();
   ComebackCoach.renderBattleHUD();
   StaminaCoach.renderBattleHUD();
+  WinConditionCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -3685,6 +3747,7 @@ const GameModules = {
     { id: 'defenseRead', label: 'Defense Read', check: () => !!(DefenseRead && typeof DefenseRead.getState === 'function' && typeof DefenseRead.renderBattleHUD === 'function' && DefenseRead.getState().threat >= 0) },
     { id: 'comebackCoach', label: 'Comeback Coach', check: () => !!(ComebackCoach && typeof ComebackCoach.getState === 'function' && typeof ComebackCoach.renderBattleHUD === 'function' && ComebackCoach.getState().playerNeed >= 0) },
     { id: 'staminaCoach', label: 'Stamina Coach', check: () => !!(StaminaCoach && typeof StaminaCoach.getState === 'function' && typeof StaminaCoach.renderBattleHUD === 'function' && StaminaCoach.getState().tank >= 0) },
+    { id: 'winConditionCoach', label: 'Win Condition Coach', check: () => !!(WinConditionCoach && typeof WinConditionCoach.getState === 'function' && typeof WinConditionCoach.renderBattleHUD === 'function' && WinConditionCoach.getState().playerNeed >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
