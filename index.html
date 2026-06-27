@@ -283,6 +283,93 @@ const C = {
   BLACK: '#0f380f'
 };
 
+// ============================================================
+// ERROR GUARD (runtime edge-case handling)
+// ============================================================
+
+const ErrorGuard = {
+  errors: [],
+  overlayTimer: 0,
+  validStates: ['TITLE', 'CHARSELECT', 'OVERWORLD', 'BATTLE', 'DIALOG', 'LOST', 'CREDITS'],
+
+  record(source, error) {
+    const message = error && error.message ? error.message : String(error || 'Unknown error');
+    this.errors.unshift({ source, message, frame: (typeof frameCount !== 'undefined' ? frameCount : 0) });
+    this.errors = this.errors.slice(0, 4);
+    this.overlayTimer = 300;
+    if (window.console && console.error) console.error('[ErrorGuard]', source, error);
+  },
+
+  safe(source, fn, fallback) {
+    try {
+      return fn();
+    } catch (error) {
+      this.record(source, error);
+      if (typeof fallback === 'function') return fallback(error);
+      return null;
+    }
+  },
+
+  validateGameState() {
+    if (this.validStates.indexOf(gameState) === -1) {
+      this.record('gameState', 'Invalid state: ' + gameState);
+      gameState = 'TITLE';
+    }
+
+    if (!Number.isFinite(player.x) || !Number.isFinite(player.y) || !isWalkable(player.x, player.y)) {
+      this.record('player-position', 'Recovered invalid position ' + player.x + ',' + player.y);
+      player.x = 5;
+      player.y = 6;
+      player.facing = 'down';
+    }
+
+    player.maxHp = Math.max(1, Number(player.maxHp) || 100);
+    player.maxEnergy = Math.max(1, Number(player.maxEnergy) || 20);
+    player.hp = Math.max(0, Math.min(player.maxHp, Number(player.hp) || player.maxHp));
+    player.energy = Math.max(0, Math.min(player.maxEnergy, Number(player.energy) || player.maxEnergy));
+
+    if (!Array.isArray(player.moves) || player.moves.length === 0) {
+      this.record('player-moves', 'Restored starter moves');
+      player.moves = ['Layup', 'Jump Shot'];
+    }
+
+    if (gameState === 'BATTLE' && (!battle.currentTrainer || battle.phase === 'select' && (!battle.playerMoves || battle.playerMoves.length === 0))) {
+      this.record('battle-state', 'Recovered incomplete battle state');
+      battle.active = false;
+      battle.currentTrainer = null;
+      gameState = 'OVERWORLD';
+      startDialog('Der Kampf wurde sicher abgebrochen.', 'Zurück auf den Court!');
+    }
+  },
+
+  renderBadge(x, y) {
+    const ok = this.errors.length === 0;
+    ctx.fillStyle = ok ? C.DARKEST : C.DARK;
+    ctx.fillRect(x - 58, y - 10, 116, 15);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ERROR GUARD: ' + (ok ? 'OK' : 'RECOVERED'), x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderOverlay() {
+    if (this.overlayTimer <= 0 || this.errors.length === 0) return;
+    this.overlayTimer--;
+    const latest = this.errors[0];
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(8, 8, 250, 36);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('FEHLER ABGEFANGEN: ' + latest.source, 14, 22);
+    ctx.fillText(latest.message.substring(0, 34), 14, 34);
+  }
+};
+
+window.addEventListener('error', (event) => ErrorGuard.record('window.error', event.error || event.message));
+window.addEventListener('unhandledrejection', (event) => ErrorGuard.record('promise', event.reason));
+
 const TILE = 16;
 const VIEW_W = 480;
 const VIEW_H = 432;
@@ -989,7 +1076,7 @@ const keysPressed = {};
 window.addEventListener('keydown', (e) => {
   if (!keys[e.key]) keysPressed[e.key] = true;
   keys[e.key] = true;
-  checkEasterEgg(e.key);
+  ErrorGuard.safe('input', () => checkEasterEgg(e.key));
   e.preventDefault();
 });
 window.addEventListener('keyup', (e) => {
@@ -1487,15 +1574,18 @@ function drawTitleScreen() {
   GameModules.renderBadge(bx, 386);
   GameModules.renderPanel();
 
+  // Runtime edge-case guard marker: visible proof that recoverable errors are handled.
+  ErrorGuard.renderBadge(bx, 398);
+
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('GITHUB PAGES READY', bx, 402);
+  ctx.fillText('GITHUB PAGES READY', bx, 412);
 
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 418);
+  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 426);
 
   ctx.textAlign = 'left';
 }
@@ -2209,77 +2299,90 @@ function updateBattle() {
 // ============================================================
 
 function gameLoop() {
-  const now = performance.now();
-  PerfHUD.tick(now);
-  frameCount++;
+  ErrorGuard.safe('gameLoop', () => {
+    const now = performance.now();
+    PerfHUD.tick(now);
+    frameCount++;
+    ErrorGuard.validateGameState();
 
-  // Clear
-  ctx.fillStyle = C.LIGHT;
-  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    // Clear
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-  switch (gameState) {
-    case 'TITLE':
-      drawTitleScreen();
-      if (wasPressed('Enter')) {
-        gameState = 'CHARSELECT';
-        charSelect.phase = 'gender';
-        charSelect.gender = 0;
-        charSelect.build = 0;
-      }
-      if (wasPressed('c')) {
-        gameState = 'CREDITS';
-      }
-      break;
+    switch (gameState) {
+      case 'TITLE':
+        drawTitleScreen();
+        if (wasPressed('Enter')) {
+          gameState = 'CHARSELECT';
+          charSelect.phase = 'gender';
+          charSelect.gender = 0;
+          charSelect.build = 0;
+        }
+        if (wasPressed('c')) {
+          gameState = 'CREDITS';
+        }
+        break;
 
-    case 'CHARSELECT':
-      drawCharSelect();
-      updateCharSelect();
-      break;
+      case 'CHARSELECT':
+        drawCharSelect();
+        updateCharSelect();
+        break;
 
-    case 'OVERWORLD':
-      updateOverworld();
-      drawOverworld();
-      break;
+      case 'OVERWORLD':
+        updateOverworld();
+        drawOverworld();
+        break;
 
-    case 'DIALOG':
-      // Draw underlying overworld
-      drawOverworld();
-      updateDialog();
-      drawDialog();
-      break;
+      case 'DIALOG':
+        // Draw underlying overworld
+        drawOverworld();
+        updateDialog();
+        drawDialog();
+        break;
 
-    case 'BATTLE':
-      updateBattle();
-      drawBattle();
-      break;
+      case 'BATTLE':
+        updateBattle();
+        drawBattle();
+        break;
 
-    case 'LOST':
-      ctx.fillStyle = C.DARKEST;
-      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-      ctx.fillStyle = C.LIGHT;
-      ctx.font = '14px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', VIEW_W / 2, VIEW_H / 2 - 20);
-      ctx.font = '10px monospace';
-      ctx.fillText('You returned home to rest.', VIEW_W / 2, VIEW_H / 2 + 10);
-      ctx.fillText('ENTER to continue', VIEW_W / 2, VIEW_H / 2 + 40);
-      ctx.textAlign = 'left';
-      if (wasPressed('Enter')) {
-        player.hp = player.maxHp;
-        player.energy = player.maxEnergy;
-        player.x = 5;
-        player.y = 6;
-        gameState = 'OVERWORLD';
-      }
-      break;
+      case 'LOST':
+        ctx.fillStyle = C.DARKEST;
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        ctx.fillStyle = C.LIGHT;
+        ctx.font = '14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', VIEW_W / 2, VIEW_H / 2 - 20);
+        ctx.font = '10px monospace';
+        ctx.fillText('You returned home to rest.', VIEW_W / 2, VIEW_H / 2 + 10);
+        ctx.fillText('ENTER to continue', VIEW_W / 2, VIEW_H / 2 + 40);
+        ctx.textAlign = 'left';
+        if (wasPressed('Enter')) {
+          player.hp = player.maxHp;
+          player.energy = player.maxEnergy;
+          player.x = 5;
+          player.y = 6;
+          gameState = 'OVERWORLD';
+        }
+        break;
 
-    case 'CREDITS':
-      drawCredits();
-      if (wasPressed('Enter') || wasPressed('Escape')) {
-        gameState = 'TITLE';
-      }
-      break;
-  }
+      case 'CREDITS':
+        drawCredits();
+        if (wasPressed('Enter') || wasPressed('Escape')) {
+          gameState = 'TITLE';
+        }
+        break;
+    }
+
+    ErrorGuard.renderOverlay();
+  }, () => {
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('RECOVERING...', VIEW_W / 2, VIEW_H / 2);
+    gameState = 'TITLE';
+  });
 
   requestAnimationFrame(gameLoop);
 }
@@ -2313,16 +2416,24 @@ const DexData = {
   },
 
   isTrainerDefeated(trainerId) {
-    // Check all maps' trainers for defeated status
-    for (const mapName in Maps) {
-      const map = Maps[mapName];
-      if (map.trainers) {
-        for (const t of map.trainers) {
-          if (t.id === trainerId && t.defeated) return true;
+    // Edge-case safe: older single-map builds do not define Maps, so fall back to current trainers.
+    if (typeof Maps !== 'undefined' && Maps) {
+      for (const mapName in Maps) {
+        const map = Maps[mapName];
+        if (map.trainers) {
+          for (const t of map.trainers) {
+            if (t.id === trainerId && (t.defeated || t.beaten)) return true;
+          }
         }
       }
     }
-    return false;
+
+    const wanted = String(trainerId).toLowerCase();
+    return trainers.some(t => {
+      const idMatch = String(t.id).toLowerCase() === wanted;
+      const nameMatch = String(t.name || '').toLowerCase().indexOf(wanted) !== -1;
+      return (idMatch || nameMatch) && (t.defeated || t.beaten);
+    });
   },
 
   getDexProgress() {
@@ -2350,6 +2461,7 @@ const GameModules = {
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
+    { id: 'errors', label: 'Error Guard', check: () => !!(ErrorGuard && typeof ErrorGuard.safe === 'function') },
   ],
   showPanel: window.location.search.indexOf('modules=1') !== -1,
 
