@@ -56,6 +56,7 @@
 - [x] Coach-Card Controls-Hilfe — H/?-Overlay mit Tastatur-, D-Pad- und Mobile-Hinweisen plus sichtbarem Title-Screen-Marker ergänzt.
 - [x] Trainer-Scout Overlay — S-Taste zeigt im Spiel den nächsten Rivalen mit Level, Zielscore, HP/EN, EXP-Belohnung und Fortschritt; Title-Screen-Marker ergänzt.
 - [x] Coach-Tipps — T-Taste zeigt taktische In-Game-Hinweise; Title-Screen-Marker, Overworld-HUD und Module-Check ergänzt.
+- [x] Rivalen-Fortschrittsbalken — sichtbares Overworld-HUD mit Siege-Zähler, nächstem Gegner, Title-Screen-Marker und Module-Check ergänzt.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 17 Boot-Checks und Title-Screen-Status ergänzt

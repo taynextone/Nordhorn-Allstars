@@ -1355,6 +1355,50 @@ const ScoutCard = {
   }
 };
 
+const RivalProgress = {
+  getStats() {
+    const total = trainers.length || 1;
+    const beaten = trainers.filter(t => t.beaten).length;
+    const next = QuestRadar.getNextTrainer();
+    return { total, beaten, next, pct: beaten / total };
+  },
+
+  renderTitleBadge(x, y) {
+    const stats = this.getStats();
+    ctx.fillStyle = C.DARK;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('RIVAL PROGRESS: ' + stats.beaten + '/' + stats.total + ' WINS · LIVE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const stats = this.getStats();
+    const x = 164;
+    const y = 4;
+    const w = 128;
+    const h = 30;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('RIVALS ' + stats.beaten + '/' + stats.total, x + 7, y + 13);
+    ctx.fillStyle = C.MID;
+    ctx.fillRect(x + 7, y + 18, w - 14, 5);
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(x + 7, y + 18, Math.floor((w - 14) * stats.pct), 5);
+    if (stats.next) {
+      ctx.fillStyle = C.DARK;
+      ctx.font = '6px monospace';
+      ctx.fillText('NEXT ' + stats.next.name.substring(0, 10), x + 69, y + 13);
+    }
+  }
+};
+
 function wrapText(text, x, y, maxWidth, lineHeight) {
   const words = String(text).split(' ');
   let line = '';
@@ -1917,6 +1961,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
   ctx.fillText('BASKETBALL RPG', bx, 250);
+  RivalProgress.renderTitleBadge(bx, 292);
 
   // New/Continue menu
   const hasSave = SaveSystem.hasSave();
@@ -2275,6 +2320,7 @@ function drawOverworld() {
 
   // Lightweight visible performance marker for Phase 5 testing.
   QuestRadar.renderHUD();
+  RivalProgress.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -2941,6 +2987,7 @@ const GameModules = {
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
     { id: 'quest', label: 'Quest Radar', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderHUD === 'function') },
+    { id: 'rivalProgress', label: 'Rival Progress', check: () => !!(RivalProgress && typeof RivalProgress.getStats === 'function' && typeof RivalProgress.renderHUD === 'function') },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
