@@ -199,6 +199,110 @@ const T = {
   GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14
 };
 
+// ============================================================
+// CREDITS SCREEN
+// ============================================================
+
+function drawCredits() {
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  
+  // Background pattern
+  ctx.fillStyle = C.MID;
+  for (let y = 0; y < VIEW_H; y += 8) {
+    for (let x = 0; x < VIEW_W; x += 8) {
+      if ((x + y) % 16 === 0) ctx.fillRect(x, y, 4, 4);
+    }
+  }
+  
+  const cx = VIEW_W / 2;
+  const scrollY = Math.floor(Date.now() / 30) % 500;
+  
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = 'bold 14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('NORDHORN ALL STARS', cx, 60);
+  
+  ctx.font = '10px monospace';
+  ctx.fillText('BASKETBALL RPG', cx, 80);
+  
+  ctx.fillStyle = C.DARK;
+  ctx.font = '8px monospace';
+  
+  const lines = [
+    '',
+    '--- TEAM ---',
+    '',
+    'Game Design',
+    'Jurica',
+    '',
+    'Programming',
+    'Jurica & Hermes AI',
+    '',
+    'Art & Sprites',
+    'Pixel Art by Jurica',
+    '',
+    'Music & Sound',
+    'Chiptune Engine',
+    '',
+    '--- SPECIAL THANKS ---',
+    '',
+    'Nordhorn Basketball Community',
+    '',
+    'All the courts & players',
+    'who inspired this game',
+    '',
+    '--- TRAINERS ---',
+    '',
+    'Klaus - The Rival',
+    'Anna - The Student',
+    'Markus - The Guardian',
+    'Sophie - The Fighter',
+    'Coach Mihler - The Master',
+    '',
+    '--- LOCATIONS ---',
+    '',
+    'Nordhorn',
+    'Lingen',
+    'The Ems River',
+    'The Stadium',
+    '',
+    '',
+    'Thank you for playing!',
+    '',
+    '',
+    '© 2025 NORDHORN ALL STARS',
+    'Made with love in Nordhorn',
+  ];
+  
+  const startY = 110;
+  const lineHeight = 14;
+  
+  lines.forEach((line, i) => {
+    const y = startY + i * lineHeight - scrollY;
+    if (y > 10 && y < VIEW_H - 20) {
+      if (line.includes('---')) {
+        ctx.fillStyle = C.DARK;
+        ctx.font = 'bold 8px monospace';
+      } else {
+        ctx.fillStyle = C.DARKEST;
+        ctx.font = '8px monospace';
+      }
+      ctx.fillText(line, cx, y);
+    }
+  });
+  
+  // Press enter prompt
+  const blink = Math.floor(Date.now() / 500) % 2;
+  if (blink) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '8px monospace';
+    ctx.fillText('PRESS ENTER', cx, VIEW_H - 15);
+  }
+  
+  ctx.textAlign = 'left';
+}
+
 // Generate map procedurally
 let worldMap = [];
 function generateMap() {
@@ -629,7 +733,7 @@ function drawTrainerSprite(trainer, camX, camY) {
 // GAME STATE
 // ============================================================
 
-let gameState = 'TITLE'; // TITLE, CHARSELECT, OVERWORLD, BATTLE, DIALOG, LOST
+let gameState = 'TITLE'; // TITLE, CHARSELECT, OVERWORLD, BATTLE, DIALOG, LOST, CREDITS
 let frameCount = 0;
 let animFrame = 0;
 
@@ -727,12 +831,45 @@ let charSelect = {
   blinkTimer: 0,
 };
 
+// ============================================================
+// EASTER EGG SYSTEM
+// ============================================================
+
+const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+let easterEggActive = false;
+
+function checkEasterEgg(key) {
+  if (key === KONAMI[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === KONAMI.length) {
+      konamiIndex = 0;
+      easterEggActive = !easterEggActive;
+      if (easterEggActive) {
+        // Bonus: Unlock all moves
+        player.stats.dribbling += 5;
+        player.stats.shooting += 5;
+        player.stats.athleticism += 5;
+        player.stats.defense += 5;
+        player.stats.courtVision += 5;
+        player.maxHp += 20;
+        player.hp = player.maxHp;
+        startDialog('KONAMI CODE!', '+5 All Stats, +20 HP!');
+        gameState = 'DIALOG';
+      }
+    }
+  } else {
+    konamiIndex = 0;
+  }
+}
+
 // Input
 const keys = {};
 const keysPressed = {};
 window.addEventListener('keydown', (e) => {
   if (!keys[e.key]) keysPressed[e.key] = true;
   keys[e.key] = true;
+  checkEasterEgg(e.key);
   e.preventDefault();
 });
 window.addEventListener('keyup', (e) => {
@@ -1183,6 +1320,11 @@ function drawTitleScreen() {
     ctx.fillText('PRESS ENTER', bx, 320);
   }
   
+  // Credits option
+  ctx.fillStyle = C.DARK;
+  ctx.font = '8px monospace';
+  ctx.fillText('C: Credits', bx, 350);
+  
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
@@ -1351,10 +1493,20 @@ function drawOverworld() {
   
   // Draw player
   drawPlayer(camX, camY, player.facing, Math.floor(frameCount / 15) % 2);
-  
+
+  // Draw minimap
+  if (minimapVisible) drawMinimap();
+
+  // Draw minimap hint
+  ctx.font = '6px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = C.DARK;
+  ctx.fillText('M: Map', VIEW_W - 10, VIEW_H - 6);
+  ctx.textAlign = 'left';
+
   // Draw area labels
   ctx.font = '8px monospace';
-Align = 'center';
+  ctx.textAlign = 'center';
   ctx.fillStyle = C.DARKEST;
   
   // Home label
@@ -1395,15 +1547,99 @@ Align = 'center';
   ctx.textAlign = 'left';
 }
 
+// ============================================================
+// MINIMAP
+// ============================================================
+
+const MINIMAP_SCALE = 2; // pixels per tile
+const MINIMAP_W = MAP_W * MINIMAP_SCALE; // 140
+const MINIMAP_H = MAP_H * MINIMAP_SCALE; // 120
+const MINIMAP_X = VIEW_W - MINIMAP_W - 8;
+const MINIMAP_Y = 8;
+const MINIMAP_BG = 'rgba(15, 56, 15, 0.85)';
+
+// Tile colors for minimap (simplified)
+const MINIMAP_COLORS = {
+  [T.GRASS]: '#9bbc0f',
+  [T.PATH]: '#8bac0f',
+  [T.WATER]: '#306230',
+  [T.TREE]: '#306230',
+  [T.BUILD]: '#4a4a4a',
+  [T.ROOF]: '#2a2a2a',
+  [T.FENCE]: '#6b6b6b',
+  [T.COURT]: '#5a5a3a',
+  [T.DOOR]: '#0f380f',
+  [T.FLOWER]: '#9bbc0f',
+  [T.BENCH]: '#6b5b3b',
+  [T.BRIDGE]: '#5a4a2a',
+  [T.STADIUM]: '#4a4a4a',
+  [T.WALL]: '#3a3a3a',
+};
+
+function drawMinimap() {
+  // Background
+  ctx.fillStyle = MINIMAP_BG;
+  ctx.fillRect(MINIMAP_X - 2, MINIMAP_Y - 2, MINIMAP_W + 4, MINIMAP_H + 4);
+  
+  // Border
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(MINIMAP_X - 2, MINIMAP_Y - 2, MINIMAP_W + 4, MINIMAP_H + 4);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(MINIMAP_X - 1, MINIMAP_Y - 1, MINIMAP_W + 2, MINIMAP_H + 2);
+  
+  // Draw map tiles (sample every other tile for performance)
+  const step = 1;
+  for (let y = 0; y < MAP_H; y += step) {
+    for (let x = 0; x < MAP_W; x += step) {
+      const tile = worldMap[y][x];
+      const color = MINIMAP_COLORS[tile] || C.LIGHT;
+      ctx.fillStyle = color;
+      ctx.fillRect(
+        MINIMAP_X + x * MINIMAP_SCALE,
+        MINIMAP_Y + y * MINIMAP_SCALE,
+        MINIMAP_SCALE,
+        MINIMAP_SCALE
+      );
+    }
+  }
+  
+  // Draw trainers on minimap (as red dots)
+  trainers.forEach(t => {
+    const mx = MINIMAP_X + t.x * MINIMAP_SCALE;
+    const my = MINIMAP_Y + t.y * MINIMAP_SCALE;
+    ctx.fillStyle = t.beaten ? C.MID : '#ff4444';
+    ctx.fillRect(mx - 1, my - 1, 3, 3);
+  });
+  
+  // Draw player on minimmap (blinking white dot)
+  const blink = Math.floor(Date.now() / 300) % 2;
+  const px = MINIMAP_X + player.x * MINIMAP_SCALE;
+  const py = MINIMAP_Y + player.y * MINIMAP_SCALE;
+  ctx.fillStyle = blink ? '#ffffff' : C.DARK;
+  ctx.fillRect(px - 1, py - 1, 3, 3);
+  
+  // Label
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '6px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('MAP', MINIMAP_X + MINIMAP_W / 2, MINIMAP_Y + MINIMAP_H + 8);
+  ctx.textAlign = 'left';
+}
+
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = worldMap[y][x];
   return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE;
 }
 
+let minimapVisible = true;
+
 function updateOverworld() {
   let dx = 0, dy = 0;
   player.moving = false;
+  
+  // Toggle minimap
+  if (wasPressed('m')) { minimapVisible = !minimapVisible; }
   
   if (keysPressed['ArrowLeft'] || keys['ArrowLeft']) { dx = -1; player.facing = 'left'; player.moving = true; }
   else if (keysPressed['ArrowRight'] || keys['ArrowRight']) { dx = 1; player.facing = 'right'; player.moving = true; }
@@ -1788,6 +2024,9 @@ function gameLoop() {
         charSelect.gender = 0;
         charSelect.build = 0;
       }
+      if (wasPressed('c')) {
+        gameState = 'CREDITS';
+      }
       break;
       
     case 'CHARSELECT':
@@ -1829,6 +2068,13 @@ function gameLoop() {
         player.x = 5;
         player.y = 6;
         gameState = 'OVERWORLD';
+      }
+      break;
+      
+    case 'CREDITS':
+      drawCredits();
+      if (wasPressed('Enter') || wasPressed('Escape')) {
+        gameState = 'TITLE';
       }
       break;
   }

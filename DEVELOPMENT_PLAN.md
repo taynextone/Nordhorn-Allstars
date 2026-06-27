@@ -41,7 +41,7 @@
 - [x] Speicher-System (LocalStorage) — Auto-Save nach Kämpfen/Reisen/Items, Continue auf Title-Screen, manueller Save im Menü
 - [x] Pause-Menü (Status mit Stats, Badges, Moves, Standort)
 - [x] Pokédex-Äquivalent ("Spieler-Liste") — 13 Trainer scrollbar, Detailansicht, Fortschrittsbalken
-- [ ] Mobile Touch-Controls
+- [x] Mobile Touch-Controls (D-Pad, Action-Buttons, Swipe, Canvas-Tap)
 - [ ] Minimap
 
 ## Phase 5: Feinschliff
