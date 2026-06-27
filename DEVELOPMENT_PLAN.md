@@ -75,3 +75,4 @@
 - [x] Route-Coach Overworld-HUD — smarte nächste Route zu Rivalen/Home-Rest mit Pfeil, Distanz, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Win-Condition-Coach Battle-HUD — sichtbare Punkte-bis-Sieg-Anzeige mit Match-/Danger-Point-Tipps, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Timeout-Coach Battle-HUD — sichtbare Tempo-/Timeout-Empfehlung mit HP/EN/Lead-Analyse, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Foul-Trouble-Coach Battle-HUD — sichtbare Foul-Risiko-/Clean-Defense-Anzeige mit Title-Screen-Marker und Module-Check ergänzt.

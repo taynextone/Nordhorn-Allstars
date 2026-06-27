@@ -2130,6 +2130,68 @@ const TimeoutCoach = {
   }
 };
 
+const FoulTroubleCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const hpPct = Math.round(((battle.playerHp ?? player.hp ?? 0) / (player.maxHp || 1)) * 100);
+    const enPct = Math.round(((battle.playerEnergy ?? player.energy ?? 0) / (player.maxEnergy || 1)) * 100);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    let foulRisk = 18 + Math.max(0, -lead) * 7 + (battle.hasBall ? -6 : 12) + Math.max(0, 60 - hpPct) * 0.45 + Math.max(0, 40 - enPct) * 0.35;
+    if (enemyNeed <= 5) foulRisk += 12;
+    if ((battle.turnCount || 0) >= 8) foulRisk += 8;
+    foulRisk = Math.max(0, Math.min(100, Math.round(foulRisk)));
+
+    let label = 'CLEAN PLAY';
+    let advice = battle.hasBall ? 'PROTECT BALL' : 'HANDS UP';
+    if (foulRisk >= 76) {
+      label = 'FOUL TROUBLE';
+      advice = battle.hasBall ? 'NO CHARGE' : 'DO NOT REACH';
+    } else if (foulRisk >= 55) {
+      label = 'BONUS WARNING';
+      advice = battle.hasBall ? 'SLOW DRIVE' : 'VERTICAL D';
+    } else if (!battle.hasBall && lead <= -4) {
+      label = 'PRESS SMART';
+      advice = 'CONTAIN FIRST';
+    } else if (battle.hasBall && enPct <= 35) {
+      label = 'TIRED HANDLE';
+      advice = 'SAFE PASS';
+    }
+    return { foulRisk, label, advice, hpPct, enPct, lead, enemyNeed, hasBall: !!battle.hasBall, turn: battle.turnCount || 0 };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('FOUL TROUBLE COACH · CLEAN DEFENSE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = 10;
+    const y = 132;
+    const w = 152;
+    const h = 38;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.foulRisk >= 76 ? '#d4600a' : (info.foulRisk >= 55 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('FOUL RISK ' + info.foulRisk + '%', x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.label + ' · T' + info.turn, x + 7, y + 24);
+    ctx.fillText(info.advice, x + 78, y + 34);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2740,6 +2802,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
+  FoulTroubleCoach.renderTitleBadge(bx, 58);
   ClutchAlert.renderTitleBadge(bx, 188);
   ctx.fillText('NORDHORN', bx, 200);
   ctx.fillText('ALL STARS', bx, 224);
@@ -3350,6 +3413,7 @@ function drawBattle() {
   StaminaCoach.renderBattleHUD();
   WinConditionCoach.renderBattleHUD();
   TimeoutCoach.renderBattleHUD();
+  FoulTroubleCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -3812,6 +3876,7 @@ const GameModules = {
     { id: 'staminaCoach', label: 'Stamina Coach', check: () => !!(StaminaCoach && typeof StaminaCoach.getState === 'function' && typeof StaminaCoach.renderBattleHUD === 'function' && StaminaCoach.getState().tank >= 0) },
     { id: 'winConditionCoach', label: 'Win Condition Coach', check: () => !!(WinConditionCoach && typeof WinConditionCoach.getState === 'function' && typeof WinConditionCoach.renderBattleHUD === 'function' && WinConditionCoach.getState().playerNeed >= 0) },
     { id: 'timeoutCoach', label: 'Timeout Coach', check: () => !!(TimeoutCoach && typeof TimeoutCoach.getState === 'function' && typeof TimeoutCoach.renderBattleHUD === 'function' && TimeoutCoach.getState().urgency >= 0) },
+    { id: 'foulTroubleCoach', label: 'Foul Trouble Coach', check: () => !!(FoulTroubleCoach && typeof FoulTroubleCoach.getState === 'function' && typeof FoulTroubleCoach.renderBattleHUD === 'function' && FoulTroubleCoach.getState().foulRisk >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
