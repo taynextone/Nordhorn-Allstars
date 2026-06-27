@@ -1453,6 +1453,62 @@ const BattlePrep = {
   }
 };
 
+const DuelRiskMeter = {
+  getAssessment() {
+    const next = QuestRadar.getNextTrainer();
+    if (!next) return { status: 'CHAMPION', risk: 0, next: null, distance: 0, levelGap: 0, advice: 'CREDITS READY' };
+    const readiness = BattlePrep.getReadiness();
+    const distance = QuestRadar.getDistanceTo(next);
+    const levelGap = next.level - player.level;
+    let risk = 100 - readiness.score;
+    risk += Math.max(0, levelGap) * 8;
+    if (distance <= 2) risk += 8;
+    risk = Math.max(0, Math.min(99, Math.round(risk)));
+    let status = 'ATTACK';
+    let advice = 'GO CHALLENGE';
+    if (risk >= 60 || readiness.state === 'REST FIRST') {
+      status = 'REST';
+      advice = 'HEAL AT HOME';
+    } else if (risk >= 35 || readiness.state === 'CAUTION') {
+      status = 'PREP';
+      advice = 'SAVE ENERGY';
+    }
+    return { status, risk, next, distance, levelGap, advice };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('DUEL RISK METER · ATTACK/PREP/REST', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getAssessment();
+    const x = 300;
+    const y = 173;
+    const w = 176;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.status === 'ATTACK' || info.status === 'CHAMPION' ? C.LIGHT : (info.status === 'PREP' ? C.MID : '#d4600a');
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('RISK ' + info.risk + '% · ' + info.status, x + 7, y + 13);
+    ctx.font = '6px monospace';
+    const target = info.next ? info.next.name.substring(0, 10) + ' ' + info.distance + 'm' : 'ALL CLEAR';
+    ctx.fillText(target + ' · ' + info.advice, x + 7, y + 24);
+    ctx.fillStyle = C.MID;
+    ctx.fillRect(x + 132, y + 7, 34, 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x + 132, y + 7, Math.floor(34 * (info.risk / 100)), 4);
+  }
+};
+
 const PossessionCoach = {
   getState() {
     const trainer = battle.currentTrainer;
@@ -2164,7 +2220,7 @@ function drawTitleScreen() {
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · REST', bx, 428);
+  ctx.fillText('GITHUB PAGES · QUEST RADAR · REST · DUEL RISK', bx, 428);
 
   // Footer
   ctx.fillStyle = C.DARK;
@@ -2479,6 +2535,7 @@ function drawOverworld() {
   HomeRest.renderHUD();
   RivalProgress.renderHUD();
   BattlePrep.renderHUD();
+  DuelRiskMeter.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -3152,6 +3209,7 @@ const GameModules = {
     { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
     { id: 'rivalProgress', label: 'Rival Progress', check: () => !!(RivalProgress && typeof RivalProgress.getStats === 'function' && typeof RivalProgress.renderHUD === 'function') },
     { id: 'battlePrep', label: 'Battle Prep HUD', check: () => !!(BattlePrep && typeof BattlePrep.getReadiness === 'function' && BattlePrep.getReadiness().score >= 0) },
+    { id: 'duelRisk', label: 'Duel Risk Meter', check: () => !!(DuelRiskMeter && typeof DuelRiskMeter.getAssessment === 'function' && DuelRiskMeter.getAssessment().risk >= 0 && typeof DuelRiskMeter.renderHUD === 'function') },
     { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
