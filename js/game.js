@@ -611,6 +611,103 @@ function updateCamera() {
 // INPUT
 // ============================================
 
+// --- Mobile Touch Detection ---
+function isTouchDevice() {
+  return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+}
+
+let touchDevice = isTouchDevice();
+if (touchDevice) {
+  document.getElementById('touchControls').classList.add('active');
+}
+
+// --- Touch Input Handling ---
+let touchState = {}; // Track active touches for multi-touch support
+
+function handleTouchStart(key) {
+  touchState[key] = true;
+  keys[key] = true;
+  keysPressed[key] = true;
+  // Initialize audio on first touch (browser autoplay policy)
+  Audio.init();
+  Audio.resume();
+  Music.init();
+}
+
+function handleTouchEnd(key) {
+  touchState[key] = false;
+  keys[key] = false;
+}
+
+// Attach touch listeners to all touch buttons
+document.querySelectorAll('.dpad-btn, .action-btn, .menu-btn').forEach(btn => {
+  const key = btn.dataset.key;
+  
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    btn.classList.add('pressed');
+    handleTouchStart(key);
+  }, { passive: false });
+  
+  btn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    btn.classList.remove('pressed');
+    handleTouchEnd(key);
+  }, { passive: false });
+  
+  btn.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    btn.classList.remove('pressed');
+    handleTouchEnd(key);
+  });
+  
+  // Prevent double-tap zoom on touch buttons
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+  });
+});
+
+// --- Canvas Tap Support (for menus/dialogs on touch) ---
+let canvasTouchStartX = 0;
+let canvasTouchStartY = 0;
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  canvasTouchStartX = touch.clientX;
+  canvasTouchStartY = touch.clientY;
+  // Tap on canvas = confirm/action (like pressing Enter/Space)
+  keysPressed['Enter'] = true;
+  keysPressed[' '] = true;
+  Audio.init();
+  Audio.resume();
+  Music.init();
+}, { passive: false });
+
+// --- Swipe Support for Overworld Movement ---
+let swipeThreshold = 30;
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  if (gameState !== GameState.OVERWORLD) return;
+  const touch = e.changedTouches[0];
+  const dx = touch.clientX - canvasTouchStartX;
+  const dy = touch.clientY - canvasTouchStartY;
+  
+  if (Math.abs(dx) < swipeThreshold && Math.abs(dy) < swipeThreshold) return; // It was a tap, not a swipe
+  
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // Horizontal swipe
+    keysPressed[dx > 0 ? 'ArrowRight' : 'ArrowLeft'] = true;
+  } else {
+    // Vertical swipe
+    keysPressed[dy > 0 ? 'ArrowDown' : 'ArrowUp'] = true;
+  }
+}, { passive: false });
+
+// --- Keyboard Input (Desktop) ---
 document.addEventListener('keydown', (e) => {
   keys[e.key] = true;
   keysPressed[e.key] = true;
