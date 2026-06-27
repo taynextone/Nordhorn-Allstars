@@ -1512,6 +1512,30 @@ function applyCharacterCreation() {
 // OVERWORLD
 // ============================================================
 
+const PerfHUD = {
+  last: performance.now(),
+  frames: 0,
+  fps: 0,
+
+  tick(now) {
+    this.frames++;
+    if (now - this.last >= 500) {
+      this.fps = Math.round((this.frames * 1000) / (now - this.last));
+      this.frames = 0;
+      this.last = now;
+    }
+  },
+
+  render() {
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(4, VIEW_H - 18, 44, 12);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('FPS ' + this.fps, 7, VIEW_H - 10);
+  }
+};
+
 function drawOverworld() {
   const camX = Math.max(0, Math.min(MAP_W - VIEW_TILES_W / 1, player.x - Math.floor(VIEW_TILES_W / 2)));
   const camY = Math.max(0, Math.min(MAP_H - VIEW_TILES_H / 1, player.y - Math.floor(VIEW_TILES_H / 2)));
@@ -1592,6 +1616,9 @@ function drawOverworld() {
   }
 
   ctx.textAlign = 'left';
+
+  // Lightweight visible performance marker for Phase 5 testing.
+  PerfHUD.render();
 }
 
 // ============================================================
@@ -1623,32 +1650,53 @@ const MINIMAP_COLORS = {
   [T.WALL]: '#3a3a3a',
 };
 
-function drawMinimap() {
-  // Background
-  ctx.fillStyle = MINIMAP_BG;
-  ctx.fillRect(MINIMAP_X - 2, MINIMAP_Y - 2, MINIMAP_W + 4, MINIMAP_H + 4);
+const MinimapCache = {
+  canvas: null,
+  ctx: null,
+  dirty: true,
 
+  ensure() {
+    if (!this.canvas) {
+      this.canvas = document.createElement('canvas');
+      this.canvas.width = MINIMAP_W;
+      this.canvas.height = MINIMAP_H;
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.imageSmoothingEnabled = false;
+      this.dirty = true;
+    }
+    if (this.dirty) this.rebuild();
+    return this.canvas;
+  },
+
+  rebuild() {
+    if (!this.ctx) return;
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        const tile = worldMap[y][x];
+        this.ctx.fillStyle = MINIMAP_COLORS[tile] || C.LIGHT;
+        this.ctx.fillRect(
+          x * MINIMAP_SCALE,
+          y * MINIMAP_SCALE,
+          MINIMAP_SCALE,
+          MINIMAP_SCALE
+        );
+      }
+    }
+    this.dirty = false;
+  }
+};
+
+function drawMinimap() {
   // Border
   ctx.fillStyle = C.DARK;
   ctx.fillRect(MINIMAP_X - 2, MINIMAP_Y - 2, MINIMAP_W + 4, MINIMAP_H + 4);
   ctx.fillStyle = C.LIGHT;
   ctx.fillRect(MINIMAP_X - 1, MINIMAP_Y - 1, MINIMAP_W + 2, MINIMAP_H + 2);
 
-  // Draw map tiles (sample every other tile for performance)
-  const step = 1;
-  for (let y = 0; y < MAP_H; y += step) {
-    for (let x = 0; x < MAP_W; x += step) {
-      const tile = worldMap[y][x];
-      const color = MINIMAP_COLORS[tile] || C.LIGHT;
-      ctx.fillStyle = color;
-      ctx.fillRect(
-        MINIMAP_X + x * MINIMAP_SCALE,
-        MINIMAP_Y + y * MINIMAP_SCALE,
-        MINIMAP_SCALE,
-        MINIMAP_SCALE
-      );
-    }
-  }
+  // Static tile layer is cached: 4,200 tiny fills become one drawImage per frame.
+  ctx.globalAlpha = 0.92;
+  ctx.drawImage(MinimapCache.ensure(), MINIMAP_X, MINIMAP_Y);
+  ctx.globalAlpha = 1;
 
   // Draw trainers on minimap (as red dots)
   trainers.forEach(t => {
@@ -2048,6 +2096,8 @@ function updateBattle() {
 // ============================================================
 
 function gameLoop() {
+  const now = performance.now();
+  PerfHUD.tick(now);
   frameCount++;
 
   // Clear
@@ -2174,6 +2224,7 @@ const DexData = {
 // ============================================================
 
 generateMap();
+MinimapCache.dirty = true;
 gameLoop();
 
 </script>

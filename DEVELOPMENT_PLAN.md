@@ -48,7 +48,7 @@
 - [x] Balance-Tuning (Stats, Moves, Level) — Moves/Energie-Kosten, Trainer-HP/EN/EXP, smartere Gegner-KI und Battle-HUD-Anzeigen abgestimmt
 - [x] Easter Eggs (Konami-Code: +5 alle Stats, +20 HP)
 - [x] Credits-Screen (Scrolling-Title, Team, Trainer, Locations)
-- [ ] Performance-Optimierung
+- [x] Performance-Optimierung — Minimap-Tilelayer gecacht (4.200 Draws → 1 drawImage/Frame) und sichtbarer FPS-HUD ergänzt
 - [ ] Cross-Browser-Test
 - [ ] Deployment (GitHub Pages)
 
