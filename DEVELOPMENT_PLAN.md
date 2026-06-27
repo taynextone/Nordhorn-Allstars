@@ -86,3 +86,4 @@
 - [x] Free-Throw-Coach Battle-HUD — sichtbare Clutch-Line-/Bonus-Fokus-Anzeige mit Energie-, Closeout- und And-One-Tipps, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Pick-Roll-Coach Battle-HUD — sichtbare Screen-Read-Anzeige mit Pick-and-Roll-/Switch-Tipps, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Spacing-Coach Battle-HUD — sichtbare Floor-Balance-/Spacing-Anzeige mit Offense-/Defense-Tipps, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Practice-Plan Overworld-HUD — sichtbare Next-Drill-Empfehlung mit Rest/Training/Duell-Plan, Title-Screen-Marker und Module-Check ergänzt.

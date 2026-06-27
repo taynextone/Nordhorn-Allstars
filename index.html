@@ -2910,6 +2910,68 @@ const SpacingCoach = {
   }
 };
 
+
+const PracticePlan = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const readiness = BattlePrep.getReadiness();
+    const risk = DuelRiskMeter.getAssessment();
+    if (!next) {
+      return { label: 'CHAMPION PLAN', advice: 'ROLL CREDITS', next: null, readiness: readiness.state, levelGap: 0, risk: 0, focus: 100 };
+    }
+
+    const levelGap = (next.level || 1) - (player.level || 1);
+    const hpPct = player.maxHp ? Math.round((player.hp / player.maxHp) * 100) : 0;
+    const enPct = player.maxEnergy ? Math.round((player.energy / player.maxEnergy) * 100) : 0;
+    let focus = 50 + readiness.score * 0.35 - risk.risk * 0.25 - Math.max(0, levelGap) * 8;
+    focus = Math.max(0, Math.min(100, Math.round(focus)));
+
+    let label = 'DUEL READY';
+    let advice = 'CHASE RIVAL';
+    if (readiness.state === 'REST FIRST' || hpPct < 45 || enPct < 35) {
+      label = 'REST DRILL';
+      advice = 'HOME FIRST';
+    } else if (levelGap >= 2 || risk.status === 'PREP') {
+      label = 'TRAIN SKILLS';
+      advice = 'SAVE ENERGY';
+    } else if (risk.status === 'ATTACK') {
+      label = 'GAME PLAN';
+      advice = 'ATTACK NOW';
+    }
+
+    return { label, advice, next, readiness: readiness.state, levelGap, risk: risk.risk, focus, hpPct, enPct };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PRACTICE PLAN · NEXT-DRILL HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 300;
+    const y = 249;
+    const w = 176;
+    const h = 36;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.label === 'REST DRILL' ? C.MID : C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PLAN ' + info.focus + '% · ' + info.label, x + 7, y + 13);
+    ctx.font = '6px monospace';
+    const target = info.next ? info.next.name.substring(0, 10) + ' GAP ' + info.levelGap : 'CHAMPION';
+    ctx.fillText(target + ' · RISK ' + info.risk + '%', x + 7, y + 24);
+    ctx.fillText(info.advice, x + 112, y + 33);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3520,6 +3582,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
+  PracticePlan.renderTitleBadge(bx, 18);
   SpacingCoach.renderTitleBadge(bx, 28);
   PickRollCoach.renderTitleBadge(bx, 38);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
@@ -3911,6 +3974,7 @@ function drawOverworld() {
   BattlePrep.renderHUD();
   DuelRiskMeter.renderHUD();
   RouteCoach.renderHUD();
+  PracticePlan.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -4625,6 +4689,7 @@ const GameModules = {
     { id: 'freeThrowCoach', label: 'Free Throw Coach', check: () => !!(FreeThrowCoach && typeof FreeThrowCoach.getState === 'function' && typeof FreeThrowCoach.renderBattleHUD === 'function' && FreeThrowCoach.getState().focus >= 0) },
     { id: 'pickRollCoach', label: 'Pick-Roll Coach', check: () => !!(PickRollCoach && typeof PickRollCoach.getState === 'function' && typeof PickRollCoach.renderBattleHUD === 'function' && PickRollCoach.getState().screenValue >= 0) },
     { id: 'spacingCoach', label: 'Spacing Coach', check: () => !!(SpacingCoach && typeof SpacingCoach.getState === 'function' && typeof SpacingCoach.renderBattleHUD === 'function' && SpacingCoach.getState().spacing >= 0) },
+    { id: 'practicePlan', label: 'Practice Plan', check: () => !!(PracticePlan && typeof PracticePlan.getState === 'function' && typeof PracticePlan.renderHUD === 'function' && PracticePlan.getState().focus >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
