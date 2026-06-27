@@ -547,6 +547,9 @@ function generateMap() {
   worldMap[7][6] = T.DOOR;
   // Fence around yard
   for (let x = 2; x < 10; x++) worldMap[8][x] = T.FENCE;
+  // Yard gate: keeps the starting path playable instead of trapping the player behind the fence.
+  worldMap[8][5] = T.PATH;
+  worldMap[8][6] = T.PATH;
   for (let y = 3; y < 8; y++) { worldMap[y][2] = T.FENCE; worldMap[y][9] = T.FENCE; }
   worldMap[2][5] = T.FENCE; worldMap[2][6] = T.FENCE;
 
@@ -946,7 +949,7 @@ let titleSelection = 0; // 0 = New Game, 1 = Continue (when a save exists)
 
 // Player data
 const player = {
-  x: 5, y: 6,
+  x: 5, y: 9,
   facing: 'down',
   moving: false,
   gender: 'boy',
@@ -1093,7 +1096,7 @@ const SaveSystem = {
       if (!data || !data.player) return false;
       const p = data.player;
       player.x = p.x ?? 5;
-      player.y = p.y ?? 6;
+      player.y = p.y ?? 9;
       player.facing = p.facing || 'down';
       player.moving = false;
       player.gender = p.gender || 'boy';
@@ -1167,7 +1170,7 @@ const SaveSystem = {
 
 function resetRunProgress() {
   player.x = 5;
-  player.y = 6;
+  player.y = 9;
   player.facing = 'down';
   player.moving = false;
   player.level = 1;
@@ -1237,6 +1240,7 @@ const ControlsHelp = {
     ['M', 'Toggle minimap'],
     ['S', 'Scout next rival'],
     ['T', 'Coach tip / next tactic'],
+    ['R', 'Rest at home (HP/EN full)'],
     ['H / ?', 'Show this coach card'],
     ['C', 'Credits from title']
   ],
@@ -1256,7 +1260,7 @@ const ControlsHelp = {
   renderOverlay() {
     if (!this.visible) return;
     const w = 260;
-    const h = 138;
+    const h = 154;
     const x = Math.floor((VIEW_W - w) / 2);
     const y = Math.floor((VIEW_H - h) / 2);
     ctx.fillStyle = C.DARKEST;
@@ -1396,6 +1400,61 @@ const RivalProgress = {
       ctx.font = '6px monospace';
       ctx.fillText('NEXT ' + stats.next.name.substring(0, 10), x + 69, y + 13);
     }
+  }
+};
+
+const HomeRest = {
+  homeX: 5,
+  homeY: 9,
+  radius: 3,
+
+  getDistance() {
+    return Math.abs(player.x - this.homeX) + Math.abs(player.y - this.homeY);
+  },
+
+  isAvailable() {
+    return this.getDistance() <= this.radius;
+  },
+
+  needsRest() {
+    return player.hp < player.maxHp || player.energy < player.maxEnergy;
+  },
+
+  rest() {
+    if (!this.isAvailable()) return false;
+    player.hp = player.maxHp;
+    player.energy = player.maxEnergy;
+    SaveSystem.save('Rested at home');
+    startDialog('HOME COURT', 'Mom patched you up!', 'HP and energy restored.');
+    gameState = 'DIALOG';
+    return true;
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('HOME REST READY · PRESS R NEAR HOME', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const near = this.isAvailable();
+    const x = 4;
+    const y = 38;
+    const w = 154;
+    const h = 24;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = near ? C.LIGHT : C.MID;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('HOME REST ' + (near ? 'R' : this.getDistance() + 'm'), x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '  EN ' + player.energy + '/' + player.maxEnergy, x + 7, y + 21);
   }
 };
 
@@ -1961,6 +2020,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
   ctx.fillText('BASKETBALL RPG', bx, 250);
+  HomeRest.renderTitleBadge(bx, 280);
   RivalProgress.renderTitleBadge(bx, 292);
 
   // New/Continue menu
@@ -2008,7 +2068,7 @@ function drawTitleScreen() {
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · TIPS', bx, 428);
+  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · REST', bx, 428);
 
   // Footer
   ctx.fillStyle = C.DARK;
@@ -2320,6 +2380,7 @@ function drawOverworld() {
 
   // Lightweight visible performance marker for Phase 5 testing.
   QuestRadar.renderHUD();
+  HomeRest.renderHUD();
   RivalProgress.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
@@ -2431,7 +2492,7 @@ function drawMinimap() {
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = worldMap[y][x];
-  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE;
+  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
 }
 
 let minimapVisible = true;
@@ -2442,6 +2503,7 @@ function updateOverworld() {
 
   // Toggle minimap
   if (wasPressed('m')) { minimapVisible = !minimapVisible; }
+  if (wasPressed('r') || wasPressed('R')) { HomeRest.rest(); }
 
   if (keysPressed['ArrowLeft'] || keys['ArrowLeft']) { dx = -1; player.facing = 'left'; player.moving = true; }
   else if (keysPressed['ArrowRight'] || keys['ArrowRight']) { dx = 1; player.facing = 'right'; player.moving = true; }
@@ -2883,7 +2945,7 @@ function gameLoop() {
           player.hp = player.maxHp;
           player.energy = player.maxEnergy;
           player.x = 5;
-          player.y = 6;
+          player.y = 9;
           gameState = 'OVERWORLD';
         }
         break;
@@ -2987,6 +3049,7 @@ const GameModules = {
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
     { id: 'quest', label: 'Quest Radar', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderHUD === 'function') },
+    { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
     { id: 'rivalProgress', label: 'Rival Progress', check: () => !!(RivalProgress && typeof RivalProgress.getStats === 'function' && typeof RivalProgress.renderHUD === 'function') },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },

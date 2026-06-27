@@ -57,8 +57,9 @@
 - [x] Trainer-Scout Overlay — S-Taste zeigt im Spiel den nächsten Rivalen mit Level, Zielscore, HP/EN, EXP-Belohnung und Fortschritt; Title-Screen-Marker ergänzt.
 - [x] Coach-Tipps — T-Taste zeigt taktische In-Game-Hinweise; Title-Screen-Marker, Overworld-HUD und Module-Check ergänzt.
 - [x] Rivalen-Fortschrittsbalken — sichtbares Overworld-HUD mit Siege-Zähler, nächstem Gegner, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Home-Rest-System — Start/Respawn auf begehbarer Home-Gate-Position gefixt, R-Taste heilt HP/EN zuhause, sichtbares HUD/Title-Marker und Module-Check ergänzt.
 
 ## Technische Schulden
-- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 17 Boot-Checks und Title-Screen-Status ergänzt
+- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 19 Boot-Checks und Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt
