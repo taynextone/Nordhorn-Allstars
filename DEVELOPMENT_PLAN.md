@@ -55,8 +55,9 @@
 - [x] Quest-Radar — sichtbares Overworld-HUD, Zielpfeil, Trainer-Distanz und Minimap-Markierung für den nächsten unbesiegten Gegner ergänzt.
 - [x] Coach-Card Controls-Hilfe — H/?-Overlay mit Tastatur-, D-Pad- und Mobile-Hinweisen plus sichtbarem Title-Screen-Marker ergänzt.
 - [x] Trainer-Scout Overlay — S-Taste zeigt im Spiel den nächsten Rivalen mit Level, Zielscore, HP/EN, EXP-Belohnung und Fortschritt; Title-Screen-Marker ergänzt.
+- [x] Coach-Tipps — T-Taste zeigt taktische In-Game-Hinweise; Title-Screen-Marker, Overworld-HUD und Module-Check ergänzt.
 
 ## Technische Schulden
-- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 15 Boot-Checks und Title-Screen-Status ergänzt
+- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 17 Boot-Checks und Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt

@@ -1236,6 +1236,7 @@ const ControlsHelp = {
     ['SPACE / B', 'Dialog / action'],
     ['M', 'Toggle minimap'],
     ['S', 'Scout next rival'],
+    ['T', 'Coach tip / next tactic'],
     ['H / ?', 'Show this coach card'],
     ['C', 'Credits from title']
   ],
@@ -1350,6 +1351,94 @@ const ScoutCard = {
     ctx.fillStyle = C.DARKEST;
     ctx.textAlign = 'center';
     ctx.fillText('S schließt · nutze Radar + Minimap', VIEW_W / 2, y + h - 15);
+    ctx.textAlign = 'left';
+  }
+};
+
+function wrapText(text, x, y, maxWidth, lineHeight) {
+  const words = String(text).split(' ');
+  let line = '';
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? line + ' ' + words[i] : words[i];
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      ctx.fillText(line, x, y);
+      line = words[i];
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line) ctx.fillText(line, x, y);
+}
+
+const CoachTip = {
+  visible: false,
+  tipIndex: 0,
+  tips: [
+    'Spare Energie: Setup-Moves zuerst, Finisher zum Schluss.',
+    'Trainer nahe? Oeffne S fuer HP, Zielscore und EXP-Belohnung.',
+    'Bei wenig EN: zur Home-Zone zurueck und sicher neu starten.',
+    'Minimap + Radar zeigen den schnellsten Weg zum naechsten Duel.',
+    'Defense-Builds gewinnen ueber Blocks und lange Ballbesitze.'
+  ],
+
+  toggle() {
+    this.visible = !this.visible;
+    if (this.visible) this.nextTip();
+  },
+
+  nextTip() {
+    this.tipIndex = (this.tipIndex + 1) % this.tips.length;
+  },
+
+  getCurrentTip() {
+    return this.tips[this.tipIndex] || 'Trainiere smart, spiele geduldig.';
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('COACH TIPS READY · PRESS T IN-GAME', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const x = 56;
+    const y = VIEW_H - 31;
+    const w = 276;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, 16);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, 12);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('TIPP T: ' + this.getCurrentTip().substring(0, 43), x + 6, y + 11);
+  },
+
+  renderOverlay() {
+    if (!this.visible || gameState === 'TITLE' || gameState === 'CHARSELECT') return;
+    const w = 300;
+    const h = 112;
+    const x = Math.floor((VIEW_W - w) / 2);
+    const y = 62;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(x + 8, y + 8, w - 16, 18);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('COACH-TIPP #' + (this.tipIndex + 1), VIEW_W / 2, y + 21);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '8px monospace';
+    wrapText(this.getCurrentTip(), x + 18, y + 50, w - 36, 12);
+    ctx.font = '7px monospace';
+    ctx.fillText('T = naechster Tipp / schliessen', VIEW_W / 2, y + h - 13);
     ctx.textAlign = 'left';
   }
 };
@@ -1865,18 +1954,21 @@ function drawTitleScreen() {
   // Code-comment coverage marker: the source now includes an in-game architecture guide.
   CodeComments.renderBadge(bx, 410);
 
+  // Coach tips marker: visible proof that in-game tactical guidance is available.
+  CoachTip.renderTitleBadge(bx, 416);
+
   // Trainer scout marker: visible proof that the next-rival intel overlay is available.
-  ScoutCard.renderTitleBadge(bx, 416);
+  ScoutCard.renderTitleBadge(bx, 422);
 
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · SCOUT CARD', bx, 424);
+  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · TIPS', bx, 428);
 
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 430);
+  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 431);
 
   ctx.textAlign = 'left';
 }
@@ -2183,6 +2275,7 @@ function drawOverworld() {
 
   // Lightweight visible performance marker for Phase 5 testing.
   QuestRadar.renderHUD();
+  CoachTip.renderHUD();
   PerfHUD.render();
 }
 
@@ -2681,6 +2774,10 @@ function gameLoop() {
       ScoutCard.toggle();
     }
 
+    if (wasPressed('t') || wasPressed('T')) {
+      CoachTip.toggle();
+    }
+
     switch (gameState) {
       case 'TITLE':
         drawTitleScreen();
@@ -2754,6 +2851,7 @@ function gameLoop() {
     }
 
     SaveSystem.renderToast();
+    CoachTip.renderOverlay();
     ScoutCard.renderOverlay();
     ControlsHelp.renderOverlay();
     ErrorGuard.renderOverlay();
@@ -2843,7 +2941,8 @@ const GameModules = {
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
     { id: 'quest', label: 'Quest Radar', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderHUD === 'function') },
-    { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 6) },
+    { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
+    { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
     { id: 'errors', label: 'Error Guard', check: () => !!(ErrorGuard && typeof ErrorGuard.safe === 'function') },
