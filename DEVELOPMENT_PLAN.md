@@ -77,3 +77,4 @@
 - [x] Timeout-Coach Battle-HUD — sichtbare Tempo-/Timeout-Empfehlung mit HP/EN/Lead-Analyse, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Foul-Trouble-Coach Battle-HUD — sichtbare Foul-Risiko-/Clean-Defense-Anzeige mit Title-Screen-Marker und Module-Check ergänzt.
 - [x] Pressure-Release-Coach Battle-HUD — sichtbare Press-Break-/Reset-Empfehlung mit Druck-Prozent, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Turnover-Coach Battle-HUD — sichtbare Ballverlust-Risikoanzeige mit Safe-Handle-Tipp, Title-Screen-Marker und Module-Check ergänzt.
