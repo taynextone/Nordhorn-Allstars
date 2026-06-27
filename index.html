@@ -1235,6 +1235,7 @@ const ControlsHelp = {
     ['ENTER / A', 'Start / confirm / shoot'],
     ['SPACE / B', 'Dialog / action'],
     ['M', 'Toggle minimap'],
+    ['S', 'Scout next rival'],
     ['H / ?', 'Show this coach card'],
     ['C', 'Credits from title']
   ],
@@ -1254,7 +1255,7 @@ const ControlsHelp = {
   renderOverlay() {
     if (!this.visible) return;
     const w = 260;
-    const h = 126;
+    const h = 138;
     const x = Math.floor((VIEW_W - w) / 2);
     const y = Math.floor((VIEW_H - h) / 2);
     ctx.fillStyle = C.DARKEST;
@@ -1279,6 +1280,76 @@ const ControlsHelp = {
     ctx.fillStyle = C.DARKEST;
     ctx.textAlign = 'center';
     ctx.fillText('Press H or ? to close', VIEW_W / 2, y + h - 12);
+    ctx.textAlign = 'left';
+  }
+};
+
+const ScoutCard = {
+  visible: false,
+
+  toggle() {
+    this.visible = !this.visible;
+  },
+
+  getTarget() {
+    return QuestRadar.getNextTrainer();
+  },
+
+  getWinProgress() {
+    return trainers.filter(t => t.beaten).length + '/' + trainers.length;
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCOUT CARD READY · PRESS S IN-GAME', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderOverlay() {
+    if (!this.visible || gameState === 'TITLE' || gameState === 'CHARSELECT') return;
+    const target = this.getTarget();
+    const w = 274;
+    const h = 142;
+    const x = Math.floor((VIEW_W - w) / 2);
+    const y = 38;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(x + 8, y + 8, w - 16, 19);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TRAINER-SCOUT', VIEW_W / 2, y + 21);
+
+    ctx.textAlign = 'left';
+    ctx.font = '7px monospace';
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillText('FORTSCHRITT: ' + this.getWinProgress() + ' Siege', x + 18, y + 43);
+
+    if (target) {
+      const distance = QuestRadar.getDistanceTo(target);
+      const arrow = QuestRadar.getArrowTo(target);
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(x + 18, y + 52, w - 36, 52);
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillText('NEXT: ' + target.name + '  ' + arrow + ' ' + distance + 'm', x + 26, y + 66);
+      ctx.fillText('LV ' + target.level + ' · ' + target.aiStyle + ' · Ziel ' + target.ptsToWin, x + 26, y + 80);
+      ctx.fillText('HP ' + target.playerHp + ' · EN ' + target.enemyEnergy + ' · EXP +' + target.expReward, x + 26, y + 94);
+    } else {
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(x + 18, y + 52, w - 36, 40);
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillText('Alle Trainer besiegt!', x + 26, y + 68);
+      ctx.fillText('Geh zum Credits-Screen: C', x + 26, y + 82);
+    }
+
+    ctx.fillStyle = C.DARKEST;
+    ctx.textAlign = 'center';
+    ctx.fillText('S schließt · nutze Radar + Minimap', VIEW_W / 2, y + h - 15);
     ctx.textAlign = 'left';
   }
 };
@@ -1794,10 +1865,13 @@ function drawTitleScreen() {
   // Code-comment coverage marker: the source now includes an in-game architecture guide.
   CodeComments.renderBadge(bx, 410);
 
+  // Trainer scout marker: visible proof that the next-rival intel overlay is available.
+  ScoutCard.renderTitleBadge(bx, 416);
+
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · CONTROLS HELP', bx, 421);
+  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · SCOUT CARD', bx, 424);
 
   // Footer
   ctx.fillStyle = C.DARK;
@@ -2603,6 +2677,10 @@ function gameLoop() {
       ControlsHelp.toggle();
     }
 
+    if (wasPressed('s') || wasPressed('S')) {
+      ScoutCard.toggle();
+    }
+
     switch (gameState) {
       case 'TITLE':
         drawTitleScreen();
@@ -2676,6 +2754,7 @@ function gameLoop() {
     }
 
     SaveSystem.renderToast();
+    ScoutCard.renderOverlay();
     ControlsHelp.renderOverlay();
     ErrorGuard.renderOverlay();
   }, () => {

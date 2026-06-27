@@ -54,6 +54,7 @@
 - [x] Quick-Continue Save-Slot — Titelbild zeigt NEW GAME/CONTINUE, Siege/Rast werden in LocalStorage gespeichert und alte Dialog-Callbacks werden sicher bereinigt.
 - [x] Quest-Radar — sichtbares Overworld-HUD, Zielpfeil, Trainer-Distanz und Minimap-Markierung für den nächsten unbesiegten Gegner ergänzt.
 - [x] Coach-Card Controls-Hilfe — H/?-Overlay mit Tastatur-, D-Pad- und Mobile-Hinweisen plus sichtbarem Title-Screen-Marker ergänzt.
+- [x] Trainer-Scout Overlay — S-Taste zeigt im Spiel den nächsten Rivalen mit Level, Zielscore, HP/EN, EXP-Belohnung und Fortschritt; Title-Screen-Marker ergänzt.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 15 Boot-Checks und Title-Screen-Status ergänzt
