@@ -68,3 +68,4 @@
 - [x] Duel-Risk-Meter — sichtbares Overworld-HUD mit Risiko-Prozent, Rest/Prep/Attack-Empfehlung, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Momentum-Meter Battle-HUD — Live-Druckanzeige im Duell mit Hot/Cold-Status, Taktik-Hinweis, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Clutch-Alert Battle-HUD — sichtbare Endgame-Anzeige für benötigte Punkte, Rivalen-Gefahr, Closeout-Tipps, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Shot-Quality Advisor — sichtbares Move-Select-HUD mit Trefferchance, Energiecheck, taktischem Wurf-Tipp, Title-Screen-Marker und Module-Check ergänzt.

@@ -1675,6 +1675,81 @@ const ClutchAlert = {
   }
 };
 
+const ShotQualityAdvisor = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const moves = battle.playerMoves || [];
+    const selectedMove = moves[battle.selectedMove] || null;
+    if (!trainer || !selectedMove) {
+      return { move: null, quality: 'PICK A MOVE', chance: 0, energyOk: true, advice: 'SELECT A SHOT', points: 0 };
+    }
+
+    const energyCost = selectedMove.energy || 0;
+    const energyOk = battle.playerEnergy >= energyCost;
+    let chance = 0;
+    let points = selectedMove.pts || 0;
+    if (selectedMove.type === 'attack') {
+      const calc = calculateDamage(selectedMove, player, { stats: { defense: trainer.defense || trainer.level * 2 } });
+      chance = Math.round(calc.accuracy * 100);
+    } else if (selectedMove.type === 'buff') {
+      chance = 100;
+    } else if (selectedMove.special) {
+      chance = selectedMove.name === 'Block' ? 100 : 70;
+    }
+
+    let quality = 'GOOD LOOK';
+    let advice = 'TAKE IT';
+    if (!energyOk) {
+      quality = 'NO ENERGY';
+      advice = 'REST / DEFEND';
+    } else if (chance >= 85 || points >= 3) {
+      quality = 'GREEN LIGHT';
+      advice = points >= 3 ? 'LET IT FLY' : 'ATTACK RIM';
+    } else if (chance < 60) {
+      quality = 'TOUGH SHOT';
+      advice = 'SET UP FIRST';
+    } else if (battle.playerEnergy - energyCost <= 3) {
+      quality = 'LOW TANK';
+      advice = 'MAKE IT COUNT';
+    }
+
+    return { move: selectedMove.name, quality, chance, energyOk, advice, points, energyCost };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SHOT QUALITY ADVISOR · MOVE SELECT HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || battle.phase !== 'select' || !battle.playerTurn) return;
+    const info = this.getState();
+    const x = 228;
+    const y = VIEW_H - 140;
+    const w = 232;
+    const h = 60;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.energyOk ? C.LIGHT : C.MID;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('SHOT QUALITY', x + 8, y + 14);
+    ctx.font = '7px monospace';
+    ctx.fillText(info.quality + ' · ' + info.chance + '%', x + 8, y + 29);
+    ctx.fillText((info.move || 'MOVE').substring(0, 16) + '  EN ' + (info.energyCost || 0), x + 8, y + 42);
+    ctx.fillText(info.advice, x + 126, y + 42);
+    ctx.fillStyle = C.MID;
+    ctx.fillRect(x + 126, y + 24, 92, 5);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x + 126, y + 24, Math.floor(92 * (info.chance / 100)), 5);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2292,6 +2367,7 @@ function drawTitleScreen() {
   // Subtitle
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
+  ShotQualityAdvisor.renderTitleBadge(bx, 240);
   ctx.fillText('BASKETBALL RPG', bx, 250);
   PossessionCoach.renderTitleBadge(bx, 262);
   BattlePrep.renderTitleBadge(bx, 274);
@@ -2917,6 +2993,7 @@ function drawBattle() {
 
   // Move selection
   if (battle.phase === 'select' && battle.playerTurn) {
+    ShotQualityAdvisor.renderBattleHUD();
     drawMoveSelect();
   }
 
@@ -3336,6 +3413,7 @@ const GameModules = {
     { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
     { id: 'momentumMeter', label: 'Momentum Meter', check: () => !!(MomentumMeter && typeof MomentumMeter.getState === 'function' && typeof MomentumMeter.renderBattleHUD === 'function' && MomentumMeter.getState().value >= 0) },
     { id: 'clutchAlert', label: 'Clutch Alert', check: () => !!(ClutchAlert && typeof ClutchAlert.getState === 'function' && typeof ClutchAlert.renderBattleHUD === 'function' && ClutchAlert.getState().playerNeed >= 0) },
+    { id: 'shotQuality', label: 'Shot Quality', check: () => !!(ShotQualityAdvisor && typeof ShotQualityAdvisor.getState === 'function' && typeof ShotQualityAdvisor.renderBattleHUD === 'function' && ShotQualityAdvisor.getState().chance >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
