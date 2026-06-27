@@ -3297,6 +3297,76 @@ const RecoveryCoach = {
   }
 };
 
+const TravelPaceCoach = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const hydration = HydrationCoach.getState();
+    const recovery = RecoveryCoach.getState();
+    const route = RouteCoach.getState();
+    const hpPct = player.maxHp ? Math.round((player.hp / player.maxHp) * 100) : 0;
+    const enPct = player.maxEnergy ? Math.round((player.energy / player.maxEnergy) * 100) : 0;
+    const homeDistance = HomeRest.getDistance();
+    const rivalDistance = next ? QuestRadar.getDistanceTo(next) : 0;
+    let pace = Math.round(enPct * 0.45 + hpPct * 0.25 + Math.max(0, 18 - Math.min(rivalDistance, homeDistance)) * 1.4 - recovery.recovery * 0.25);
+    pace = Math.max(0, Math.min(100, pace));
+
+    let label = 'STEADY PACE';
+    let advice = 'FOLLOW RADAR';
+    let target = route.target || (next ? next.name.toUpperCase().substring(0, 10) : 'CREDITS');
+    if (!next) {
+      label = 'PARADE PACE';
+      advice = 'ENJOY ROUTE';
+      target = 'CREDITS';
+    } else if (hpPct < 45 || recovery.label === 'PATCH UP') {
+      label = 'WALK IT OFF';
+      advice = homeDistance <= HomeRest.radius ? 'PRESS R' : 'HOME WALK';
+      target = 'HOME';
+    } else if (enPct < 35 || hydration.label === 'DRINK BREAK') {
+      label = 'SAVE LEGS';
+      advice = 'NO SPRINT';
+      target = 'HOME';
+    } else if (rivalDistance <= 4 && hpPct >= 60 && enPct >= 55) {
+      label = 'SPRINT TIPOFF';
+      advice = 'START DUEL';
+      target = next.name.toUpperCase().substring(0, 10);
+    } else if (route.mode === 'REST ROUTE') {
+      label = 'RESET WALK';
+      advice = 'HOME ROUTE';
+      target = 'HOME';
+    }
+
+    return { pace, label, advice, hpPct, enPct, homeDistance, rivalDistance, target, routeMode: route.mode, next };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TRAVEL PACE COACH · ROUTE-SPEED HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 4;
+    const y = 246;
+    const w = 154;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.label === 'SPRINT TIPOFF' ? C.LIGHT : (info.pace < 45 ? '#d4600a' : C.MID);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PACE ' + info.pace + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('HP ' + info.hpPct + '% EN ' + info.enPct + '% → ' + info.target, x + 7, y + 23);
+    ctx.fillText(info.advice.substring(0, 18), x + 82, y + 31);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3916,6 +3986,7 @@ function drawTitleScreen() {
   PickRollCoach.renderTitleBadge(bx, 38);
   RecoveryCoach.renderTitleBadge(bx, 44);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
+  TravelPaceCoach.renderTitleBadge(bx, 52);
   FoulTroubleCoach.renderTitleBadge(bx, 58);
   TurnoverCoach.renderTitleBadge(bx, 68);
   AssistCoach.renderTitleBadge(bx, 78);
@@ -4310,6 +4381,7 @@ function drawOverworld() {
   TipoffChecklist.renderHUD();
   BenchCoach.renderHUD();
   RecoveryCoach.renderHUD();
+  TravelPaceCoach.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -5030,6 +5102,7 @@ const GameModules = {
     { id: 'tipoffChecklist', label: 'Tipoff Checklist', check: () => !!(TipoffChecklist && typeof TipoffChecklist.getState === 'function' && typeof TipoffChecklist.renderHUD === 'function' && TipoffChecklist.getState().checks >= 0) },
     { id: 'benchCoach', label: 'Bench Coach', check: () => !!(BenchCoach && typeof BenchCoach.getState === 'function' && typeof BenchCoach.renderHUD === 'function' && BenchCoach.getState().bench >= 0) },
     { id: 'recoveryCoach', label: 'Recovery Coach', check: () => !!(RecoveryCoach && typeof RecoveryCoach.getState === 'function' && typeof RecoveryCoach.renderHUD === 'function' && RecoveryCoach.getState().recovery >= 0) },
+    { id: 'travelPaceCoach', label: 'Travel Pace Coach', check: () => !!(TravelPaceCoach && typeof TravelPaceCoach.getState === 'function' && typeof TravelPaceCoach.renderHUD === 'function' && TravelPaceCoach.getState().pace >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
