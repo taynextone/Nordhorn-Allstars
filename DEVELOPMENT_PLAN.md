@@ -50,7 +50,7 @@
 - [x] Credits-Screen (Scrolling-Title, Team, Trainer, Locations)
 - [x] Performance-Optimierung — Minimap-Tilelayer gecacht (4.200 Draws → 1 drawImage/Frame) und sichtbarer FPS-HUD ergänzt
 - [x] Cross-Browser-Test — sichtbarer Compat-Check auf dem Titelbild, rAF/performance-Polyfills, Safe-Area/dvh-Fallbacks; Chromium file:// Smoke-Test OK, Firefox-Headless in dieser Sandbox blockiert.
-- [ ] Deployment (GitHub Pages)
+- [x] Deployment (GitHub Pages) — Pages-Actions-Workflow, .nojekyll, README-Link und sichtbarer Title-Screen-Deploy-Marker ergänzt.
 
 ## Technische Schulden
 - [ ] Code-Refactoring (saubere Module)

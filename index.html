@@ -1483,10 +1483,15 @@ function drawTitleScreen() {
   BrowserCompat.renderBadge(bx, 374);
   BrowserCompat.renderPanel();
 
+  // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
+  ctx.fillStyle = C.DARK;
+  ctx.font = '8px monospace';
+  ctx.fillText('GITHUB PAGES READY', bx, 396);
+
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('© 2025 NORDHORN ALL STARS', bx, 402);
+  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 412);
 
   ctx.textAlign = 'left';
 }
