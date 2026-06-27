@@ -2069,6 +2069,67 @@ const WinConditionCoach = {
   }
 };
 
+
+const TimeoutCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const playerHp = battle.playerHp ?? player.hp ?? 0;
+    const hpPct = Math.round((playerHp / (player.maxHp || 1)) * 100);
+    const enPct = Math.round(((battle.playerEnergy ?? player.energy ?? 0) / (player.maxEnergy || 1)) * 100);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const urgency = Math.max(0, Math.min(100, Math.round((100 - hpPct) * 0.36 + (100 - enPct) * 0.32 + Math.max(0, -lead) * 8 + (enemyNeed <= 5 ? 10 : 0))));
+    let call = 'PLAY THROUGH';
+    let advice = battle.hasBall ? 'RUN SET PLAY' : 'STAY LOCKED';
+    if (urgency >= 75) {
+      call = 'CALL TIMEOUT';
+      advice = 'RESET + SAFE TWO';
+    } else if (urgency >= 55) {
+      call = 'SLOW TEMPO';
+      advice = battle.hasBall ? 'USE CLOCK' : 'HALF-COURT D';
+    } else if (lead >= 6 && enemyNeed > 3) {
+      call = 'CONTROL CLOCK';
+      advice = 'NO RUSH SHOTS';
+    } else if (battle.turnCount <= 2) {
+      call = 'FEEL OUT';
+      advice = 'READ RIVAL';
+    }
+    return { urgency, call, advice, hpPct, enPct, lead, target, enemyNeed, hasBall: !!battle.hasBall };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TIMEOUT COACH · TEMPO RESET HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = 10;
+    const y = 92;
+    const w = 152;
+    const h = 38;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.urgency >= 75 ? '#d4600a' : (info.urgency >= 55 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('TIMEOUT ' + info.urgency + '% · ' + info.call, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    const leadText = info.lead >= 0 ? '+' + info.lead : String(info.lead);
+    ctx.fillText('HP ' + info.hpPct + '% EN ' + info.enPct + '% LEAD ' + leadText, x + 7, y + 24);
+    ctx.fillText(info.advice, x + 76, y + 34);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2691,6 +2752,7 @@ function drawTitleScreen() {
   RouteCoach.renderTitleBadge(bx, 146);
   ComebackCoach.renderTitleBadge(bx, 168);
   DefenseRead.renderTitleBadge(bx, 178);
+  TimeoutCoach.renderTitleBadge(bx, 232);
   ShotQualityAdvisor.renderTitleBadge(bx, 240);
   ctx.fillText('BASKETBALL RPG', bx, 250);
   PossessionCoach.renderTitleBadge(bx, 262);
@@ -3287,6 +3349,7 @@ function drawBattle() {
   ComebackCoach.renderBattleHUD();
   StaminaCoach.renderBattleHUD();
   WinConditionCoach.renderBattleHUD();
+  TimeoutCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -3748,6 +3811,7 @@ const GameModules = {
     { id: 'comebackCoach', label: 'Comeback Coach', check: () => !!(ComebackCoach && typeof ComebackCoach.getState === 'function' && typeof ComebackCoach.renderBattleHUD === 'function' && ComebackCoach.getState().playerNeed >= 0) },
     { id: 'staminaCoach', label: 'Stamina Coach', check: () => !!(StaminaCoach && typeof StaminaCoach.getState === 'function' && typeof StaminaCoach.renderBattleHUD === 'function' && StaminaCoach.getState().tank >= 0) },
     { id: 'winConditionCoach', label: 'Win Condition Coach', check: () => !!(WinConditionCoach && typeof WinConditionCoach.getState === 'function' && typeof WinConditionCoach.renderBattleHUD === 'function' && WinConditionCoach.getState().playerNeed >= 0) },
+    { id: 'timeoutCoach', label: 'Timeout Coach', check: () => !!(TimeoutCoach && typeof TimeoutCoach.getState === 'function' && typeof TimeoutCoach.renderBattleHUD === 'function' && TimeoutCoach.getState().urgency >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
