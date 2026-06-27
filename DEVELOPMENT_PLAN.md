@@ -94,3 +94,4 @@
 - [x] Recovery-Coach Overworld-HUD — sichtbare Rest-Route-/Patch-Up-Empfehlung mit HP/EN/Home-Distanz, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Travel-Pace-Coach Overworld-HUD — sichtbare Route-Speed-/Sprint-/Schon-Tempo-Empfehlung mit HP/EN/Zielanzeige, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Crowd-Energy-Coach Overworld-HUD — sichtbare Hype-/Chant-Anzeige mit Tipoff-Bereitschaft, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Flow-State-Coach Overworld-HUD — sichtbare Rhythmus-/Flow-Anzeige mit HP/EN/Wins/Rivalen-Ziel, Title-Screen-Marker und Module-Check ergänzt; Home-Rest-Dialogcallback-Bug gefixt.
