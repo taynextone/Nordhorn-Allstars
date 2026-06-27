@@ -33,7 +33,7 @@
 - [x] Items (Schuhe, Armbänder, Energy-Drinks)
 
 ## Phase 4: Polish & AAA-Feeling
-- [ ] Bessere Pixel-Art (Aseprite-Qualität)
+- [x] Bessere Pixel-Art (Aseprite-Qualität) — neue Hoopster-Sprites mit Jerseys, Nummern, Headbands, Ball/Dribbling und Battle-Portraits
 - [x] Screen-Transitions (Fade, Wipe)
 - [x] Battle-Animationen (Ball fliegt, Korb-Swish)
 - [x] Sound-Effekte (Chiptune via Web Audio) — 20+ SFX: Kampf, Menü, Dialog, Item, Warp, Victory, Defeat, Level-Up, Badge
@@ -42,12 +42,12 @@
 - [x] Pause-Menü (Status mit Stats, Badges, Moves, Standort)
 - [x] Pokédex-Äquivalent ("Spieler-Liste") — 13 Trainer scrollbar, Detailansicht, Fortschrittsbalken
 - [x] Mobile Touch-Controls (D-Pad, Action-Buttons, Swipe, Canvas-Tap)
-- [ ] Minimap
+- [x] Minimap (Toggle mit M, zeigt Spieler, Trainer, Karten-Layout)
 
 ## Phase 5: Feinschliff
 - [ ] Balance-Tuning (Stats, Moves, Level)
-- [ ] Easter Eggs
-- [ ] Credits-Screen
+- [x] Easter Eggs (Konami-Code: +5 alle Stats, +20 HP)
+- [x] Credits-Screen (Scrolling-Title, Team, Trainer, Locations)
 - [ ] Performance-Optimierung
 - [ ] Cross-Browser-Test
 - [ ] Deployment (GitHub Pages)
