@@ -3367,6 +3367,71 @@ const TravelPaceCoach = {
   }
 };
 
+
+const CrowdEnergyCoach = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const progress = RivalProgress.getStats();
+    const tipoff = TipoffChecklist.getState();
+    const pace = TravelPaceCoach.getState();
+    const hpPct = player.maxHp ? Math.round((player.hp / player.maxHp) * 100) : 0;
+    const enPct = player.maxEnergy ? Math.round((player.energy / player.maxEnergy) * 100) : 0;
+    const rivalDistance = next ? QuestRadar.getDistanceTo(next) : 0;
+    let energy = Math.round(30 + progress.pct * 0.35 + tipoff.pct * 0.25 + pace.pace * 0.25 + Math.max(0, 8 - rivalDistance) * 2);
+    if (hpPct < 45 || enPct < 35) energy -= 18;
+    energy = Math.max(0, Math.min(100, energy));
+
+    let label = 'BUILD HYPE';
+    let advice = 'FOLLOW BEAT';
+    let chant = next ? next.name.toUpperCase().substring(0, 10) : 'CHAMPION';
+    if (!next) {
+      label = 'PARADE ROAR';
+      advice = 'CROWD MVP';
+      chant = 'ALLSTARS';
+    } else if (hpPct < 45 || enPct < 35) {
+      label = 'QUIET BENCH';
+      advice = 'REST FIRST';
+      chant = 'HOME';
+    } else if (rivalDistance <= 4 && tipoff.checks === tipoff.total) {
+      label = 'TIPOFF ROAR';
+      advice = 'FEED CROWD';
+    } else if (progress.beaten > 0 && energy >= 70) {
+      label = 'HOT CROWD';
+      advice = 'KEEP RUN';
+    }
+
+    return { energy, label, advice, chant, hpPct, enPct, rivalDistance, next, progress: progress.pct, tipoff: tipoff.pct };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('CROWD ENERGY COACH · HYPE-ROUTE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 300;
+    const y = 289;
+    const w = 176;
+    const h = 36;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.label === 'TIPOFF ROAR' || info.label === 'PARADE ROAR' ? C.LIGHT : (info.label === 'QUIET BENCH' ? '#d4600a' : C.MID);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('CROWD ' + info.energy + '% · ' + info.label, x + 7, y + 13);
+    ctx.font = '6px monospace';
+    ctx.fillText('CHANT ' + info.chant + ' · TIP ' + info.tipoff + '%', x + 7, y + 24);
+    ctx.fillText(info.advice.substring(0, 18), x + 112, y + 33);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3987,6 +4052,7 @@ function drawTitleScreen() {
   RecoveryCoach.renderTitleBadge(bx, 44);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
   TravelPaceCoach.renderTitleBadge(bx, 52);
+  CrowdEnergyCoach.renderTitleBadge(bx, 62);
   FoulTroubleCoach.renderTitleBadge(bx, 58);
   TurnoverCoach.renderTitleBadge(bx, 68);
   AssistCoach.renderTitleBadge(bx, 78);
@@ -4382,6 +4448,7 @@ function drawOverworld() {
   BenchCoach.renderHUD();
   RecoveryCoach.renderHUD();
   TravelPaceCoach.renderHUD();
+  CrowdEnergyCoach.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -5103,6 +5170,7 @@ const GameModules = {
     { id: 'benchCoach', label: 'Bench Coach', check: () => !!(BenchCoach && typeof BenchCoach.getState === 'function' && typeof BenchCoach.renderHUD === 'function' && BenchCoach.getState().bench >= 0) },
     { id: 'recoveryCoach', label: 'Recovery Coach', check: () => !!(RecoveryCoach && typeof RecoveryCoach.getState === 'function' && typeof RecoveryCoach.renderHUD === 'function' && RecoveryCoach.getState().recovery >= 0) },
     { id: 'travelPaceCoach', label: 'Travel Pace Coach', check: () => !!(TravelPaceCoach && typeof TravelPaceCoach.getState === 'function' && typeof TravelPaceCoach.renderHUD === 'function' && TravelPaceCoach.getState().pace >= 0) },
+    { id: 'crowdEnergyCoach', label: 'Crowd Energy Coach', check: () => !!(CrowdEnergyCoach && typeof CrowdEnergyCoach.getState === 'function' && typeof CrowdEnergyCoach.renderHUD === 'function' && CrowdEnergyCoach.getState().energy >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
