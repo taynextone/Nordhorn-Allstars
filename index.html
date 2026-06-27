@@ -3229,6 +3229,74 @@ const BenchCoach = {
   }
 };
 
+const RecoveryCoach = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const bench = BenchCoach.getState();
+    const hydration = HydrationCoach.getState();
+    const tipoff = TipoffChecklist.getState();
+    const homeDistance = HomeRest.getDistance();
+    const hpPct = player.maxHp ? Math.round((player.hp / player.maxHp) * 100) : 0;
+    const enPct = player.maxEnergy ? Math.round((player.energy / player.maxEnergy) * 100) : 0;
+    let recovery = Math.round((100 - hpPct) * 0.45 + (100 - enPct) * 0.35 + Math.min(20, homeDistance * 2));
+    if (bench.label === 'SUB OUT') recovery += 15;
+    if (tipoff.label === 'REST FIRST') recovery += 10;
+    recovery = Math.max(0, Math.min(100, recovery));
+
+    let label = 'COURT READY';
+    let advice = 'KEEP ROUTE';
+    let target = next ? next.name.substring(0, 10).toUpperCase() : 'CREDITS';
+    if (!next) {
+      label = 'CHAMPION RECOVERY';
+      advice = 'CELEBRATE';
+    } else if (hpPct < 45) {
+      label = 'PATCH UP';
+      advice = homeDistance <= HomeRest.radius ? 'PRESS R NOW' : 'WALK HOME';
+      target = 'HOME';
+    } else if (enPct < 35) {
+      label = 'WATER RUN';
+      advice = hydration.advice === 'HOME WATER' ? 'HOME WATER' : 'SAVE ENERGY';
+      target = 'HOME';
+    } else if (bench.label === 'SUB OUT' || tipoff.label === 'REST FIRST') {
+      label = 'RESET LEGS';
+      advice = 'REST ROUTE';
+      target = 'HOME';
+    } else if (tipoff.label === 'TIPOFF READY') {
+      label = 'GREEN LIGHT';
+      advice = 'TAKE TIPOFF';
+    }
+    return { recovery, label, advice, hpPct, enPct, homeDistance, target, next };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('RECOVERY COACH · REST-ROUTE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 4;
+    const y = 208;
+    const w = 154;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.recovery >= 65 ? '#d4600a' : (info.recovery >= 38 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('RECOVERY ' + info.recovery + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('HP ' + info.hpPct + '% EN ' + info.enPct + '% H' + info.homeDistance, x + 7, y + 23);
+    ctx.fillText(info.advice.substring(0, 18), x + 78, y + 31);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3846,6 +3914,7 @@ function drawTitleScreen() {
   PracticePlan.renderTitleBadge(bx, 28);
   SpacingCoach.renderTitleBadge(bx, 34);
   PickRollCoach.renderTitleBadge(bx, 38);
+  RecoveryCoach.renderTitleBadge(bx, 44);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
   FoulTroubleCoach.renderTitleBadge(bx, 58);
   TurnoverCoach.renderTitleBadge(bx, 68);
@@ -4240,6 +4309,7 @@ function drawOverworld() {
   HydrationCoach.renderHUD();
   TipoffChecklist.renderHUD();
   BenchCoach.renderHUD();
+  RecoveryCoach.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -4959,6 +5029,7 @@ const GameModules = {
     { id: 'hydrationCoach', label: 'Hydration Coach', check: () => !!(HydrationCoach && typeof HydrationCoach.getState === 'function' && typeof HydrationCoach.renderHUD === 'function' && HydrationCoach.getState().hydration >= 0) },
     { id: 'tipoffChecklist', label: 'Tipoff Checklist', check: () => !!(TipoffChecklist && typeof TipoffChecklist.getState === 'function' && typeof TipoffChecklist.renderHUD === 'function' && TipoffChecklist.getState().checks >= 0) },
     { id: 'benchCoach', label: 'Bench Coach', check: () => !!(BenchCoach && typeof BenchCoach.getState === 'function' && typeof BenchCoach.renderHUD === 'function' && BenchCoach.getState().bench >= 0) },
+    { id: 'recoveryCoach', label: 'Recovery Coach', check: () => !!(RecoveryCoach && typeof RecoveryCoach.getState === 'function' && typeof RecoveryCoach.renderHUD === 'function' && RecoveryCoach.getState().recovery >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

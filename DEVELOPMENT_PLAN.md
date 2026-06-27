@@ -91,3 +91,4 @@
 - [x] Hydration-Coach Overworld-HUD — sichtbare HP/EN-Pace-Anzeige mit Trink-/Rest-Empfehlung, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Tipoff-Checklist Overworld-HUD — sichtbare 5-Schritte-Duellbereitschaft mit HP/EN/Rest/Risiko/Drill-Checks, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Bench-Coach Overworld-HUD — sichtbare Sub-Out-/Rest-/Check-In-Empfehlung mit HP/EN/Home-Distanz, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Recovery-Coach Overworld-HUD — sichtbare Rest-Route-/Patch-Up-Empfehlung mit HP/EN/Home-Distanz, Title-Screen-Marker und Module-Check ergänzt.
