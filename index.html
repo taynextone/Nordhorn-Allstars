@@ -3101,6 +3101,74 @@ const HydrationCoach = {
   }
 };
 
+const TipoffChecklist = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const readiness = BattlePrep.getReadiness();
+    const hydration = HydrationCoach.getState();
+    const warmup = WarmupCoach.getState();
+    const risk = DuelRiskMeter.getAssessment();
+    if (!next) {
+      return { label: 'CHAMPION READY', advice: 'ROLL CREDITS', checks: 5, total: 5, pct: 100, next: null, flags: ['✓', '✓', '✓', '✓', '✓'] };
+    }
+
+    const flags = [
+      hydration.hpPct >= 60 ? '✓' : 'HP',
+      hydration.enPct >= 55 ? '✓' : 'EN',
+      readiness.state !== 'REST FIRST' ? '✓' : 'REST',
+      risk.risk < 65 ? '✓' : 'RISK',
+      warmup.drillScore >= 60 ? '✓' : 'DRILL'
+    ];
+    const checks = flags.filter(flag => flag === '✓').length;
+    const total = flags.length;
+    const pct = Math.round((checks / total) * 100);
+    let label = 'TIPOFF READY';
+    let advice = 'START DUEL';
+    if (hydration.hpPct < 50 || hydration.enPct < 40 || readiness.state === 'REST FIRST') {
+      label = 'REST FIRST';
+      advice = 'HOME COURT';
+    } else if (risk.risk >= 70) {
+      label = 'PLAY SAFE';
+      advice = 'LOW RISK ROUTE';
+    } else if (warmup.drillScore < 60) {
+      label = 'RUN WARMUP';
+      advice = warmup.advice;
+    } else if (hydration.rivalDistance > 8) {
+      label = 'FIND RIVAL';
+      advice = QuestRadar.getArrowTo(next) + ' ' + hydration.rivalDistance + 'm';
+    }
+    return { label, advice, checks, total, pct, next, flags, hydration, readiness, warmup, risk };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TIPOFF CHECKLIST · 5-STEP READY HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 4;
+    const y = 132;
+    const w = 154;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.checks === info.total ? C.LIGHT : (info.checks >= 3 ? C.MID : '#d4600a');
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('TIPOFF ' + info.checks + '/' + info.total + ' · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.flags.join(' ') + ' · ' + info.pct + '%', x + 7, y + 23);
+    ctx.fillText(info.advice.substring(0, 18), x + 80, y + 31);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3711,6 +3779,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
+  TipoffChecklist.renderTitleBadge(bx, 2);
   HydrationCoach.renderTitleBadge(bx, 6);
   WarmupCoach.renderTitleBadge(bx, 14);
   PracticePlan.renderTitleBadge(bx, 24);
@@ -4108,6 +4177,7 @@ function drawOverworld() {
   PracticePlan.renderHUD();
   WarmupCoach.renderHUD();
   HydrationCoach.renderHUD();
+  TipoffChecklist.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -4825,6 +4895,7 @@ const GameModules = {
     { id: 'practicePlan', label: 'Practice Plan', check: () => !!(PracticePlan && typeof PracticePlan.getState === 'function' && typeof PracticePlan.renderHUD === 'function' && PracticePlan.getState().focus >= 0) },
     { id: 'warmupCoach', label: 'Warmup Coach', check: () => !!(WarmupCoach && typeof WarmupCoach.getState === 'function' && typeof WarmupCoach.renderHUD === 'function' && WarmupCoach.getState().drillScore >= 0) },
     { id: 'hydrationCoach', label: 'Hydration Coach', check: () => !!(HydrationCoach && typeof HydrationCoach.getState === 'function' && typeof HydrationCoach.renderHUD === 'function' && HydrationCoach.getState().hydration >= 0) },
+    { id: 'tipoffChecklist', label: 'Tipoff Checklist', check: () => !!(TipoffChecklist && typeof TipoffChecklist.getState === 'function' && typeof TipoffChecklist.renderHUD === 'function' && TipoffChecklist.getState().checks >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
