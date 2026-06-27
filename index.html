@@ -2760,6 +2760,79 @@ const FreeThrowCoach = {
   }
 };
 
+const PickRollCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const hasBall = !!battle.hasBall;
+    const energy = battle.playerEnergy ?? player.energy ?? 0;
+    const enPct = Math.round((energy / (player.maxEnergy || 1)) * 100);
+    const selectedMove = (battle.playerMoves || [])[battle.selectedMove || 0] || null;
+    const cost = selectedMove ? (selectedMove.energy || 0) : 0;
+    const vision = (player.stats && player.stats.courtVision) || 1;
+    const athleticism = (player.stats && player.stats.athleticism) || 1;
+    const enemyNeed = Math.max(0, target - enemyScore);
+
+    let screenValue = 26 + vision * 5 + athleticism * 3 + (hasBall ? 14 : -2) + Math.max(0, -lead) * 4;
+    if (cost > energy) screenValue += 18;
+    if (enPct <= 30) screenValue += 12;
+    if (!hasBall && enemyNeed <= 5) screenValue += 10;
+    screenValue = Math.max(0, Math.min(100, Math.round(screenValue)));
+
+    let label = 'SPACING SET';
+    let advice = hasBall ? 'READ SCREEN' : 'FIGHT OVER';
+    if (hasBall && screenValue >= 78) {
+      label = 'CALL SCREEN';
+      advice = 'ROLL HARD';
+    } else if (hasBall && screenValue >= 60) {
+      label = 'PICK READY';
+      advice = 'USE ANGLE';
+    } else if (!hasBall && enemyNeed <= 5) {
+      label = 'SWITCH ALERT';
+      advice = 'NO SLIP LAYUP';
+    } else if (!hasBall && screenValue >= 58) {
+      label = 'SCREEN D';
+      advice = 'SHOW + RECOVER';
+    } else if (hasBall && lead >= 5) {
+      label = 'CONTROL SET';
+      advice = 'SAFE HANDOFF';
+    }
+
+    return { screenValue, label, advice, lead, enPct, hasBall, enemyNeed, move: selectedMove ? selectedMove.name : 'NONE' };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PICK-ROLL COACH · SCREEN-READ HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = Math.floor((VIEW_W - 152) / 2);
+    const y = 258;
+    const w = 152;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.screenValue >= 78 ? '#d4600a' : (info.screenValue >= 58 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('SCREEN ' + info.screenValue + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('EN ' + info.enPct + '% · ' + (info.hasBall ? 'P&R' : 'SWITCH'), x + 7, y + 23);
+    ctx.fillText(info.advice, x + 82, y + 31);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3370,6 +3443,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
+  PickRollCoach.renderTitleBadge(bx, 38);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
   FoulTroubleCoach.renderTitleBadge(bx, 58);
   TurnoverCoach.renderTitleBadge(bx, 68);
@@ -3998,6 +4072,7 @@ function drawBattle() {
   MismatchCoach.renderBattleHUD();
   ShotClockCoach.renderBattleHUD();
   FreeThrowCoach.renderBattleHUD();
+  PickRollCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -4469,6 +4544,7 @@ const GameModules = {
     { id: 'mismatchCoach', label: 'Mismatch Coach', check: () => !!(MismatchCoach && typeof MismatchCoach.getState === 'function' && typeof MismatchCoach.renderBattleHUD === 'function' && MismatchCoach.getState().edge >= 0) },
     { id: 'shotClockCoach', label: 'Shot Clock Coach', check: () => !!(ShotClockCoach && typeof ShotClockCoach.getState === 'function' && typeof ShotClockCoach.renderBattleHUD === 'function' && ShotClockCoach.getState().pressure >= 0) },
     { id: 'freeThrowCoach', label: 'Free Throw Coach', check: () => !!(FreeThrowCoach && typeof FreeThrowCoach.getState === 'function' && typeof FreeThrowCoach.renderBattleHUD === 'function' && FreeThrowCoach.getState().focus >= 0) },
+    { id: 'pickRollCoach', label: 'Pick-Roll Coach', check: () => !!(PickRollCoach && typeof PickRollCoach.getState === 'function' && typeof PickRollCoach.renderBattleHUD === 'function' && PickRollCoach.getState().screenValue >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
