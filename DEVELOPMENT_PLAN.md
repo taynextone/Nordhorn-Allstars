@@ -90,3 +90,4 @@
 - [x] Warmup-Coach Overworld-HUD — sichtbare Stat-Drill-Empfehlung mit schwächstem Skill, Energiecheck, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Hydration-Coach Overworld-HUD — sichtbare HP/EN-Pace-Anzeige mit Trink-/Rest-Empfehlung, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Tipoff-Checklist Overworld-HUD — sichtbare 5-Schritte-Duellbereitschaft mit HP/EN/Rest/Risiko/Drill-Checks, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Bench-Coach Overworld-HUD — sichtbare Sub-Out-/Rest-/Check-In-Empfehlung mit HP/EN/Home-Distanz, Title-Screen-Marker und Module-Check ergänzt.

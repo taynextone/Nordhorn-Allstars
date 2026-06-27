@@ -3169,6 +3169,66 @@ const TipoffChecklist = {
   }
 };
 
+const BenchCoach = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const prep = BattlePrep.getReadiness();
+    const tipoff = TipoffChecklist.getState();
+    const homeDistance = HomeRest.getDistance();
+    const hpPct = player.maxHp ? Math.round((player.hp / player.maxHp) * 100) : 0;
+    const enPct = player.maxEnergy ? Math.round((player.energy / player.maxEnergy) * 100) : 0;
+    const rivalDistance = next ? QuestRadar.getDistanceTo(next) : 0;
+    let bench = Math.round((hpPct * 0.4 + enPct * 0.4 + tipoff.pct * 0.2) - Math.min(18, homeDistance * 2));
+    bench = Math.max(0, Math.min(100, bench));
+
+    let label = 'STAY ON FLOOR';
+    let advice = 'KEEP MOVING';
+    if (!next) {
+      label = 'CHAMPION BENCH';
+      advice = 'CELEBRATE';
+    } else if (hpPct < 45 || enPct < 35 || prep.state === 'REST FIRST') {
+      label = 'SUB OUT';
+      advice = homeDistance <= 6 ? 'REST NOW' : 'FIND HOME';
+    } else if (tipoff.checks < tipoff.total) {
+      label = 'BENCH TALK';
+      advice = tipoff.advice;
+    } else if (rivalDistance <= 3) {
+      label = 'CHECK IN';
+      advice = 'START DUEL';
+    }
+
+    return { bench, label, advice, hpPct, enPct, homeDistance, rivalDistance, next };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('BENCH COACH · SUB/REST READY HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 4;
+    const y = 170;
+    const w = 154;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.label === 'SUB OUT' ? '#d4600a' : (info.label === 'CHECK IN' ? C.LIGHT : C.MID);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('BENCH ' + info.bench + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('HP ' + info.hpPct + '% EN ' + info.enPct + '% H' + info.homeDistance, x + 7, y + 23);
+    ctx.fillText(info.advice.substring(0, 18), x + 78, y + 31);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3782,7 +3842,8 @@ function drawTitleScreen() {
   TipoffChecklist.renderTitleBadge(bx, 2);
   HydrationCoach.renderTitleBadge(bx, 6);
   WarmupCoach.renderTitleBadge(bx, 14);
-  PracticePlan.renderTitleBadge(bx, 24);
+  BenchCoach.renderTitleBadge(bx, 20);
+  PracticePlan.renderTitleBadge(bx, 28);
   SpacingCoach.renderTitleBadge(bx, 34);
   PickRollCoach.renderTitleBadge(bx, 38);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
@@ -4178,6 +4239,7 @@ function drawOverworld() {
   WarmupCoach.renderHUD();
   HydrationCoach.renderHUD();
   TipoffChecklist.renderHUD();
+  BenchCoach.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -4896,6 +4958,7 @@ const GameModules = {
     { id: 'warmupCoach', label: 'Warmup Coach', check: () => !!(WarmupCoach && typeof WarmupCoach.getState === 'function' && typeof WarmupCoach.renderHUD === 'function' && WarmupCoach.getState().drillScore >= 0) },
     { id: 'hydrationCoach', label: 'Hydration Coach', check: () => !!(HydrationCoach && typeof HydrationCoach.getState === 'function' && typeof HydrationCoach.renderHUD === 'function' && HydrationCoach.getState().hydration >= 0) },
     { id: 'tipoffChecklist', label: 'Tipoff Checklist', check: () => !!(TipoffChecklist && typeof TipoffChecklist.getState === 'function' && typeof TipoffChecklist.renderHUD === 'function' && TipoffChecklist.getState().checks >= 0) },
+    { id: 'benchCoach', label: 'Bench Coach', check: () => !!(BenchCoach && typeof BenchCoach.getState === 'function' && typeof BenchCoach.renderHUD === 'function' && BenchCoach.getState().bench >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
