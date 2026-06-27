@@ -52,8 +52,9 @@
 - [x] Cross-Browser-Test — sichtbarer Compat-Check auf dem Titelbild, rAF/performance-Polyfills, Safe-Area/dvh-Fallbacks; Chromium file:// Smoke-Test OK, Firefox-Headless in dieser Sandbox blockiert.
 - [x] Deployment (GitHub Pages) — Pages-Actions-Workflow, .nojekyll, README-Link und sichtbarer Title-Screen-Deploy-Marker ergänzt.
 - [x] Quick-Continue Save-Slot — Titelbild zeigt NEW GAME/CONTINUE, Siege/Rast werden in LocalStorage gespeichert und alte Dialog-Callbacks werden sicher bereinigt.
+- [x] Quest-Radar — sichtbares Overworld-HUD, Zielpfeil, Trainer-Distanz und Minimap-Markierung für den nächsten unbesiegten Gegner ergänzt.
 
 ## Technische Schulden
-- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 14 Boot-Checks und Title-Screen-Status ergänzt
+- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 15 Boot-Checks und Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt
