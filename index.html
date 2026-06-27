@@ -786,23 +786,23 @@ const BUILD_BONUS = {
 
 // Move unlocks by level
 const MOVE_UNLOCKS = {
-  1: { name: 'Layup', energy: 5, type: 'attack', power: 15, pts: 2, desc: 'Quick close-range shot' },
-  2: { name: 'Jump Shot', energy: 8, type: 'attack', power: 20, pts: 2, desc: 'Mid-range jumper' },
-  3: { name: 'Three Pointer', energy: 12, type: 'attack', power: 18, pts: 3, desc: 'Long range - 3 points!' },
-  4: { name: 'Block', energy: 6, type: 'attack', power: 12, pts: 0, desc: 'Block opponent shot', special: true },
-  5: { name: 'Steal', energy: 8, type: 'attack', power: 10, pts: 0, desc: 'Steal ball from opponent', special: true },
-  6: { name: 'Crossover', energy: 7, type: 'attack', power: 25, pts: 2, desc: 'Dribble past defender' },
-  7: { name: 'Dunk', energy: 15, type: 'attack', power: 35, pts: 2, desc: 'Powerful slam dunk!' },
-  8: { name: 'Court Vision', energy: 5, type: 'buff', desc: 'Boost next shot accuracy' },
+  1: { name: 'Layup', energy: 4, type: 'attack', power: 14, pts: 2, desc: 'Reliable close shot' },
+  2: { name: 'Jump Shot', energy: 7, type: 'attack', power: 20, pts: 2, desc: 'Balanced mid-range shot' },
+  3: { name: 'Three Pointer', energy: 10, type: 'attack', power: 17, pts: 3, desc: 'Risky long range - 3 pts!' },
+  4: { name: 'Block', energy: 5, type: 'attack', power: 10, pts: 0, desc: 'Halve next enemy strike', special: true },
+  5: { name: 'Steal', energy: 7, type: 'attack', power: 10, pts: 0, desc: 'Low damage, keeps pressure', special: true },
+  6: { name: 'Crossover', energy: 8, type: 'attack', power: 26, pts: 2, desc: 'High-skill drive' },
+  7: { name: 'Dunk', energy: 14, type: 'attack', power: 34, pts: 2, desc: 'Powerful but expensive!' },
+  8: { name: 'Court Vision', energy: 4, type: 'buff', desc: 'Boost next shot accuracy' },
 };
 
 // Trainers
 const trainers = [
-  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#404040', body: '#404040', pants: '#202020' }, dialogue: "Hey! You think you can handle a basketball? Let's see!", beaten: false, playerHp: 80, playerEnergy: 15, level: 1, ptsToWin: 15 },
-  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#ff6b6b', body: '#ff6b6b', pants: '#402020' }, dialogue: "Hallo! Time for a little one-on-one!", beaten: false, playerHp: 100, playerEnergy: 20, level: 2, ptsToWin: 18 },
-  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#2ecc71', body: '#2ecc71', pants: '#1a3a1a' }, dialogue: "Schalibim! Nobody gets past me!", beaten: false, playerHp: 100, playerEnergy: 20, level: 3, ptsToWin: 21 },
-  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#e67e22', body: '#e67e22', pants: '#3a2a1a' }, dialogue: "Ready for some real competition?", beaten: false, playerHp: 110, playerEnergy: 22, level: 4, ptsToWin: 21 },
-  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#9b59b6', body: '#9b59b6', pants: '#2a1a3a' }, dialogue: "I am Coach Mihler. You have trained hard. Now face me!", beaten: false, playerHp: 130, playerEnergy: 25, level: 5, ptsToWin: 21 },
+  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#404040', body: '#404040', pants: '#202020' }, dialogue: "Hey! You think you can handle a basketball? Let's see!", beaten: false, playerHp: 75, enemyEnergy: 16, level: 1, ptsToWin: 11, offense: 2, defense: 1, regen: 3, expReward: 22, aiStyle: 'Rookie' },
+  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#ff6b6b', body: '#ff6b6b', pants: '#402020' }, dialogue: "Hallo! Time for a little one-on-one!", beaten: false, playerHp: 92, enemyEnergy: 18, level: 2, ptsToWin: 15, offense: 4, defense: 2, regen: 3, expReward: 30, aiStyle: 'Shooter' },
+  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#2ecc71', body: '#2ecc71', pants: '#1a3a1a' }, dialogue: "Schalibim! Nobody gets past me!", beaten: false, playerHp: 108, enemyEnergy: 20, level: 3, ptsToWin: 18, offense: 5, defense: 4, regen: 3, expReward: 40, aiStyle: 'Defender' },
+  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#e67e22', body: '#e67e22', pants: '#3a2a1a' }, dialogue: "Ready for some real competition?", beaten: false, playerHp: 122, enemyEnergy: 23, level: 4, ptsToWin: 21, offense: 7, defense: 5, regen: 4, expReward: 52, aiStyle: 'Playmaker' },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#9b59b6', body: '#9b59b6', pants: '#2a1a3a' }, dialogue: "I am Coach Mihler. You have trained hard. Now face me!", beaten: false, playerHp: 145, enemyEnergy: 26, level: 5, ptsToWin: 21, offense: 9, defense: 7, regen: 4, expReward: 68, aiStyle: 'Coach' },
 ];
 
 // Battle state
@@ -821,6 +821,7 @@ let battle = {
   subMessage: '',
   playerEnergy: 20,
   enemyEnergy: 20,
+  enemyMaxEnergy: 20,
   playerHp: 100,
   enemyHp: 100,
   ballOwner: 'player', // who has the ball
@@ -930,16 +931,21 @@ function startBattle(trainer) {
   battle.phase = 'select';
   battle.selectedMove = 0;
   battle.playerEnergy = player.energy;
-  battle.enemyEnergy = 20;
+  battle.enemyMaxEnergy = trainer.enemyEnergy || 20;
+  battle.enemyEnergy = battle.enemyMaxEnergy;
   battle.playerHp = player.hp;
   battle.enemyHp = trainer.playerHp;
   battle.ballOwner = 'player';
   battle.hasBall = true;
   battle.turnCount = 0;
+  battle.playerBlockNext = false;
+  battle.enemyBlockNext = false;
+  battle.playerBuffed = false;
+  battle.enemyBuffed = false;
   battle.playerMoves = getPlayerMoves();
   battle.enemyMoves = getEnemyMoves(trainer.level);
   battle.message = trainer.name + ' wants to battle!';
-  battle.subMessage = 'First to ' + trainer.ptsToWin + ' points wins!';
+  battle.subMessage = 'LV ' + trainer.level + ' ' + trainer.aiStyle + ' - first to ' + trainer.ptsToWin;
 }
 
 function calculateDamage(move, attacker, defender) {
@@ -1003,7 +1009,7 @@ function executePlayerMove() {
     setTimeout(() => endTurn(), 1000);
   } else {
     // Attack move
-    const calc = calculateDamage(move, player, { stats: { defense: battle.currentTrainer.level * 2 } });
+    const calc = calculateDamage(move, player, { stats: { defense: battle.currentTrainer.defense || battle.currentTrainer.level * 2 } });
 
     let accuracy = calc.accuracy;
     if (battle.playerBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.playerBuffed = false; }
@@ -1027,18 +1033,47 @@ function executePlayerMove() {
   }
 }
 
+function chooseEnemyMove(availableMoves) {
+  const trainer = battle.currentTrainer;
+  const behind = battle.enemyScore < battle.playerScore;
+  const lowHp = battle.enemyHp < trainer.playerHp * 0.35;
+  const canShootThree = availableMoves.filter(m => m.pts === 3);
+  const canDefend = availableMoves.filter(m => m.special || m.type === 'buff');
+
+  // Late-game trainers play smarter: catch up with threes, protect low HP,
+  // otherwise favor efficient two-pointers over pure randomness.
+  if (behind && trainer.level >= 3 && canShootThree.length && Math.random() < 0.55) {
+    return canShootThree[Math.floor(Math.random() * canShootThree.length)];
+  }
+  if (lowHp && canDefend.length && Math.random() < 0.45) {
+    return canDefend[Math.floor(Math.random() * canDefend.length)];
+  }
+
+  const weighted = [];
+  availableMoves.forEach(move => {
+    let weight = 2;
+    if (move.pts === 2) weight += 2;
+    if (move.pts === 3 && trainer.aiStyle === 'Shooter') weight += 3;
+    if (move.name === 'Block' && trainer.aiStyle === 'Defender') weight += 4;
+    if (move.name === 'Court Vision' && trainer.aiStyle === 'Playmaker') weight += 3;
+    if ((move.energy || 0) > battle.enemyEnergy - 2) weight -= 1;
+    for (let i = 0; i < Math.max(1, weight); i++) weighted.push(move);
+  });
+  return weighted[Math.floor(Math.random() * weighted.length)];
+}
+
 function executeEnemyMove() {
   const availableMoves = battle.enemyMoves.filter(m => battle.enemyEnergy >= (m.energy || 0));
   if (availableMoves.length === 0) {
     // Skip turn to regain energy
-    battle.enemyEnergy = Math.min(25, battle.enemyEnergy + 5);
+    battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5);
     battle.message = battle.currentTrainer.name + ' rests...';
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
     return;
   }
 
-  const move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+  const move = chooseEnemyMove(availableMoves);
   battle.enemyEnergy -= (move.energy || 0);
   battle.phase = 'anim';
   battle.animTimer = 60;
@@ -1051,8 +1086,8 @@ function executeEnemyMove() {
   } else if (move.special && move.name === 'Steal') {
     const success = Math.random() < (0.3 + battle.currentTrainer.level * 0.05);
     if (success) {
-      const dmg = 8 + Math.floor(Math.random() * 5);
-      if (battle.enemyBlockNext) { dmg = Math.floor(dmg / 2); battle.enemyBlockNext = false; }
+      let dmg = 8 + Math.floor(Math.random() * 5);
+      if (battle.playerBlockNext) { dmg = Math.floor(dmg / 2); battle.playerBlockNext = false; }
       battle.playerHp -= dmg;
       battle.message = battle.currentTrainer.name + ' steals! -' + dmg + ' HP';
       battle.ballOwner = 'enemy';
@@ -1068,7 +1103,7 @@ function executeEnemyMove() {
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else {
-    const calc = calculateDamage(move, { stats: { shooting: battle.currentTrainer.level * 2 } }, { stats: { defense: player.stats.defense } });
+    const calc = calculateDamage(move, { stats: { shooting: battle.currentTrainer.offense || battle.currentTrainer.level * 2 } }, { stats: { defense: player.stats.defense } });
 
     let accuracy = calc.accuracy;
     if (battle.enemyBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.enemyBuffed = false; }
@@ -1127,8 +1162,8 @@ function endTurn() {
     battle.phase = 'select';
     battle.selectedMove = 0;
     // Energy regen
-    battle.playerEnergy = Math.min(player.maxEnergy, battle.playerEnergy + 2);
-    battle.enemyEnergy = Math.min(25, battle.enemyEnergy + 2);
+    battle.playerEnergy = Math.min(player.maxEnergy, battle.playerEnergy + 3);
+    battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + (battle.currentTrainer.regen || 3));
   } else {
     battle.playerTurn = false;
     battle.phase = 'anim';
@@ -1145,7 +1180,7 @@ function winBattle() {
   }
 
   // EXP gain
-  const expGain = 15 + trainer.level * 10;
+  const expGain = trainer.expReward || (15 + trainer.level * 10);
   player.exp += expGain;
   battle.message = 'Gained ' + expGain + ' EXP!';
   battle.subMessage = '';
@@ -1859,6 +1894,8 @@ function drawBattleHUD() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = '8px monospace';
   ctx.fillText('LV ' + player.level, 14, VIEW_H - 60);
+  ctx.font = '7px monospace';
+  ctx.fillText('REG +3', 164, VIEW_H - 52);
 
   // HP bar
   ctx.fillStyle = C.DARK;
@@ -1876,7 +1913,7 @@ function drawBattleHUD() {
   ctx.fillStyle = '#2a5a9a';
   ctx.fillRect(62, VIEW_H - 46, enWidth, 4);
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText('EN ' + battle.playerEnergy + '/' + (player.maxEnergy + 3), 14, VIEW_H - 52);
+  ctx.fillText('EN ' + battle.playerEnergy + '/' + player.maxEnergy, 14, VIEW_H - 52);
 
   // Enemy stats box (top right or bottom right)
   ctx.fillStyle = C.DARK;
@@ -1902,11 +1939,13 @@ function drawBattleHUD() {
 
   ctx.fillStyle = C.DARK;
   ctx.fillRect(VIEW_W - 140, VIEW_H - 48, 100, 8);
-  const eEnWidth = Math.max(0, (battle.enemyEnergy / 25) * 96);
+  const eEnWidth = Math.max(0, (battle.enemyEnergy / battle.enemyMaxEnergy) * 96);
   ctx.fillStyle = '#2a5a9a';
   ctx.fillRect(VIEW_W - 138, VIEW_H - 46, eEnWidth, 4);
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText('EN ' + battle.enemyEnergy, VIEW_W - 196, VIEW_H - 52);
+  ctx.fillText('EN ' + battle.enemyEnergy + '/' + battle.enemyMaxEnergy, VIEW_W - 196, VIEW_H - 52);
+  ctx.font = '7px monospace';
+  ctx.fillText((battle.currentTrainer.aiStyle || 'Trainer') + '  Ziel ' + battle.currentTrainer.ptsToWin, VIEW_W - 196, VIEW_H - 34);
 
   // Message area
   if (battle.message && battle.phase !== 'select') {

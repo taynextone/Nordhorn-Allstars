@@ -45,7 +45,7 @@
 - [x] Minimap (Toggle mit M, zeigt Spieler, Trainer, Karten-Layout)
 
 ## Phase 5: Feinschliff
-- [ ] Balance-Tuning (Stats, Moves, Level)
+- [x] Balance-Tuning (Stats, Moves, Level) — Moves/Energie-Kosten, Trainer-HP/EN/EXP, smartere Gegner-KI und Battle-HUD-Anzeigen abgestimmt
 - [x] Easter Eggs (Konami-Code: +5 alle Stats, +20 HP)
 - [x] Credits-Screen (Scrolling-Title, Team, Trainer, Locations)
 - [ ] Performance-Optimierung
