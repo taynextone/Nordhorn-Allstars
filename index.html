@@ -1228,6 +1228,61 @@ window.addEventListener('keyup', (e) => {
   keys[e.key] = false;
 });
 
+const ControlsHelp = {
+  visible: false,
+  rows: [
+    ['ARROWS / DPAD', 'Walk / menu select'],
+    ['ENTER / A', 'Start / confirm / shoot'],
+    ['SPACE / B', 'Dialog / action'],
+    ['M', 'Toggle minimap'],
+    ['H / ?', 'Show this coach card'],
+    ['C', 'Credits from title']
+  ],
+
+  toggle() {
+    this.visible = !this.visible;
+  },
+
+  renderHint(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('H/? CONTROLS', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderOverlay() {
+    if (!this.visible) return;
+    const w = 260;
+    const h = 126;
+    const x = Math.floor((VIEW_W - w) / 2);
+    const y = Math.floor((VIEW_H - h) / 2);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(x + 8, y + 8, w - 16, 17);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('COACH-CARD: CONTROLS', VIEW_W / 2, y + 20);
+    ctx.textAlign = 'left';
+    ctx.font = '7px monospace';
+    this.rows.forEach((row, index) => {
+      const rowY = y + 42 + index * 12;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillText(row[0], x + 18, rowY);
+      ctx.fillStyle = C.DARK;
+      ctx.fillText(row[1], x + 112, rowY);
+    });
+    ctx.fillStyle = C.DARKEST;
+    ctx.textAlign = 'center';
+    ctx.fillText('Press H or ? to close', VIEW_W / 2, y + h - 12);
+    ctx.textAlign = 'left';
+  }
+};
+
 function wasPressed(key) {
   if (keysPressed[key]) { keysPressed[key] = false; return true; }
   return false;
@@ -1723,6 +1778,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
   ctx.fillText('UP/DOWN Select  ENTER Start  C: Credits', bx, 354);
+  ControlsHelp.renderHint(bx, 364);
 
   // Cross-browser status (visible smoke-test marker)
   BrowserCompat.renderBadge(bx, 374);
@@ -1741,7 +1797,7 @@ function drawTitleScreen() {
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR', bx, 421);
+  ctx.fillText('GITHUB PAGES READY · SAVE READY · QUEST RADAR · CONTROLS HELP', bx, 421);
 
   // Footer
   ctx.fillStyle = C.DARK;
@@ -2543,6 +2599,10 @@ function gameLoop() {
     ctx.fillStyle = C.LIGHT;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
+    if (wasPressed('h') || wasPressed('H') || wasPressed('?')) {
+      ControlsHelp.toggle();
+    }
+
     switch (gameState) {
       case 'TITLE':
         drawTitleScreen();
@@ -2616,6 +2676,7 @@ function gameLoop() {
     }
 
     SaveSystem.renderToast();
+    ControlsHelp.renderOverlay();
     ErrorGuard.renderOverlay();
   }, () => {
     ctx.fillStyle = C.DARKEST;
@@ -2703,6 +2764,7 @@ const GameModules = {
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
     { id: 'quest', label: 'Quest Radar', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderHUD === 'function') },
+    { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 6) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
     { id: 'errors', label: 'Error Guard', check: () => !!(ErrorGuard && typeof ErrorGuard.safe === 'function') },
