@@ -51,8 +51,9 @@
 - [x] Performance-Optimierung — Minimap-Tilelayer gecacht (4.200 Draws → 1 drawImage/Frame) und sichtbarer FPS-HUD ergänzt
 - [x] Cross-Browser-Test — sichtbarer Compat-Check auf dem Titelbild, rAF/performance-Polyfills, Safe-Area/dvh-Fallbacks; Chromium file:// Smoke-Test OK, Firefox-Headless in dieser Sandbox blockiert.
 - [x] Deployment (GitHub Pages) — Pages-Actions-Workflow, .nojekyll, README-Link und sichtbarer Title-Screen-Deploy-Marker ergänzt.
+- [x] Quick-Continue Save-Slot — Titelbild zeigt NEW GAME/CONTINUE, Siege/Rast werden in LocalStorage gespeichert und alte Dialog-Callbacks werden sicher bereinigt.
 
 ## Technische Schulden
-- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 13 Boot-Checks und Title-Screen-Status ergänzt
+- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 14 Boot-Checks und Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt

@@ -942,6 +942,7 @@ function drawTrainerSprite(trainer, camX, camY) {
 let gameState = 'TITLE'; // TITLE, CHARSELECT, OVERWORLD, BATTLE, DIALOG, LOST, CREDITS
 let frameCount = 0;
 let animFrame = 0;
+let titleSelection = 0; // 0 = New Game, 1 = Continue (when a save exists)
 
 // Player data
 const player = {
@@ -1037,6 +1038,150 @@ let charSelect = {
   nameIndex: 0,
   blinkTimer: 0,
 };
+
+// ============================================================
+// SAVE SYSTEM (LocalStorage quick-continue)
+// ============================================================
+
+const SaveSystem = {
+  STORAGE_KEY: 'nordhorn_allstars_save_v2',
+  lastMessage: '',
+  toastTimer: 0,
+
+  hasSave() {
+    try { return !!localStorage.getItem(this.STORAGE_KEY); }
+    catch (err) { return false; }
+  },
+
+  collect() {
+    return {
+      version: 2,
+      savedAt: new Date().toISOString(),
+      player: {
+        x: player.x, y: player.y, facing: player.facing,
+        gender: player.gender, build: player.build,
+        level: player.level, exp: player.exp, expNext: player.expNext,
+        maxHp: player.maxHp, hp: player.hp,
+        maxEnergy: player.maxEnergy, energy: player.energy,
+        stats: { ...player.stats },
+        moves: [...player.moves],
+        beatenTrainers: [...player.beatenTrainers],
+        rivalBeaten: player.rivalBeaten,
+      },
+      trainers: trainers.map(t => ({ id: t.id, beaten: !!t.beaten })),
+    };
+  },
+
+  save(reason = 'Progress saved') {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.collect()));
+      this.lastMessage = reason;
+      this.toastTimer = 120;
+      return true;
+    } catch (err) {
+      this.lastMessage = 'Save failed';
+      this.toastTimer = 120;
+      return false;
+    }
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (!data || !data.player) return false;
+      const p = data.player;
+      player.x = p.x ?? 5;
+      player.y = p.y ?? 6;
+      player.facing = p.facing || 'down';
+      player.moving = false;
+      player.gender = p.gender || 'boy';
+      player.build = p.build || 'shooter';
+      player.level = p.level || 1;
+      player.exp = p.exp || 0;
+      player.expNext = p.expNext || 20;
+      player.maxHp = p.maxHp || 100;
+      player.hp = Math.min(p.hp ?? player.maxHp, player.maxHp);
+      player.maxEnergy = p.maxEnergy || 20;
+      player.energy = Math.min(p.energy ?? player.maxEnergy, player.maxEnergy);
+      player.stats = { ...player.stats, ...(p.stats || {}) };
+      player.moves = Array.isArray(p.moves) ? [...p.moves] : ['Layup', 'Jump Shot'];
+      player.beatenTrainers = Array.isArray(p.beatenTrainers) ? [...p.beatenTrainers] : [];
+      player.rivalBeaten = !!p.rivalBeaten;
+      trainers.forEach(t => { t.beaten = player.beatenTrainers.includes(t.id); });
+      if (Array.isArray(data.trainers)) {
+        data.trainers.forEach(saved => {
+          const trainer = trainers.find(t => t.id === saved.id);
+          if (trainer) trainer.beaten = !!saved.beaten;
+        });
+      }
+      gameState = 'OVERWORLD';
+      startDialog('Save geladen!', 'Weiter geht es in Nordhorn.');
+      this.lastMessage = 'Save loaded';
+      this.toastTimer = 120;
+      return true;
+    } catch (err) {
+      this.lastMessage = 'Save corrupt';
+      this.toastTimer = 120;
+      return false;
+    }
+  },
+
+  clear() {
+    try { localStorage.removeItem(this.STORAGE_KEY); } catch (err) {}
+    this.toastTimer = 0;
+    this.lastMessage = '';
+  },
+
+  getInfo() {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      const p = data.player || {};
+      const date = data.savedAt ? new Date(data.savedAt) : null;
+      return {
+        level: p.level || 1,
+        beaten: Array.isArray(p.beatenTrainers) ? p.beatenTrainers.length : 0,
+        time: date ? date.toLocaleDateString('de-DE') : 'unbekannt',
+      };
+    } catch (err) { return null; }
+  },
+
+  renderToast() {
+    if (this.toastTimer <= 0) return;
+    this.toastTimer--;
+    const alpha = Math.min(1, this.toastTimer / 30);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(VIEW_W - 118, VIEW_H - 34, 112, 18);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SAVE ' + this.lastMessage, VIEW_W - 62, VIEW_H - 22);
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+  }
+};
+
+function resetRunProgress() {
+  player.x = 5;
+  player.y = 6;
+  player.facing = 'down';
+  player.moving = false;
+  player.level = 1;
+  player.exp = 0;
+  player.expNext = 20;
+  player.maxHp = 100;
+  player.hp = 100;
+  player.maxEnergy = 20;
+  player.energy = 20;
+  player.moves = ['Layup', 'Jump Shot'];
+  player.beatenTrainers = [];
+  player.rivalBeaten = false;
+  trainers.forEach(t => { t.beaten = false; });
+}
 
 // ============================================================
 // EASTER EGG SYSTEM
@@ -1397,6 +1542,7 @@ function winBattle() {
     }
   }
 
+  SaveSystem.save('Victory saved');
   battle.phase = 'result';
   setTimeout(() => endBattle(), 2000);
 }
@@ -1409,6 +1555,7 @@ function loseBattle() {
     player.energy = player.maxEnergy;
     player.x = 5;
     player.y = 6;
+    SaveSystem.save('Rest saved');
     gameState = 'OVERWORLD';
     startDialog("You went home to rest...", "Mom: Feel better soon!");
   }, 2000);
@@ -1424,7 +1571,7 @@ function endBattle() {
 // DIALOG SYSTEM
 // ============================================================
 
-function startDialog(text, subText) {
+function startDialog(text, subText, onComplete = null) {
   dialog.active = true;
   dialog.text = text;
   dialog.subText = subText || '';
@@ -1432,6 +1579,7 @@ function startDialog(text, subText) {
   dialog.charIndex = 0;
   dialog.timer = 0;
   dialog.typing = true;
+  dialog.onComplete = onComplete;
 }
 
 function updateDialog() {
@@ -1453,7 +1601,9 @@ function updateDialog() {
       dialog.typing = false;
     } else {
       dialog.active = false;
-      if (dialog.onComplete) dialog.onComplete();
+      const onComplete = dialog.onComplete;
+      dialog.onComplete = null;
+      if (onComplete) onComplete();
     }
   }
 
@@ -1553,18 +1703,26 @@ function drawTitleScreen() {
   ctx.font = '10px monospace';
   ctx.fillText('BASKETBALL RPG', bx, 250);
 
-  // Press enter
+  // New/Continue menu
+  const hasSave = SaveSystem.hasSave();
+  if (!hasSave) titleSelection = 0;
+  const saveInfo = SaveSystem.getInfo();
   const blink = Math.floor(Date.now() / 500) % 2;
-  if (blink) {
-    ctx.fillStyle = C.DARKEST;
-    ctx.font = '10px monospace';
-    ctx.fillText('PRESS ENTER', bx, 320);
+  ctx.font = '10px monospace';
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillText((titleSelection === 0 && blink ? '> ' : '  ') + 'NEW GAME', bx, 306);
+  ctx.fillStyle = hasSave ? C.DARKEST : C.MID;
+  ctx.fillText((titleSelection === 1 && blink ? '> ' : '  ') + 'CONTINUE', bx, 322);
+  if (saveInfo) {
+    ctx.font = '7px monospace';
+    ctx.fillStyle = C.DARK;
+    ctx.fillText('LV ' + saveInfo.level + ' · WINS ' + saveInfo.beaten + '/5 · ' + saveInfo.time, bx, 334);
   }
 
   // Credits option
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('C: Credits', bx, 350);
+  ctx.fillText('UP/DOWN Select  ENTER Start  C: Credits', bx, 354);
 
   // Cross-browser status (visible smoke-test marker)
   BrowserCompat.renderBadge(bx, 374);
@@ -1583,7 +1741,7 @@ function drawTitleScreen() {
   // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES READY', bx, 421);
+  ctx.fillText('GITHUB PAGES READY · SAVE READY', bx, 421);
 
   // Footer
   ctx.fillStyle = C.DARK;
@@ -1697,6 +1855,8 @@ function updateCharSelect() {
 }
 
 function applyCharacterCreation() {
+  SaveSystem.clear();
+  resetRunProgress();
   player.gender = charSelect.gender === 0 ? 'boy' : 'girl';
 
   const buildNames = ['shooter', 'allrounder', 'defender'];
@@ -1984,8 +2144,7 @@ function checkTrainerEncounter() {
       else if (player.y < t.y) player.facing = 'down';
       else player.facing = 'up';
 
-      startDialog(t.dialogue, '');
-      dialog.onComplete = () => startBattle(t);
+      startDialog(t.dialogue, '', () => startBattle(t));
       gameState = 'DIALOG';
       return;
     }
@@ -2315,11 +2474,19 @@ function gameLoop() {
     switch (gameState) {
       case 'TITLE':
         drawTitleScreen();
+        if (SaveSystem.hasSave() && (wasPressed('ArrowUp') || wasPressed('ArrowDown'))) {
+          titleSelection = titleSelection === 0 ? 1 : 0;
+        }
         if (wasPressed('Enter')) {
-          gameState = 'CHARSELECT';
-          charSelect.phase = 'gender';
-          charSelect.gender = 0;
-          charSelect.build = 0;
+          if (titleSelection === 1 && SaveSystem.hasSave()) {
+            if (!SaveSystem.load()) titleSelection = 0;
+          } else {
+            SaveSystem.clear();
+            gameState = 'CHARSELECT';
+            charSelect.phase = 'gender';
+            charSelect.gender = 0;
+            charSelect.build = 0;
+          }
         }
         if (wasPressed('c')) {
           gameState = 'CREDITS';
@@ -2376,6 +2543,7 @@ function gameLoop() {
         break;
     }
 
+    SaveSystem.renderToast();
     ErrorGuard.renderOverlay();
   }, () => {
     ctx.fillStyle = C.DARKEST;
@@ -2465,6 +2633,7 @@ const GameModules = {
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
     { id: 'errors', label: 'Error Guard', check: () => !!(ErrorGuard && typeof ErrorGuard.safe === 'function') },
+    { id: 'save', label: 'Save/Continue', check: () => !!(SaveSystem && typeof SaveSystem.save === 'function' && typeof SaveSystem.load === 'function') },
   ],
   showPanel: window.location.search.indexOf('modules=1') !== -1,
 
