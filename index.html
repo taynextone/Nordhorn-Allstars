@@ -1750,6 +1750,86 @@ const ShotQualityAdvisor = {
   }
 };
 
+const DefenseRead = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    if (!trainer) {
+      return { threat: 0, label: 'NO RIVAL', advice: 'WAIT', bestMove: 'NONE', energy: 0, canShoot: false };
+    }
+
+    const availableMoves = (battle.enemyMoves || []).filter(m => battle.enemyEnergy >= (m.energy || 0));
+    const bestMove = availableMoves.reduce((best, move) => {
+      const bestPts = best ? (best.pts || 0) : -1;
+      const movePts = move.pts || 0;
+      if (movePts > bestPts) return move;
+      if (movePts === bestPts && (move.power || 0) > ((best && best.power) || 0)) return move;
+      return best;
+    }, null);
+
+    const target = trainer.ptsToWin || 21;
+    const enemyNeed = Math.max(0, target - (battle.enemyScore || 0));
+    const playerLead = (battle.playerScore || 0) - (battle.enemyScore || 0);
+    const canShoot = !!bestMove;
+    let threat = (trainer.offense || trainer.level || 1) * 6;
+    threat += canShoot ? (bestMove.pts || 0) * 12 : -18;
+    threat += enemyNeed <= 5 ? 12 : 0;
+    threat += playerLead < 0 ? 10 : 0;
+    threat -= battle.enemyEnergy <= 3 ? 16 : 0;
+    threat = Math.max(0, Math.min(100, Math.round(threat)));
+
+    let label = 'SET DEFENSE';
+    let advice = 'CONTEST SHOT';
+    if (!canShoot) {
+      label = 'LOW ENERGY';
+      advice = 'PRESS NOW';
+    } else if (threat >= 75) {
+      label = 'DANGER READ';
+      advice = 'PROTECT ARC';
+    } else if ((bestMove.pts || 0) >= 3) {
+      label = 'ARC WARNING';
+      advice = 'CLOSE OUT';
+    } else if (battle.playerBlockNext) {
+      label = 'BLOCK READY';
+      advice = 'HOLD GROUND';
+    }
+
+    return { threat, label, advice, bestMove: bestMove ? bestMove.name : 'REST', energy: battle.enemyEnergy || 0, canShoot };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('DEFENSE READ · ENEMY TURN HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || battle.playerTurn || battle.phase === 'result' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = 228;
+    const y = VIEW_H - 140;
+    const w = 232;
+    const h = 60;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.threat >= 75 ? C.MID : C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('DEFENSE READ', x + 8, y + 14);
+    ctx.font = '7px monospace';
+    ctx.fillText(info.label + ' · ' + info.threat + '%', x + 8, y + 29);
+    ctx.fillText(info.bestMove.substring(0, 16) + '  EN ' + info.energy, x + 8, y + 42);
+    ctx.fillText(info.advice, x + 126, y + 42);
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(x + 126, y + 24, 92, 5);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x + 126, y + 24, Math.floor(92 * (info.threat / 100)), 5);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2367,6 +2447,7 @@ function drawTitleScreen() {
   // Subtitle
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
+  DefenseRead.renderTitleBadge(bx, 178);
   ShotQualityAdvisor.renderTitleBadge(bx, 240);
   ctx.fillText('BASKETBALL RPG', bx, 250);
   PossessionCoach.renderTitleBadge(bx, 262);
@@ -2959,6 +3040,7 @@ function drawBattle() {
   PossessionCoach.renderBattleHUD();
   MomentumMeter.renderBattleHUD();
   ClutchAlert.renderBattleHUD();
+  DefenseRead.renderBattleHUD();
 
   // Player side
   drawBattlePlayer(100, 280);
@@ -3414,6 +3496,7 @@ const GameModules = {
     { id: 'momentumMeter', label: 'Momentum Meter', check: () => !!(MomentumMeter && typeof MomentumMeter.getState === 'function' && typeof MomentumMeter.renderBattleHUD === 'function' && MomentumMeter.getState().value >= 0) },
     { id: 'clutchAlert', label: 'Clutch Alert', check: () => !!(ClutchAlert && typeof ClutchAlert.getState === 'function' && typeof ClutchAlert.renderBattleHUD === 'function' && ClutchAlert.getState().playerNeed >= 0) },
     { id: 'shotQuality', label: 'Shot Quality', check: () => !!(ShotQualityAdvisor && typeof ShotQualityAdvisor.getState === 'function' && typeof ShotQualityAdvisor.renderBattleHUD === 'function' && ShotQualityAdvisor.getState().chance >= 0) },
+    { id: 'defenseRead', label: 'Defense Read', check: () => !!(DefenseRead && typeof DefenseRead.getState === 'function' && typeof DefenseRead.renderBattleHUD === 'function' && DefenseRead.getState().threat >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
