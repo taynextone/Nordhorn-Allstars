@@ -1830,6 +1830,63 @@ const DefenseRead = {
   }
 };
 
+const ComebackCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const margin = playerScore - enemyScore;
+    const playerNeed = Math.max(0, target - playerScore);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const possessionsLeft = Math.max(1, Math.ceil(Math.max(playerNeed, enemyNeed) / 3));
+    let label = 'CONTROL TEMPO';
+    let advice = battle.hasBall ? 'QUALITY SHOT' : 'ONE STOP';
+    if (margin <= -6) {
+      label = 'COMEBACK RUN';
+      advice = battle.hasBall ? '3PT OR SETUP' : 'TRAP PRESS';
+    } else if (margin < 0) {
+      label = 'CHIP AWAY';
+      advice = battle.hasBall ? 'SCORE NOW' : 'FORCE MISS';
+    } else if (margin >= 6) {
+      label = 'PROTECT LEAD';
+      advice = battle.hasBall ? 'SAFE POSSESSION' : 'NO THREES';
+    } else if (playerNeed <= 3) {
+      label = 'WINNING LOOK';
+      advice = battle.hasBall ? 'TAKE BEST SHOT' : 'GET BALL BACK';
+    }
+    return { margin, target, playerScore, enemyScore, playerNeed, enemyNeed, possessionsLeft, label, advice };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('COMEBACK COACH · SCORE-RUN HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = Math.floor((VIEW_W - 176) / 2);
+    const y = 154;
+    const w = 176;
+    const h = 28;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.margin < 0 ? C.MID : C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    const sign = info.margin > 0 ? '+' : '';
+    ctx.fillText('RUN PLAN ' + sign + info.margin + ' · ' + info.label, x + 8, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('NEED ' + info.playerNeed + '/' + info.target + ' · ' + info.advice, x + 8, y + 23);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2447,6 +2504,7 @@ function drawTitleScreen() {
   // Subtitle
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
+  ComebackCoach.renderTitleBadge(bx, 168);
   DefenseRead.renderTitleBadge(bx, 178);
   ShotQualityAdvisor.renderTitleBadge(bx, 240);
   ctx.fillText('BASKETBALL RPG', bx, 250);
@@ -3040,6 +3098,7 @@ function drawBattle() {
   PossessionCoach.renderBattleHUD();
   MomentumMeter.renderBattleHUD();
   ClutchAlert.renderBattleHUD();
+  ComebackCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -3497,6 +3556,7 @@ const GameModules = {
     { id: 'clutchAlert', label: 'Clutch Alert', check: () => !!(ClutchAlert && typeof ClutchAlert.getState === 'function' && typeof ClutchAlert.renderBattleHUD === 'function' && ClutchAlert.getState().playerNeed >= 0) },
     { id: 'shotQuality', label: 'Shot Quality', check: () => !!(ShotQualityAdvisor && typeof ShotQualityAdvisor.getState === 'function' && typeof ShotQualityAdvisor.renderBattleHUD === 'function' && ShotQualityAdvisor.getState().chance >= 0) },
     { id: 'defenseRead', label: 'Defense Read', check: () => !!(DefenseRead && typeof DefenseRead.getState === 'function' && typeof DefenseRead.renderBattleHUD === 'function' && DefenseRead.getState().threat >= 0) },
+    { id: 'comebackCoach', label: 'Comeback Coach', check: () => !!(ComebackCoach && typeof ComebackCoach.getState === 'function' && typeof ComebackCoach.renderBattleHUD === 'function' && ComebackCoach.getState().playerNeed >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
