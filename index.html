@@ -1614,6 +1614,67 @@ const MomentumMeter = {
   }
 };
 
+const ClutchAlert = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const playerNeed = Math.max(0, target - playerScore);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const inClutch = playerNeed <= 5 || enemyNeed <= 5;
+    let label = 'BUILD THE LEAD';
+    let advice = 'KEEP SCORING';
+    if (playerNeed === 0) {
+      label = 'GAME POINT WON';
+      advice = 'CELEBRATE';
+    } else if (enemyNeed === 0) {
+      label = 'GAME POINT LOST';
+      advice = 'REST + REMATCH';
+    } else if (playerNeed <= 3 && enemyNeed <= 3) {
+      label = 'DOUBLE CLUTCH';
+      advice = battle.hasBall ? 'TAKE THE SHOT' : 'FORCE A MISS';
+    } else if (playerNeed <= 3) {
+      label = 'CLOSEOUT CHANCE';
+      advice = battle.hasBall ? 'FINISH NOW' : 'GET ONE STOP';
+    } else if (enemyNeed <= 3) {
+      label = 'DANGER POSSESSION';
+      advice = 'DEFEND THE ARC';
+    } else if (inClutch) {
+      label = 'CLUTCH TIME';
+      advice = battle.hasBall ? 'VALUE THE BALL' : 'LOCK IN';
+    }
+    return { target, playerScore, enemyScore, playerNeed, enemyNeed, inClutch, label, advice };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('CLUTCH ALERT · ENDGAME DUEL HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = Math.floor((VIEW_W - 176) / 2);
+    const y = 124;
+    const w = 176;
+    const h = 28;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.inClutch ? '#d4600a' : C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('CLUTCH: ' + info.label, x + 8, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('NEED ' + info.playerNeed + ' · RIVAL ' + info.enemyNeed + ' · ' + info.advice, x + 8, y + 23);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2224,6 +2285,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
+  ClutchAlert.renderTitleBadge(bx, 188);
   ctx.fillText('NORDHORN', bx, 200);
   ctx.fillText('ALL STARS', bx, 224);
 
@@ -2820,6 +2882,7 @@ function drawBattle() {
   // Live possession coach: keeps the basketball objective visible during duels.
   PossessionCoach.renderBattleHUD();
   MomentumMeter.renderBattleHUD();
+  ClutchAlert.renderBattleHUD();
 
   // Player side
   drawBattlePlayer(100, 280);
@@ -3272,6 +3335,7 @@ const GameModules = {
     { id: 'duelRisk', label: 'Duel Risk Meter', check: () => !!(DuelRiskMeter && typeof DuelRiskMeter.getAssessment === 'function' && DuelRiskMeter.getAssessment().risk >= 0 && typeof DuelRiskMeter.renderHUD === 'function') },
     { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
     { id: 'momentumMeter', label: 'Momentum Meter', check: () => !!(MomentumMeter && typeof MomentumMeter.getState === 'function' && typeof MomentumMeter.renderBattleHUD === 'function' && MomentumMeter.getState().value >= 0) },
+    { id: 'clutchAlert', label: 'Clutch Alert', check: () => !!(ClutchAlert && typeof ClutchAlert.getState === 'function' && typeof ClutchAlert.renderBattleHUD === 'function' && ClutchAlert.getState().playerNeed >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
