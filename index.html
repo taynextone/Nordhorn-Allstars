@@ -1509,6 +1509,65 @@ const DuelRiskMeter = {
   }
 };
 
+const RouteCoach = {
+  getState() {
+    const next = QuestRadar.getNextTrainer();
+    const readiness = BattlePrep.getReadiness();
+    const risk = DuelRiskMeter.getAssessment();
+    if (!next) {
+      return { mode: 'CHAMPION', target: 'CREDITS', arrow: '✓', distance: 0, advice: 'PRESS C ON TITLE' };
+    }
+
+    const homeDistance = HomeRest.getDistance();
+    const shouldRest = readiness.state === 'REST FIRST' || risk.status === 'REST';
+    const routeTarget = shouldRest ? 'HOME COURT' : next.name.toUpperCase().substring(0, 12);
+    const distance = shouldRest ? homeDistance : QuestRadar.getDistanceTo(next);
+    const arrow = shouldRest ? this.getArrowTo(HomeRest.homeX, HomeRest.homeY) : QuestRadar.getArrowTo(next);
+    let mode = shouldRest ? 'REST ROUTE' : 'ATTACK ROUTE';
+    let advice = shouldRest ? 'HEAL BEFORE DUEL' : 'CHASE NEXT RIVAL';
+    if (!shouldRest && risk.status === 'PREP') {
+      mode = 'PREP ROUTE';
+      advice = 'SAVE ENERGY';
+    }
+    return { mode, target: routeTarget, arrow, distance, advice };
+  },
+
+  getArrowTo(x, y) {
+    const dx = x - player.x;
+    const dy = y - player.y;
+    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) return '!';
+    if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? '→' : '←';
+    return dy > 0 ? '↓' : '↑';
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ROUTE COACH · SMART NEXT STEP HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderHUD() {
+    if (gameState !== 'OVERWORLD') return;
+    const info = this.getState();
+    const x = 300;
+    const y = 211;
+    const w = 176;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.mode === 'REST ROUTE' ? C.MID : C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(info.arrow + ' ' + info.mode + ' · ' + info.distance + 'm', x + 7, y + 13);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.target + ' · ' + info.advice, x + 7, y + 25);
+  }
+};
+
 const PossessionCoach = {
   getState() {
     const trainer = battle.currentTrainer;
@@ -2568,6 +2627,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
   StaminaCoach.renderTitleBadge(bx, 156);
+  RouteCoach.renderTitleBadge(bx, 146);
   ComebackCoach.renderTitleBadge(bx, 168);
   DefenseRead.renderTitleBadge(bx, 178);
   ShotQualityAdvisor.renderTitleBadge(bx, 240);
@@ -2936,6 +2996,7 @@ function drawOverworld() {
   RivalProgress.renderHUD();
   BattlePrep.renderHUD();
   DuelRiskMeter.renderHUD();
+  RouteCoach.renderHUD();
   CoachTip.renderHUD();
   PerfHUD.render();
 }
@@ -3616,6 +3677,7 @@ const GameModules = {
     { id: 'rivalProgress', label: 'Rival Progress', check: () => !!(RivalProgress && typeof RivalProgress.getStats === 'function' && typeof RivalProgress.renderHUD === 'function') },
     { id: 'battlePrep', label: 'Battle Prep HUD', check: () => !!(BattlePrep && typeof BattlePrep.getReadiness === 'function' && BattlePrep.getReadiness().score >= 0) },
     { id: 'duelRisk', label: 'Duel Risk Meter', check: () => !!(DuelRiskMeter && typeof DuelRiskMeter.getAssessment === 'function' && DuelRiskMeter.getAssessment().risk >= 0 && typeof DuelRiskMeter.renderHUD === 'function') },
+    { id: 'routeCoach', label: 'Route Coach', check: () => !!(RouteCoach && typeof RouteCoach.getState === 'function' && typeof RouteCoach.renderHUD === 'function' && RouteCoach.getState().distance >= 0) },
     { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
     { id: 'momentumMeter', label: 'Momentum Meter', check: () => !!(MomentumMeter && typeof MomentumMeter.getState === 'function' && typeof MomentumMeter.renderBattleHUD === 'function' && MomentumMeter.getState().value >= 0) },
     { id: 'clutchAlert', label: 'Clutch Alert', check: () => !!(ClutchAlert && typeof ClutchAlert.getState === 'function' && typeof ClutchAlert.renderBattleHUD === 'function' && ClutchAlert.getState().playerNeed >= 0) },
