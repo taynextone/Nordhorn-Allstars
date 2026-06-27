@@ -2538,6 +2538,77 @@ const FastbreakCoach = {
   }
 };
 
+const MismatchCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const playerBuild = (player.build || 'allrounder').toUpperCase();
+    const rivalBuild = trainer ? (trainer.build || trainer.aiStyle || 'ALLROUNDER').toUpperCase() : 'ALLROUNDER';
+    const hasBall = !!battle.hasBall;
+    const shooting = (player.stats && player.stats.shooting) || 1;
+    const athleticism = (player.stats && player.stats.athleticism) || 1;
+    const defense = (player.stats && player.stats.defense) || 1;
+    const rivalLevel = trainer ? (trainer.level || 1) : 1;
+    const levelGap = player.level - rivalLevel;
+    const energy = battle.playerEnergy ?? player.energy ?? 0;
+    const enPct = Math.round((energy / (player.maxEnergy || 1)) * 100);
+
+    let edge = 42 + levelGap * 4 + (hasBall ? 8 : -2);
+    if (playerBuild.indexOf('SHOOTER') !== -1) edge += shooting * 3;
+    if (playerBuild.indexOf('DEFENDER') !== -1) edge += defense * 3;
+    if (playerBuild.indexOf('ALLROUNDER') !== -1) edge += Math.round((shooting + athleticism + defense) * 1.2);
+    if (rivalBuild.indexOf('SHOOTER') !== -1 && !hasBall) edge -= 10;
+    if (rivalBuild.indexOf('VERTEIDIGER') !== -1 && hasBall) edge -= 8;
+    if (enPct <= 25) edge -= 14;
+    edge = Math.max(0, Math.min(100, Math.round(edge)));
+
+    let label = 'EVEN MATCH';
+    let advice = hasBall ? 'READ MATCHUP' : 'STAY SOLID';
+    if (edge >= 72) {
+      label = 'MISMATCH EDGE';
+      advice = hasBall ? 'ATTACK WEAK SIDE' : 'PRESS ADVANTAGE';
+    } else if (edge <= 34) {
+      label = 'BAD MATCHUP';
+      advice = hasBall ? 'CALL SCREEN' : 'HELP EARLY';
+    } else if (rivalBuild.indexOf('SHOOTER') !== -1 && !hasBall) {
+      label = 'CHASE SHOOTER';
+      advice = 'NO CLEAN LOOK';
+    } else if (rivalBuild.indexOf('VERTEIDIGER') !== -1 && hasBall) {
+      label = 'PULL BIG OUT';
+      advice = 'USE SPEED';
+    }
+
+    return { edge, label, advice, playerBuild, rivalBuild, levelGap, enPct, hasBall };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('MISMATCH COACH · BUILD-EDGE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = 10;
+    const y = 172;
+    const w = 152;
+    const h = 38;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.edge >= 72 ? '#d4600a' : (info.edge <= 34 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('MATCHUP ' + info.edge + '%', x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.label + ' · EN ' + info.enPct + '%', x + 7, y + 24);
+    ctx.fillText(info.advice, x + 78, y + 34);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3154,6 +3225,7 @@ function drawTitleScreen() {
   AssistCoach.renderTitleBadge(bx, 78);
   ReboundCoach.renderTitleBadge(bx, 88);
   FastbreakCoach.renderTitleBadge(bx, 98);
+  MismatchCoach.renderTitleBadge(bx, 108);
   ClutchAlert.renderTitleBadge(bx, 188);
   ctx.fillText('NORDHORN', bx, 200);
   ctx.fillText('ALL STARS', bx, 224);
@@ -3770,6 +3842,7 @@ function drawBattle() {
   AssistCoach.renderBattleHUD();
   ReboundCoach.renderBattleHUD();
   FastbreakCoach.renderBattleHUD();
+  MismatchCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -4238,6 +4311,7 @@ const GameModules = {
     { id: 'assistCoach', label: 'Assist Coach', check: () => !!(AssistCoach && typeof AssistCoach.getState === 'function' && typeof AssistCoach.renderBattleHUD === 'function' && AssistCoach.getState().assistValue >= 0) },
     { id: 'reboundCoach', label: 'Rebound Coach', check: () => !!(ReboundCoach && typeof ReboundCoach.getState === 'function' && typeof ReboundCoach.renderBattleHUD === 'function' && ReboundCoach.getState().reboundValue >= 0) },
     { id: 'fastbreakCoach', label: 'Fastbreak Coach', check: () => !!(FastbreakCoach && typeof FastbreakCoach.getState === 'function' && typeof FastbreakCoach.renderBattleHUD === 'function' && FastbreakCoach.getState().breakValue >= 0) },
+    { id: 'mismatchCoach', label: 'Mismatch Coach', check: () => !!(MismatchCoach && typeof MismatchCoach.getState === 'function' && typeof MismatchCoach.renderBattleHUD === 'function' && MismatchCoach.getState().edge >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

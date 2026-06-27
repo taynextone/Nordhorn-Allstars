@@ -81,3 +81,4 @@
 - [x] Assist-Coach Battle-HUD — sichtbare Extra-Pass-/Court-Vision-Anzeige mit Energie- und Ballbesitz-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Rebound-Coach Battle-HUD — sichtbare Second-Chance-/Boxout-Anzeige mit Rebound-Prozent, Energie-Hinweis, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Fastbreak-Coach Battle-HUD — sichtbare Transition-Offense-/Defense-Anzeige mit Tempo-Prozent, Laufweg-Tipp, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Mismatch-Coach Battle-HUD — sichtbare Build-Matchup-Anzeige mit Edge-Prozent, Schwachseiten-Tipp, Title-Screen-Marker und Module-Check ergänzt.
