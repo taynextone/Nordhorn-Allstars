@@ -2192,6 +2192,72 @@ const FoulTroubleCoach = {
   }
 };
 
+const PressureReleaseCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const hpPct = Math.round(((battle.playerHp ?? player.hp ?? 0) / (player.maxHp || 1)) * 100);
+    const enPct = Math.round(((battle.playerEnergy ?? player.energy ?? 0) / (player.maxEnergy || 1)) * 100);
+    const selectedMove = (battle.playerMoves || [])[battle.selectedMove || 0] || null;
+    const nextCost = selectedMove ? (selectedMove.energy || 0) : 0;
+    const playerNeed = Math.max(0, target - playerScore);
+
+    let pressure = 20 + Math.max(0, -lead) * 7 + (battle.hasBall ? -4 : 13) + Math.max(0, 55 - hpPct) * 0.45 + Math.max(0, 35 - enPct) * 0.35;
+    if (playerNeed <= 5) pressure += 8;
+    if (selectedMove && nextCost > (battle.playerEnergy ?? player.energy ?? 0)) pressure += 12;
+    pressure = Math.max(0, Math.min(100, Math.round(pressure)));
+
+    let label = 'CALM SET';
+    let advice = battle.hasBall ? 'RUN YOUR PLAY' : 'CALL SWITCH';
+    if (pressure >= 74) {
+      label = 'BREAK PRESS';
+      advice = battle.hasBall ? 'SAFE OUTLET' : 'TRAP ESCAPE';
+    } else if (pressure >= 55) {
+      label = 'RESET DRIBBLE';
+      advice = battle.hasBall ? 'PROTECT HANDLE' : 'GET STOP';
+    } else if (battle.hasBall && enPct >= 60 && lead <= 0) {
+      label = 'ATTACK GAP';
+      advice = 'QUICK FIRST STEP';
+    } else if (!battle.hasBall && lead >= 4) {
+      label = 'ABSORB RUN';
+      advice = 'NO FOULS';
+    }
+
+    return { pressure, label, advice, hpPct, enPct, lead, playerNeed, hasBall: !!battle.hasBall, nextMove: selectedMove ? selectedMove.name : 'NONE' };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PRESSURE RELEASE COACH · PRESS-BREAK HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = VIEW_W - 162;
+    const y = 132;
+    const w = 152;
+    const h = 38;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.pressure >= 74 ? '#d4600a' : (info.pressure >= 55 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PRESSURE ' + info.pressure + '%', x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.label + ' · LEAD ' + (info.lead >= 0 ? '+' : '') + info.lead, x + 7, y + 24);
+    ctx.fillText(info.advice, x + 78, y + 34);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2802,6 +2868,7 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 18px monospace';
   ctx.textAlign = 'center';
+  PressureReleaseCoach.renderTitleBadge(bx, 48);
   FoulTroubleCoach.renderTitleBadge(bx, 58);
   ClutchAlert.renderTitleBadge(bx, 188);
   ctx.fillText('NORDHORN', bx, 200);
@@ -3414,6 +3481,7 @@ function drawBattle() {
   WinConditionCoach.renderBattleHUD();
   TimeoutCoach.renderBattleHUD();
   FoulTroubleCoach.renderBattleHUD();
+  PressureReleaseCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -3877,6 +3945,7 @@ const GameModules = {
     { id: 'winConditionCoach', label: 'Win Condition Coach', check: () => !!(WinConditionCoach && typeof WinConditionCoach.getState === 'function' && typeof WinConditionCoach.renderBattleHUD === 'function' && WinConditionCoach.getState().playerNeed >= 0) },
     { id: 'timeoutCoach', label: 'Timeout Coach', check: () => !!(TimeoutCoach && typeof TimeoutCoach.getState === 'function' && typeof TimeoutCoach.renderBattleHUD === 'function' && TimeoutCoach.getState().urgency >= 0) },
     { id: 'foulTroubleCoach', label: 'Foul Trouble Coach', check: () => !!(FoulTroubleCoach && typeof FoulTroubleCoach.getState === 'function' && typeof FoulTroubleCoach.renderBattleHUD === 'function' && FoulTroubleCoach.getState().foulRisk >= 0) },
+    { id: 'pressureReleaseCoach', label: 'Pressure Release Coach', check: () => !!(PressureReleaseCoach && typeof PressureReleaseCoach.getState === 'function' && typeof PressureReleaseCoach.renderBattleHUD === 'function' && PressureReleaseCoach.getState().pressure >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
