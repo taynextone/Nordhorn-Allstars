@@ -2396,6 +2396,76 @@ const AssistCoach = {
   }
 };
 
+const ReboundCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const selectedMove = (battle.playerMoves || [])[battle.selectedMove || 0] || null;
+    const athleticism = (player.stats && player.stats.athleticism) || 1;
+    const defense = (player.stats && player.stats.defense) || 1;
+    const energy = battle.playerEnergy ?? player.energy ?? 0;
+    const enPct = Math.round((energy / (player.maxEnergy || 1)) * 100);
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const movePoints = selectedMove ? (selectedMove.pts || 0) : 0;
+
+    let reboundValue = 20 + athleticism * 5 + defense * 3 + (battle.hasBall ? -3 : 10);
+    reboundValue += Math.max(0, -lead) * 4;
+    if (movePoints >= 3) reboundValue += 10;
+    if (enPct <= 35) reboundValue -= 8;
+    if (enemyNeed <= 5 && !battle.hasBall) reboundValue += 12;
+    reboundValue = Math.max(0, Math.min(100, Math.round(reboundValue)));
+
+    let label = 'BOX OUT';
+    let advice = battle.hasBall ? 'FOLLOW SHOT' : 'FIND BODY';
+    if (reboundValue >= 76) {
+      label = 'GLASS CONTROL';
+      advice = battle.hasBall ? 'CRASH GLASS' : 'SECURE BOARD';
+    } else if (reboundValue >= 58) {
+      label = 'REBOUND EDGE';
+      advice = battle.hasBall ? 'SECOND CHANCE' : 'CHECK RIVAL';
+    } else if (enPct <= 30) {
+      label = 'TIRED LEGS';
+      advice = battle.hasBall ? 'GET BACK' : 'TEAM REBOUND';
+    } else if (lead >= 5 && !battle.hasBall) {
+      label = 'ONE SHOT D';
+      advice = 'END POSSESSION';
+    }
+
+    return { reboundValue, label, advice, lead, enPct, hasBall: !!battle.hasBall, enemyNeed, move: selectedMove ? selectedMove.name : 'NONE' };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('REBOUND COACH · SECOND-CHANCE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = Math.floor((VIEW_W - 152) / 2);
+    const y = 184;
+    const w = 152;
+    const h = 36;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.reboundValue >= 76 ? '#d4600a' : (info.reboundValue >= 58 ? C.MID : C.LIGHT);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('REBOUND ' + info.reboundValue + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('EN ' + info.enPct + '% · ' + (info.hasBall ? 'OFF GLASS' : 'DEF GLASS'), x + 7, y + 23);
+    ctx.fillText(info.advice, x + 82, y + 32);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -3010,6 +3080,7 @@ function drawTitleScreen() {
   FoulTroubleCoach.renderTitleBadge(bx, 58);
   TurnoverCoach.renderTitleBadge(bx, 68);
   AssistCoach.renderTitleBadge(bx, 78);
+  ReboundCoach.renderTitleBadge(bx, 88);
   ClutchAlert.renderTitleBadge(bx, 188);
   ctx.fillText('NORDHORN', bx, 200);
   ctx.fillText('ALL STARS', bx, 224);
@@ -3624,6 +3695,7 @@ function drawBattle() {
   PressureReleaseCoach.renderBattleHUD();
   TurnoverCoach.renderBattleHUD();
   AssistCoach.renderBattleHUD();
+  ReboundCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -4090,6 +4162,7 @@ const GameModules = {
     { id: 'pressureReleaseCoach', label: 'Pressure Release Coach', check: () => !!(PressureReleaseCoach && typeof PressureReleaseCoach.getState === 'function' && typeof PressureReleaseCoach.renderBattleHUD === 'function' && PressureReleaseCoach.getState().pressure >= 0) },
     { id: 'turnoverCoach', label: 'Turnover Coach', check: () => !!(TurnoverCoach && typeof TurnoverCoach.getState === 'function' && typeof TurnoverCoach.renderBattleHUD === 'function' && TurnoverCoach.getState().risk >= 0) },
     { id: 'assistCoach', label: 'Assist Coach', check: () => !!(AssistCoach && typeof AssistCoach.getState === 'function' && typeof AssistCoach.renderBattleHUD === 'function' && AssistCoach.getState().assistValue >= 0) },
+    { id: 'reboundCoach', label: 'Rebound Coach', check: () => !!(ReboundCoach && typeof ReboundCoach.getState === 'function' && typeof ReboundCoach.renderBattleHUD === 'function' && ReboundCoach.getState().reboundValue >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

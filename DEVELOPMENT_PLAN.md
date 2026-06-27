@@ -79,3 +79,4 @@
 - [x] Pressure-Release-Coach Battle-HUD — sichtbare Press-Break-/Reset-Empfehlung mit Druck-Prozent, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Turnover-Coach Battle-HUD — sichtbare Ballverlust-Risikoanzeige mit Safe-Handle-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Assist-Coach Battle-HUD — sichtbare Extra-Pass-/Court-Vision-Anzeige mit Energie- und Ballbesitz-Tipp, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Rebound-Coach Battle-HUD — sichtbare Second-Chance-/Boxout-Anzeige mit Rebound-Prozent, Energie-Hinweis, Title-Screen-Marker und Module-Check ergänzt.
