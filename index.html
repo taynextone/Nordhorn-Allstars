@@ -1553,6 +1553,67 @@ const PossessionCoach = {
   }
 };
 
+const MomentumMeter = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const margin = playerScore - enemyScore;
+    const scorePct = target ? playerScore / target : 0;
+    const enemyPct = target ? enemyScore / target : 0;
+    let value = 50 + margin * 8 + (battle.hasBall ? 8 : -8) + (scorePct - enemyPct) * 20;
+    value = Math.max(0, Math.min(100, Math.round(value)));
+    let label = 'EVEN';
+    let advice = 'WIN THE NEXT POSSESSION';
+    if (value >= 72) {
+      label = 'HOT HAND';
+      advice = 'KEEP PRESSURE';
+    } else if (value >= 58) {
+      label = 'EDGE';
+      advice = 'ATTACK THE RIM';
+    } else if (value <= 28) {
+      label = 'COLD';
+      advice = 'RESET + DEFEND';
+    } else if (value <= 42) {
+      label = 'UNDERDOG';
+      advice = 'STEAL MOMENTUM';
+    }
+    return { value, label, advice, margin, target, playerScore, enemyScore };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('MOMENTUM METER · LIVE DUEL PRESSURE', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = Math.floor((VIEW_W - 176) / 2);
+    const y = 92;
+    const w = 176;
+    const h = 30;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.value >= 50 ? C.LIGHT : C.MID;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('MOMENTUM ' + info.value + '% · ' + info.label, x + 8, y + 13);
+    ctx.fillStyle = C.MID;
+    ctx.fillRect(x + 8, y + 18, w - 16, 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x + 8, y + 18, Math.floor((w - 16) * (info.value / 100)), 4);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.advice, x + 8, y + 27);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2217,10 +2278,8 @@ function drawTitleScreen() {
   // Trainer scout marker: visible proof that the next-rival intel overlay is available.
   ScoutCard.renderTitleBadge(bx, 422);
 
-  // Deployment marker (visible on title screen and in GitHub Pages smoke tests)
-  ctx.fillStyle = C.DARK;
-  ctx.font = '6px monospace';
-  ctx.fillText('GITHUB PAGES · QUEST RADAR · REST · DUEL RISK', bx, 428);
+  // Deployment/polish marker (visible on title screen and in GitHub Pages smoke tests)
+  MomentumMeter.renderTitleBadge(bx, 428);
 
   // Footer
   ctx.fillStyle = C.DARK;
@@ -2760,6 +2819,7 @@ function drawBattle() {
 
   // Live possession coach: keeps the basketball objective visible during duels.
   PossessionCoach.renderBattleHUD();
+  MomentumMeter.renderBattleHUD();
 
   // Player side
   drawBattlePlayer(100, 280);
@@ -3211,6 +3271,7 @@ const GameModules = {
     { id: 'battlePrep', label: 'Battle Prep HUD', check: () => !!(BattlePrep && typeof BattlePrep.getReadiness === 'function' && BattlePrep.getReadiness().score >= 0) },
     { id: 'duelRisk', label: 'Duel Risk Meter', check: () => !!(DuelRiskMeter && typeof DuelRiskMeter.getAssessment === 'function' && DuelRiskMeter.getAssessment().risk >= 0 && typeof DuelRiskMeter.renderHUD === 'function') },
     { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
+    { id: 'momentumMeter', label: 'Momentum Meter', check: () => !!(MomentumMeter && typeof MomentumMeter.getState === 'function' && typeof MomentumMeter.renderBattleHUD === 'function' && MomentumMeter.getState().value >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

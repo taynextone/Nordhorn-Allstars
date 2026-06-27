@@ -66,3 +66,4 @@
 - [x] Battle-Prep HUD — sichtbare HP/EN-Bereitschaftsanzeige für den nächsten Rivalen, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Possession-Coach Battle-HUD — Live-Anzeige für Ballbesitz, Score-Ziel, Spielzug-Tipp und Module-Check ergänzt; Loss-Respawn zurück auf begehbares Home-Gate korrigiert.
 - [x] Duel-Risk-Meter — sichtbares Overworld-HUD mit Risiko-Prozent, Rest/Prep/Attack-Empfehlung, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Momentum-Meter Battle-HUD — Live-Druckanzeige im Duell mit Hot/Cold-Status, Taktik-Hinweis, Title-Screen-Marker und Module-Check ergänzt.
