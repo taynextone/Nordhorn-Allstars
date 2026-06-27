@@ -1453,6 +1453,50 @@ const BattlePrep = {
   }
 };
 
+const PossessionCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const margin = playerScore - enemyScore;
+    const possessor = battle.hasBall ? 'YOU' : (trainer ? trainer.name.toUpperCase().substring(0, 10) : 'RIVAL');
+    let advice = 'SET UP GOOD SHOT';
+    if (target - playerScore <= 3) advice = 'CLOSE IT OUT';
+    else if (margin < 0) advice = 'DEFEND + COUNTER';
+    else if (!battle.hasBall) advice = 'GET A STOP';
+    return { possessor, target, playerScore, enemyScore, margin, advice, turn: battle.turnCount || 0 };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('POSSESSION COACH · LIVE BATTLE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = Math.floor((VIEW_W - 176) / 2);
+    const y = 56;
+    const w = 176;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.margin >= 0 ? C.LIGHT : C.MID;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('BALL: ' + info.possessor + '  T' + info.turn, x + 8, y + 13);
+    ctx.fillText('RUN: ' + info.playerScore + '-' + info.enemyScore + ' / ' + info.target, x + 8, y + 23);
+    ctx.font = '6px monospace';
+    ctx.fillText(info.advice, x + 96, y + 23);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -1922,7 +1966,7 @@ function loseBattle() {
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
     player.x = 5;
-    player.y = 6;
+    player.y = 9;
     SaveSystem.save('Rest saved');
     gameState = 'OVERWORLD';
     startDialog("You went home to rest...", "Mom: Feel better soon!");
@@ -2070,9 +2114,10 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
   ctx.fillText('BASKETBALL RPG', bx, 250);
-  BattlePrep.renderTitleBadge(bx, 268);
-  HomeRest.renderTitleBadge(bx, 280);
-  RivalProgress.renderTitleBadge(bx, 292);
+  PossessionCoach.renderTitleBadge(bx, 262);
+  BattlePrep.renderTitleBadge(bx, 274);
+  HomeRest.renderTitleBadge(bx, 286);
+  RivalProgress.renderTitleBadge(bx, 298);
 
   // New/Continue menu
   const hasSave = SaveSystem.hasSave();
@@ -2656,6 +2701,9 @@ function drawBattle() {
   ctx.fillStyle = C.DARK;
   ctx.fillRect(200, 30, 2, 20);
 
+  // Live possession coach: keeps the basketball objective visible during duels.
+  PossessionCoach.renderBattleHUD();
+
   // Player side
   drawBattlePlayer(100, 280);
 
@@ -3104,6 +3152,7 @@ const GameModules = {
     { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
     { id: 'rivalProgress', label: 'Rival Progress', check: () => !!(RivalProgress && typeof RivalProgress.getStats === 'function' && typeof RivalProgress.renderHUD === 'function') },
     { id: 'battlePrep', label: 'Battle Prep HUD', check: () => !!(BattlePrep && typeof BattlePrep.getReadiness === 'function' && BattlePrep.getReadiness().score >= 0) },
+    { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

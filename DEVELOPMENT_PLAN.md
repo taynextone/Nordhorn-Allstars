@@ -64,3 +64,4 @@
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt
 - [x] Battle-Prep HUD — sichtbare HP/EN-Bereitschaftsanzeige für den nächsten Rivalen, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Possession-Coach Battle-HUD — Live-Anzeige für Ballbesitz, Score-Ziel, Spielzug-Tipp und Module-Check ergänzt; Loss-Respawn zurück auf begehbares Home-Gate korrigiert.
