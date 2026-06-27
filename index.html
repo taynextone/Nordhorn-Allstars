@@ -1887,6 +1887,69 @@ const ComebackCoach = {
   }
 };
 
+const StaminaCoach = {
+  getState() {
+    const playerHp = battle.playerHp ?? player.hp ?? 0;
+    const playerMaxHp = player.maxHp || 1;
+    const playerEnergy = battle.playerEnergy ?? 0;
+    const playerMaxEnergy = player.maxEnergy || 1;
+    const enemyEnergy = battle.enemyEnergy ?? 0;
+    const enemyMaxEnergy = battle.enemyMaxEnergy || 1;
+    const hpPct = Math.round((playerHp / playerMaxHp) * 100);
+    const enPct = Math.round((playerEnergy / playerMaxEnergy) * 100);
+    const rivalEnPct = Math.round((enemyEnergy / enemyMaxEnergy) * 100);
+    const tank = Math.max(0, Math.min(100, Math.round(hpPct * 0.45 + enPct * 0.4 + (100 - rivalEnPct) * 0.15)));
+    let label = 'FULL TANK';
+    let advice = battle.hasBall ? 'PUSH TEMPO' : 'PRESS RIVAL';
+    if (hpPct <= 35) {
+      label = 'SURVIVE';
+      advice = battle.hasBall ? 'SAFE SHOT' : 'AVOID FOUL';
+    } else if (enPct <= 25) {
+      label = 'LOW ENERGY';
+      advice = battle.hasBall ? 'CHEAP MOVE' : 'RECOVER EN';
+    } else if (rivalEnPct <= 30) {
+      label = 'RIVAL TIRED';
+      advice = 'ATTACK NOW';
+    } else if (tank < 55) {
+      label = 'MANAGE LEGS';
+      advice = 'SAVE STAMINA';
+    }
+    return { hpPct, enPct, rivalEnPct, tank, label, advice };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('STAMINA COACH · HP/EN DUEL HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = 10;
+    const y = 214;
+    const w = 152;
+    const h = 42;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.tank >= 60 ? C.LIGHT : C.MID;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('STAMINA ' + info.tank + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('HP ' + info.hpPct + '%  EN ' + info.enPct + '%  RV ' + info.rivalEnPct + '%', x + 7, y + 24);
+    ctx.fillStyle = C.MID;
+    ctx.fillRect(x + 7, y + 30, w - 14, 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x + 7, y + 30, Math.floor((w - 14) * (info.tank / 100)), 4);
+    ctx.fillText(info.advice, x + 74, y + 39);
+  }
+};
+
 const HomeRest = {
   homeX: 5,
   homeY: 9,
@@ -2504,6 +2567,7 @@ function drawTitleScreen() {
   // Subtitle
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
+  StaminaCoach.renderTitleBadge(bx, 156);
   ComebackCoach.renderTitleBadge(bx, 168);
   DefenseRead.renderTitleBadge(bx, 178);
   ShotQualityAdvisor.renderTitleBadge(bx, 240);
@@ -3099,6 +3163,7 @@ function drawBattle() {
   MomentumMeter.renderBattleHUD();
   ClutchAlert.renderBattleHUD();
   ComebackCoach.renderBattleHUD();
+  StaminaCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -3557,6 +3622,7 @@ const GameModules = {
     { id: 'shotQuality', label: 'Shot Quality', check: () => !!(ShotQualityAdvisor && typeof ShotQualityAdvisor.getState === 'function' && typeof ShotQualityAdvisor.renderBattleHUD === 'function' && ShotQualityAdvisor.getState().chance >= 0) },
     { id: 'defenseRead', label: 'Defense Read', check: () => !!(DefenseRead && typeof DefenseRead.getState === 'function' && typeof DefenseRead.renderBattleHUD === 'function' && DefenseRead.getState().threat >= 0) },
     { id: 'comebackCoach', label: 'Comeback Coach', check: () => !!(ComebackCoach && typeof ComebackCoach.getState === 'function' && typeof ComebackCoach.renderBattleHUD === 'function' && ComebackCoach.getState().playerNeed >= 0) },
+    { id: 'staminaCoach', label: 'Stamina Coach', check: () => !!(StaminaCoach && typeof StaminaCoach.getState === 'function' && typeof StaminaCoach.renderBattleHUD === 'function' && StaminaCoach.getState().tank >= 0) },
     { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
     { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
     { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },

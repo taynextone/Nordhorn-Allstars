@@ -71,3 +71,4 @@
 - [x] Shot-Quality Advisor — sichtbares Move-Select-HUD mit Trefferchance, Energiecheck, taktischem Wurf-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Defense-Read Enemy-Turn-HUD — sichtbare Gegnerzug-Analyse mit Threat-Prozent, erwartetem Rivalen-Move, Defense-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Comeback-Coach Battle-HUD — sichtbare Score-Run-Anzeige mit Rückstands-/Lead-Tipp, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Stamina-Coach Battle-HUD — sichtbare HP/EN-Tankanalyse mit Rivalen-Energie, Tempo-Tipp, Title-Screen-Marker und Module-Check ergänzt.
