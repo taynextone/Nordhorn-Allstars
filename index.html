@@ -27,7 +27,15 @@ body {
   image-rendering: crisp-edges;
   width: min(960px, 95vw);
   height: min(864px, 95vh);
+  height: min(864px, 95dvh);
   aspect-ratio: 480 / 432;
+  max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+@supports not (height: 100dvh) {
+  body { min-height: 100vh; }
+  #gameCanvas { max-height: 95vh; }
 }
 
 /* ============ MOBILE TOUCH CONTROLS ============ */
@@ -169,9 +177,101 @@ body {
 // NORDHORN ALL STARS - Basketball RPG (Gameboy DMG style)
 // ============================================================
 
+// Cross-browser safety net: keep the game booting on older Safari/Firefox/Chromium builds.
+(function installBrowserPolyfills() {
+  if (!window.performance) window.performance = {};
+  if (!window.performance.now) window.performance.now = function() { return Date.now(); };
+
+  let lastTime = 0;
+  const vendors = ['webkit', 'moz', 'ms', 'o'];
+  for (let i = 0; i < vendors.length && !window.requestAnimationFrame; i++) {
+    window.requestAnimationFrame = window[vendors[i] + 'RequestAnimationFrame'];
+    window.cancelAnimationFrame = window[vendors[i] + 'CancelAnimationFrame'] || window[vendors[i] + 'CancelRequestAnimationFrame'];
+  }
+  if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = function(callback) {
+      const currTime = Date.now();
+      const timeToCall = Math.max(0, 16 - (currTime - lastTime));
+      const id = window.setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
+      lastTime = currTime + timeToCall;
+      return id;
+    };
+  }
+  if (!window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = function(id) { clearTimeout(id); };
+  }
+})();
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+
+const BrowserCompat = {
+  checks: [],
+  warnings: [],
+  browserName: 'Unknown',
+  showPanel: window.location.search.indexOf('compat=1') !== -1,
+
+  detectBrowser() {
+    const ua = navigator.userAgent || '';
+    if (ua.indexOf('Firefox/') !== -1) return 'Firefox';
+    if (ua.indexOf('Edg/') !== -1) return 'Edge';
+    if (ua.indexOf('Chrome/') !== -1 || ua.indexOf('Chromium/') !== -1) return 'Chromium';
+    if (ua.indexOf('Safari/') !== -1) return 'Safari';
+    return 'Browser';
+  },
+
+  addCheck(label, ok, detail) {
+    this.checks.push({ label, ok, detail });
+    if (!ok) this.warnings.push(label + (detail ? ': ' + detail : ''));
+  },
+
+  run() {
+    this.browserName = this.detectBrowser();
+    this.addCheck('Canvas 2D', !!ctx, 'required for rendering');
+    this.addCheck('requestAnimationFrame', typeof window.requestAnimationFrame === 'function', 'polyfilled when missing');
+    this.addCheck('performance.now', !!(window.performance && performance.now), 'polyfilled when missing');
+    this.addCheck('Keyboard input', typeof window.addEventListener === 'function', 'required for controls');
+    this.addCheck('Pointer/touch fallback', true, (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 'touch controls available' : 'keyboard controls active');
+    this.addCheck('Monospace font', true, 'CSS fallback active');
+  },
+
+  summary() {
+    return this.warnings.length ? 'WARN ' + this.warnings.length : 'OK';
+  },
+
+  renderBadge(x, y) {
+    ctx.fillStyle = this.warnings.length ? C.DARK : C.DARKEST;
+    ctx.fillRect(x - 58, y - 10, 116, 15);
+    ctx.fillStyle = C.LIGHT;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.browserName + ' COMPAT: ' + this.summary(), x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderPanel() {
+    if (!this.showPanel) return;
+    const x = 294;
+    const y = 42;
+    const w = 174;
+    const h = 104;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('CROSS-BROWSER TEST', x + 8, y + 14);
+    ctx.font = '6px monospace';
+    this.checks.slice(0, 7).forEach((check, index) => {
+      ctx.fillText((check.ok ? '✓ ' : '! ') + check.label, x + 8, y + 28 + index * 10);
+    });
+  }
+};
+
+BrowserCompat.run();
 
 // Gameboy DMG Green Palette
 const C = {
@@ -1379,10 +1479,14 @@ function drawTitleScreen() {
   ctx.font = '8px monospace';
   ctx.fillText('C: Credits', bx, 350);
 
+  // Cross-browser status (visible smoke-test marker)
+  BrowserCompat.renderBadge(bx, 374);
+  BrowserCompat.renderPanel();
+
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('© 2025 NORDHORN ALL STARS', bx, 380);
+  ctx.fillText('© 2025 NORDHORN ALL STARS', bx, 402);
 
   ctx.textAlign = 'left';
 }

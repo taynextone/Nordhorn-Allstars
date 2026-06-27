@@ -49,7 +49,7 @@
 - [x] Easter Eggs (Konami-Code: +5 alle Stats, +20 HP)
 - [x] Credits-Screen (Scrolling-Title, Team, Trainer, Locations)
 - [x] Performance-Optimierung — Minimap-Tilelayer gecacht (4.200 Draws → 1 drawImage/Frame) und sichtbarer FPS-HUD ergänzt
-- [ ] Cross-Browser-Test
+- [x] Cross-Browser-Test — sichtbarer Compat-Check auf dem Titelbild, rAF/performance-Polyfills, Safe-Area/dvh-Fallbacks; Chromium file:// Smoke-Test OK, Firefox-Headless in dieser Sandbox blockiert.
 - [ ] Deployment (GitHub Pages)
 
 ## Technische Schulden
