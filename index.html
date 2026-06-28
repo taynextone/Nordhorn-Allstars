@@ -4047,14 +4047,18 @@ function loseBattle() {
     player.y = 9;
     SaveSystem.save('Rest saved');
     gameState = 'OVERWORLD';
-    startDialog("You went home to rest...", "Mom: Feel better soon!");
+    startDialog("You went home to rest...", "Mom: Feel better soon!", () => {
+      gameState = 'OVERWORLD';
+    });
   }, 2000);
 }
 
 function endBattle() {
   battle.active = false;
-  gameState = 'DIALOG';
-  startDialog('Victory!', 'Coach: Great game! Keep training!');
+  gameState = 'OVERWORLD';
+  startDialog('Victory!', 'Coach: Great game! Keep training!', () => {
+    gameState = 'OVERWORLD';
+  });
 }
 
 // ============================================================
@@ -4094,6 +4098,7 @@ function updateDialog() {
       const onComplete = dialog.onComplete;
       dialog.onComplete = null;
       if (onComplete) onComplete();
+      else if (gameState === 'DIALOG') gameState = 'OVERWORLD';
     }
   }
 
@@ -4103,6 +4108,7 @@ function updateDialog() {
 }
 
 function drawDialog() {
+  if (!dialog.active) return;
   // Dialog box
   const boxY = VIEW_H - 80;
   ctx.fillStyle = C.LIGHT;
@@ -4579,24 +4585,23 @@ function drawOverworld() {
 
   ctx.textAlign = 'left';
 
-  // Lightweight visible performance marker for Phase 5 testing.
-  QuestRadar.renderHUD();
-  HomeRest.renderHUD();
-  RivalProgress.renderHUD();
-  BattlePrep.renderHUD();
-  DuelRiskMeter.renderHUD();
-  RouteCoach.renderHUD();
-  PracticePlan.renderHUD();
-  WarmupCoach.renderHUD();
-  HydrationCoach.renderHUD();
-  TipoffChecklist.renderHUD();
-  BenchCoach.renderHUD();
-  RecoveryCoach.renderHUD();
-  TravelPaceCoach.renderHUD();
-  CrowdEnergyCoach.renderHUD();
-  FlowStateCoach.renderHUD();
-  CoachTip.renderHUD();
-  PerfHUD.render();
+  // Minimal Gameboy HUD — keep the playfield clean.
+  drawCleanOverworldHUD();
+}
+
+
+function drawCleanOverworldHUD() {
+  // Compact status strip: essentials only, no coach/stat spam.
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(6, 6, 132, 34);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(8, 8, 128, 30);
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'left';
+  const wins = trainers.filter(t => t.beaten).length;
+  ctx.fillText('LV ' + player.level + '  WINS ' + wins + '/' + trainers.length, 14, 20);
+  ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '  EN ' + player.energy + '/' + player.maxEnergy, 14, 32);
 }
 
 // ============================================================
@@ -4817,27 +4822,7 @@ function drawBattle() {
   ctx.fillStyle = C.DARK;
   ctx.fillRect(200, 30, 2, 20);
 
-  // Live possession coach: keeps the basketball objective visible during duels.
-  PossessionCoach.renderBattleHUD();
-  MomentumMeter.renderBattleHUD();
-  ClutchAlert.renderBattleHUD();
-  ComebackCoach.renderBattleHUD();
-  StaminaCoach.renderBattleHUD();
-  WinConditionCoach.renderBattleHUD();
-  TimeoutCoach.renderBattleHUD();
-  FoulTroubleCoach.renderBattleHUD();
-  PressureReleaseCoach.renderBattleHUD();
-  TurnoverCoach.renderBattleHUD();
-  AssistCoach.renderBattleHUD();
-  ReboundCoach.renderBattleHUD();
-  FastbreakCoach.renderBattleHUD();
-  MismatchCoach.renderBattleHUD();
-  ShotClockCoach.renderBattleHUD();
-  FreeThrowCoach.renderBattleHUD();
-  PickRollCoach.renderBattleHUD();
-  SpacingCoach.renderBattleHUD();
-  ZoneDefenseCoach.renderBattleHUD();
-  DefenseRead.renderBattleHUD();
+  // Coach overlays intentionally disabled: they overloaded the battle screen.
 
   // Player side
   drawBattlePlayer(100, 280);
@@ -4872,7 +4857,6 @@ function drawBattle() {
 
   // Move selection
   if (battle.phase === 'select' && battle.playerTurn) {
-    ShotQualityAdvisor.renderBattleHUD();
     drawMoveSelect();
   }
 
