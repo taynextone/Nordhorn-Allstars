@@ -2910,6 +2910,82 @@ const SpacingCoach = {
   }
 };
 
+const ZoneDefenseCoach = {
+  getState() {
+    const trainer = battle.currentTrainer;
+    const target = trainer ? (trainer.ptsToWin || 21) : 21;
+    const playerScore = battle.playerScore || 0;
+    const enemyScore = battle.enemyScore || 0;
+    const lead = playerScore - enemyScore;
+    const enemyNeed = Math.max(0, target - enemyScore);
+    const playerNeed = Math.max(0, target - playerScore);
+    const enemyEnergy = battle.enemyEnergy ?? 0;
+    const enemyMax = battle.enemyMaxEnergy || trainer?.enemyEnergy || 20;
+    const enemyEnPct = Math.round((enemyEnergy / Math.max(1, enemyMax)) * 100);
+    const defense = (player.stats && player.stats.defense) || 1;
+    const athleticism = (player.stats && player.stats.athleticism) || 1;
+    const hasBall = !!battle.hasBall;
+    const spacing = typeof SpacingCoach !== 'undefined' ? SpacingCoach.getState() : { spacing: 50 };
+
+    let zone = 32 + defense * 5 + athleticism * 3 + (hasBall ? -6 : 10);
+    if (lead >= 4) zone += 8;
+    if (enemyNeed <= 5) zone += 14;
+    if (enemyEnPct <= 35) zone += 8;
+    if (spacing.spacing >= 70 && !hasBall) zone += 6;
+    if (playerNeed <= 3 && hasBall) zone -= 8;
+    zone = Math.max(0, Math.min(100, Math.round(zone)));
+
+    let label = 'MATCHUP ZONE';
+    let advice = hasBall ? 'SET DEFENSE NEXT' : 'PACK THE PAINT';
+    if (!trainer) {
+      label = 'SCOUT ZONE';
+      advice = 'WAIT TIPOFF';
+    } else if (!hasBall && enemyNeed <= 3) {
+      label = 'NO EASY LOOK';
+      advice = 'FORCE LONG TWO';
+    } else if (!hasBall && zone >= 76) {
+      label = 'LOCKDOWN ZONE';
+      advice = 'CUT BASELINE';
+    } else if (hasBall && lead < 0) {
+      label = 'PRESS AFTER SCORE';
+      advice = 'SCORE THEN TRAP';
+    } else if (enemyEnPct <= 30) {
+      label = 'TIRE THEM OUT';
+      advice = 'FULL-COURT SHADE';
+    }
+
+    return { zone, label, advice, lead, enemyNeed, playerNeed, enemyEnPct, hasBall };
+  },
+
+  renderTitleBadge(x, y) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ZONE DEFENSE COACH · HELP-DEFENSE HUD', x, y);
+    ctx.textAlign = 'left';
+  },
+
+  renderBattleHUD() {
+    if (gameState !== 'BATTLE' || !battle.currentTrainer) return;
+    const info = this.getState();
+    const x = VIEW_W - 162;
+    const y = 326;
+    const w = 152;
+    const h = 34;
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = info.zone >= 76 ? C.LIGHT : (info.zone <= 38 ? '#d4600a' : C.MID);
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillStyle = C.DARKEST;
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('ZONE ' + info.zone + '% · ' + info.label, x + 7, y + 12);
+    ctx.font = '6px monospace';
+    ctx.fillText('RIVAL NEED ' + info.enemyNeed + ' · EN ' + info.enemyEnPct + '%', x + 7, y + 23);
+    ctx.fillText(info.advice.substring(0, 18), x + 78, y + 31);
+  }
+};
+
 
 const PracticePlan = {
   getState() {
@@ -4115,6 +4191,7 @@ function drawTitleScreen() {
   BenchCoach.renderTitleBadge(bx, 20);
   PracticePlan.renderTitleBadge(bx, 28);
   SpacingCoach.renderTitleBadge(bx, 34);
+  ZoneDefenseCoach.renderTitleBadge(bx, 30);
   PickRollCoach.renderTitleBadge(bx, 38);
   RecoveryCoach.renderTitleBadge(bx, 44);
   PressureReleaseCoach.renderTitleBadge(bx, 48);
@@ -4759,6 +4836,7 @@ function drawBattle() {
   FreeThrowCoach.renderBattleHUD();
   PickRollCoach.renderBattleHUD();
   SpacingCoach.renderBattleHUD();
+  ZoneDefenseCoach.renderBattleHUD();
   DefenseRead.renderBattleHUD();
 
   // Player side
@@ -5232,6 +5310,7 @@ const GameModules = {
     { id: 'freeThrowCoach', label: 'Free Throw Coach', check: () => !!(FreeThrowCoach && typeof FreeThrowCoach.getState === 'function' && typeof FreeThrowCoach.renderBattleHUD === 'function' && FreeThrowCoach.getState().focus >= 0) },
     { id: 'pickRollCoach', label: 'Pick-Roll Coach', check: () => !!(PickRollCoach && typeof PickRollCoach.getState === 'function' && typeof PickRollCoach.renderBattleHUD === 'function' && PickRollCoach.getState().screenValue >= 0) },
     { id: 'spacingCoach', label: 'Spacing Coach', check: () => !!(SpacingCoach && typeof SpacingCoach.getState === 'function' && typeof SpacingCoach.renderBattleHUD === 'function' && SpacingCoach.getState().spacing >= 0) },
+    { id: 'zoneDefenseCoach', label: 'Zone Defense Coach', check: () => !!(ZoneDefenseCoach && typeof ZoneDefenseCoach.getState === 'function' && typeof ZoneDefenseCoach.renderBattleHUD === 'function' && ZoneDefenseCoach.getState().zone >= 0) },
     { id: 'practicePlan', label: 'Practice Plan', check: () => !!(PracticePlan && typeof PracticePlan.getState === 'function' && typeof PracticePlan.renderHUD === 'function' && PracticePlan.getState().focus >= 0) },
     { id: 'warmupCoach', label: 'Warmup Coach', check: () => !!(WarmupCoach && typeof WarmupCoach.getState === 'function' && typeof WarmupCoach.renderHUD === 'function' && WarmupCoach.getState().drillScore >= 0) },
     { id: 'hydrationCoach', label: 'Hydration Coach', check: () => !!(HydrationCoach && typeof HydrationCoach.getState === 'function' && typeof HydrationCoach.renderHUD === 'function' && HydrationCoach.getState().hydration >= 0) },
