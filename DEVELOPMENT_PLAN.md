@@ -58,6 +58,7 @@
 - [x] Coach-Tipps — T-Taste zeigt taktische In-Game-Hinweise; Title-Screen-Marker, Overworld-HUD und Module-Check ergänzt.
 - [x] Rivalen-Fortschrittsbalken — sichtbares Overworld-HUD mit Siege-Zähler, nächstem Gegner, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Home-Rest-System — Start/Respawn auf begehbarer Home-Gate-Position gefixt, R-Taste heilt HP/EN zuhause, sichtbares HUD/Title-Marker und Module-Check ergänzt.
+- [x] Title-Screen-Declutter — überlagernde Coach-/System-Badges entfernt und durch kompakten Status ersetzt; Logo, Menü und Continue sind wieder klar lesbar.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 19 Boot-Checks und Title-Screen-Status ergänzt

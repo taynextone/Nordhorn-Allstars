@@ -4187,100 +4187,55 @@ function drawTitleScreen() {
   ctx.arc(bx + 14, by, 20, Math.PI - 0.8, Math.PI + 0.8);
   ctx.stroke();
 
-  // Title
+  // Title — keep the first screen clean and playable. The previous stacked system/coach
+  // badges covered the logo and menu; detailed debug panels remain behind their hotkeys.
   ctx.fillStyle = C.DARKEST;
-  ctx.font = 'bold 18px monospace';
+  ctx.font = 'bold 24px monospace';
   ctx.textAlign = 'center';
-  TipoffChecklist.renderTitleBadge(bx, 2);
-  HydrationCoach.renderTitleBadge(bx, 6);
-  WarmupCoach.renderTitleBadge(bx, 14);
-  BenchCoach.renderTitleBadge(bx, 20);
-  PracticePlan.renderTitleBadge(bx, 28);
-  SpacingCoach.renderTitleBadge(bx, 34);
-  ZoneDefenseCoach.renderTitleBadge(bx, 30);
-  PickRollCoach.renderTitleBadge(bx, 38);
-  RecoveryCoach.renderTitleBadge(bx, 44);
-  PressureReleaseCoach.renderTitleBadge(bx, 48);
-  TravelPaceCoach.renderTitleBadge(bx, 52);
-  CrowdEnergyCoach.renderTitleBadge(bx, 62);
-  FlowStateCoach.renderTitleBadge(bx, 72);
-  FoulTroubleCoach.renderTitleBadge(bx, 58);
-  TurnoverCoach.renderTitleBadge(bx, 68);
-  AssistCoach.renderTitleBadge(bx, 78);
-  ReboundCoach.renderTitleBadge(bx, 88);
-  FastbreakCoach.renderTitleBadge(bx, 98);
-  MismatchCoach.renderTitleBadge(bx, 108);
-  ShotClockCoach.renderTitleBadge(bx, 118);
-  FreeThrowCoach.renderTitleBadge(bx, 128);
-  ClutchAlert.renderTitleBadge(bx, 188);
-  ctx.fillText('NORDHORN', bx, 200);
-  ctx.fillText('ALL STARS', bx, 224);
+  ctx.fillText('NORDHORN', bx, 188);
+  ctx.fillText('ALL STARS', bx, 218);
 
   // Subtitle
   ctx.fillStyle = C.DARK;
   ctx.font = '10px monospace';
-  WinConditionCoach.renderTitleBadge(bx, 136);
-  StaminaCoach.renderTitleBadge(bx, 156);
-  RouteCoach.renderTitleBadge(bx, 146);
-  ComebackCoach.renderTitleBadge(bx, 168);
-  DefenseRead.renderTitleBadge(bx, 178);
-  TimeoutCoach.renderTitleBadge(bx, 232);
-  ShotQualityAdvisor.renderTitleBadge(bx, 240);
-  ctx.fillText('BASKETBALL RPG', bx, 250);
-  PossessionCoach.renderTitleBadge(bx, 262);
-  BattlePrep.renderTitleBadge(bx, 274);
-  HomeRest.renderTitleBadge(bx, 286);
-  RivalProgress.renderTitleBadge(bx, 298);
+  ctx.fillText('BASKETBALL RPG', bx, 242);
 
   // New/Continue menu
   const hasSave = SaveSystem.hasSave();
   if (!hasSave) titleSelection = 0;
   const saveInfo = SaveSystem.getInfo();
   const blink = Math.floor(Date.now() / 500) % 2;
-  ctx.font = '10px monospace';
+  ctx.font = '11px monospace';
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText((titleSelection === 0 && blink ? '> ' : '  ') + 'NEW GAME', bx, 306);
+  ctx.fillText((titleSelection === 0 && blink ? '> ' : '  ') + 'NEW GAME', bx, 278);
   ctx.fillStyle = hasSave ? C.DARKEST : C.MID;
-  ctx.fillText((titleSelection === 1 && blink ? '> ' : '  ') + 'CONTINUE', bx, 322);
+  ctx.fillText((titleSelection === 1 && blink ? '> ' : '  ') + 'CONTINUE', bx, 298);
   if (saveInfo) {
     ctx.font = '7px monospace';
     ctx.fillStyle = C.DARK;
-    ctx.fillText('LV ' + saveInfo.level + ' · WINS ' + saveInfo.beaten + '/5 · ' + saveInfo.time, bx, 334);
+    ctx.fillText('LV ' + saveInfo.level + ' · WINS ' + saveInfo.beaten + '/5 · ' + saveInfo.time, bx, 312);
   }
 
-  // Credits option
+  // Controls and compact smoke-test status
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('UP/DOWN Select  ENTER Start  C: Credits', bx, 354);
-  ControlsHelp.renderHint(bx, 364);
+  ctx.fillText('UP/DOWN Select · ENTER Start · C Credits', bx, 344);
+  ControlsHelp.renderHint(bx, 356);
 
-  // Cross-browser status (visible smoke-test marker)
-  BrowserCompat.renderBadge(bx, 374);
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(bx - 104, 370, 208, 28);
+  ctx.fillStyle = C.LIGHT;
+  ctx.font = '7px monospace';
+  const moduleSummary = GameModules.getSummary();
+  ctx.fillText('SYSTEMS ' + moduleSummary.ready + '/' + moduleSummary.total + ' OK · COMPAT ' + BrowserCompat.summary(), bx, 382);
+  ctx.fillText('H/? HELP · S SCOUT · T TIP · M MAP', bx, 394);
   BrowserCompat.renderPanel();
-
-  // Refactor health marker: shows that the major game systems are registered and bootable.
-  GameModules.renderBadge(bx, 386);
   GameModules.renderPanel();
-
-  // Runtime edge-case guard marker: visible proof that recoverable errors are handled.
-  ErrorGuard.renderBadge(bx, 398);
-
-  // Code-comment coverage marker: the source now includes an in-game architecture guide.
-  CodeComments.renderBadge(bx, 410);
-
-  // Coach tips marker: visible proof that in-game tactical guidance is available.
-  CoachTip.renderTitleBadge(bx, 416);
-
-  // Trainer scout marker: visible proof that the next-rival intel overlay is available.
-  ScoutCard.renderTitleBadge(bx, 422);
-
-  // Deployment/polish marker (visible on title screen and in GitHub Pages smoke tests)
-  MomentumMeter.renderTitleBadge(bx, 428);
 
   // Footer
   ctx.fillStyle = C.DARK;
   ctx.font = '6px monospace';
-  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 431);
+  ctx.fillText('© 2026 NORDHORN ALL STARS', bx, 424);
 
   ctx.textAlign = 'left';
 }
