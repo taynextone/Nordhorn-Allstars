@@ -1258,7 +1258,7 @@ const ControlsHelp = {
   },
 
   renderOverlay() {
-    if (!this.visible) return;
+    if (!this.visible || gameState !== 'OVERWORLD') return;
     const w = 260;
     const h = 154;
     const x = Math.floor((VIEW_W - w) / 2);
@@ -1313,7 +1313,7 @@ const ScoutCard = {
   },
 
   renderOverlay() {
-    if (!this.visible || gameState === 'TITLE' || gameState === 'CHARSELECT') return;
+    if (!this.visible || gameState !== 'OVERWORLD') return;
     const target = this.getTarget();
     const w = 274;
     const h = 142;
@@ -3694,7 +3694,7 @@ const CoachTip = {
   },
 
   renderOverlay() {
-    if (!this.visible || gameState === 'TITLE' || gameState === 'CHARSELECT') return;
+    if (!this.visible || gameState !== 'OVERWORLD') return;
     const w = 300;
     const h = 112;
     const x = Math.floor((VIEW_W - w) / 2);
@@ -3745,6 +3745,9 @@ function getEnemyMoves(enemyLevel) {
 
 function startBattle(trainer) {
   gameState = 'BATTLE';
+  ControlsHelp.visible = false;
+  ScoutCard.visible = false;
+  CoachTip.visible = false;
   battle.active = true;
   battle.currentTrainer = trainer;
   battle.playerScore = 0;
@@ -4040,6 +4043,7 @@ function winBattle() {
 function loseBattle() {
   battle.phase = 'result';
   setTimeout(() => {
+    battle.active = false;
     // Reset to home
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
@@ -4074,6 +4078,9 @@ function startDialog(text, subText, onComplete = null) {
   dialog.timer = 0;
   dialog.typing = true;
   dialog.onComplete = onComplete;
+  // Non-battle dialogs must own the state so they can type, accept input,
+  // and reliably return to the map after intro/load/victory/defeat flows.
+  if (gameState !== 'BATTLE') gameState = 'DIALOG';
 }
 
 function updateDialog() {
@@ -4337,7 +4344,6 @@ function updateCharSelect() {
     }
     if (wasPressed('Enter')) {
       applyCharacterCreation();
-      gameState = 'OVERWORLD';
       startDialog('Welcome to Nordhorn!', 'Mom: Have a sweet time!');
     }
   }
@@ -5049,15 +5055,15 @@ function gameLoop() {
     ctx.fillStyle = C.LIGHT;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-    if (wasPressed('h') || wasPressed('H') || wasPressed('?')) {
+    if (gameState === 'OVERWORLD' && (wasPressed('h') || wasPressed('H') || wasPressed('?'))) {
       ControlsHelp.toggle();
     }
 
-    if (wasPressed('s') || wasPressed('S')) {
+    if (gameState === 'OVERWORLD' && (wasPressed('s') || wasPressed('S'))) {
       ScoutCard.toggle();
     }
 
-    if (wasPressed('t') || wasPressed('T')) {
+    if (gameState === 'OVERWORLD' && (wasPressed('t') || wasPressed('T'))) {
       CoachTip.toggle();
     }
 
