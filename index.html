@@ -1727,13 +1727,12 @@ function winBattle() {
     player.stats.athleticism += 1;
     player.stats.defense += 1;
     player.stats.courtVision += 1;
-    // Unlock new move
-    if (MOVE_UNLOCKS[player.level + 1]) {
-      const newMove = MOVE_UNLOCKS[player.level + 1];
-      if (!player.moves.includes(newMove.name)) {
-        player.moves.push(newMove.name);
-        battle.subMessage = 'LEARNED ' + newMove.name + '!';
-      }
+    // Unlock the move for the level just reached. The player already starts with
+    // the level-1/2 basics, so later level-ups should not skip ahead by one tier.
+    const newMove = MOVE_UNLOCKS[player.level];
+    if (newMove && !player.moves.includes(newMove.name)) {
+      player.moves.push(newMove.name);
+      battle.subMessage = 'LEARNED ' + newMove.name + '!';
     }
   }
 

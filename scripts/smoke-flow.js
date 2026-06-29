@@ -88,6 +88,8 @@ function assertCleanRenderPaths() {
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
   assert(code.includes("trainerName + ' besiegt! Siege: '"), 'Victory dialog should show rival progress in the existing dialog box');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
+  assert(code.includes('const newMove = MOVE_UNLOCKS[player.level];'), 'Level-up move unlocks should match the level just reached');
+  assert(!code.includes('MOVE_UNLOCKS[player.level + 1]'), 'Level-up move unlocks must not skip one tier ahead');
   assert(code.includes('function movePlayerToHomeGate()'), 'Return-home flows should share one safe home-gate helper');
   assert(code.includes('ENTER/SPACE/A/B to continue'), 'Game Over hint must mention all working confirm buttons');
   assert(code.includes('const PLAYER_ENERGY_REGEN = 3;'), 'Player energy regen should be a single tuned constant');
@@ -248,6 +250,19 @@ function runSmokeFlow() {
   assert(get('isWalkable(player.x, player.y)') === true, 'Sanitized save position must be walkable');
   closeDialog();
   run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
+
+  run(`startBattle(trainers[0]);
+    player.level = 2;
+    player.exp = player.expNext;
+    player.moves = ['Layup', 'Jump Shot'];
+    battle.playerHp = player.hp;
+    battle.playerEnergy = player.energy;
+    winBattle();`);
+  assert(get('player.level') === 3, 'Level-up smoke should advance the player to level 3');
+  assert(get('player.moves.includes("Three Pointer")') === true, 'Level 3 should unlock Three Pointer at the matching tier');
+  assert(get('player.moves.includes("Block")') === false, 'Level 3 must not skip ahead and unlock the level-4 Block');
+  timers.length = 0;
+  run('resetRunProgress(); gameState = "OVERWORLD"; battle.active = false;');
 
   run('startBattle(trainers[0]); battle.enemyHp = 0; battle.playerScore = 0; endTurn();');
   assert(get('battle.phase') === 'result', 'Enemy HP reaching zero should immediately end the duel');
