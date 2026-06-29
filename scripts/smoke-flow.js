@@ -69,6 +69,10 @@ function assertCleanRenderPaths() {
   assert(battle.includes('ctx.arc(VIEW_W / 2, 120, 28'), 'Battle court should keep the clean center-circle polish');
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');
+  assert(code.includes('UP/DOWN Select · ENTER/A/B Start · C Credits'), 'Title hint must mention the working A/B start buttons');
+  const battleHud = getFunctionBody(code, 'drawBattleHUD');
+  assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
+  assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {

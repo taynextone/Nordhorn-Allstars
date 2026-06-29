@@ -1875,7 +1875,7 @@ function drawTitleScreen() {
   // Controls and compact smoke-test status
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('UP/DOWN Select · ENTER Start · C Credits', bx, 344);
+  ctx.fillText('UP/DOWN Select · ENTER/A/B Start · C Credits', bx, 344);
 
   ctx.fillStyle = C.DARKEST;
   ctx.fillRect(bx - 78, 370, 156, 28);
@@ -2603,19 +2603,38 @@ function drawBattleHUD() {
     drawPanelBox(msgBox);
     ctx.fillStyle = C.DARKEST;
     ctx.font = '7px monospace';
-    const words = battle.message.split(' ');
-    let line = '';
-    let lineY = VIEW_H - 60;
-    for (let w of words) {
-      if ((line + ' ' + w).trim().length > 13) {
-        if (line) ctx.fillText(line, msgBox.x + 8, lineY);
-        line = w;
-        lineY += 9;
-      } else {
-        line = (line ? line + ' ' : '') + w;
+
+    const drawWrappedBattleText = (text, startY, maxLines) => {
+      const words = String(text || '').split(' ').filter(Boolean);
+      let line = '';
+      let lineY = startY;
+      let linesDrawn = 0;
+      for (let w of words) {
+        if ((line + ' ' + w).trim().length > 13) {
+          if (line && linesDrawn < maxLines) {
+            ctx.fillText(line, msgBox.x + 8, lineY);
+            lineY += 9;
+            linesDrawn++;
+          }
+          line = w;
+        } else {
+          line = (line ? line + ' ' : '') + w;
+        }
       }
+      if (line && linesDrawn < maxLines) {
+        ctx.fillText(line, msgBox.x + 8, lineY);
+        lineY += 9;
+        linesDrawn++;
+      }
+      return lineY;
+    };
+
+    const nextLineY = drawWrappedBattleText(battle.message, VIEW_H - 60, 3);
+    if (battle.subMessage) {
+      ctx.font = '6px monospace';
+      ctx.fillStyle = C.DARK;
+      drawWrappedBattleText(battle.subMessage, Math.min(nextLineY + 2, VIEW_H - 32), 2);
     }
-    if (line) ctx.fillText(line, msgBox.x + 8, lineY);
   }
 }
 
