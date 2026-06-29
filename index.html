@@ -4308,12 +4308,12 @@ function drawTitleScreen() {
   ctx.fillText('UP/DOWN Select · ENTER Start · C Credits', bx, 344);
 
   ctx.fillStyle = C.DARKEST;
-  ctx.fillRect(bx - 92, 370, 184, 28);
+  ctx.fillRect(bx - 78, 370, 156, 28);
   ctx.fillStyle = C.LIGHT;
   ctx.font = '7px monospace';
   // Keep title status calm after the HUD declutter: no coach/module counter spam.
-  ctx.fillText('CLEAN HUD · COMPAT ' + BrowserCompat.summary(), bx, 382);
-  ctx.fillText('ENTER START · M MAP', bx, 394);
+  ctx.fillText('GAMEBOY CLEAN · ' + BrowserCompat.summary(), bx, 382);
+  ctx.fillText('ENTER START · C CREDITS', bx, 394);
   BrowserCompat.renderPanel();
   GameModules.renderPanel();
 
@@ -4757,7 +4757,7 @@ function isWalkable(x, y) {
   return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
 }
 
-let minimapVisible = true;
+let minimapVisible = false;
 
 function updateOverworld() {
   let dx = 0, dy = 0;
@@ -4868,8 +4868,8 @@ function drawBattle() {
 
   // Extra overlays intentionally disabled: the battle screen stays classic and readable.
 
-  // Player side — raised above the command menu so the sprite stays visible.
-  drawBattlePlayer(100, 205);
+  // Player side — fully above the command menu so the sprite, ball and label stay visible.
+  drawBattlePlayer(76, 145);
 
   // Enemy side
   drawBattleEnemy(320, 80);
@@ -4878,7 +4878,7 @@ function drawBattle() {
   if (battle.hasBall) {
     ctx.fillStyle = '#d4600a';
     ctx.beginPath();
-    ctx.arc(120, 235, 6, 0, Math.PI * 2);
+    ctx.arc(104, 191, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#2a1a0a';
     ctx.lineWidth = 1;

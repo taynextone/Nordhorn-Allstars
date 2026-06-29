@@ -41,8 +41,11 @@ function assertCleanRenderPaths() {
     assert(!battle.includes(token), 'drawBattle reintroduced overlay token: ' + token);
   }
   assert(overworld.includes('drawCleanOverworldHUD()'), 'Overworld must use the compact clean HUD');
+  assert(code.includes('let minimapVisible = false;'), 'Minimap should default off for a clean overworld');
   assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');
   assert(battle.includes('drawMoveSelect()'), 'Battle must keep the move menu');
+  assert(battle.includes('drawBattlePlayer(76, 145)'), 'Player sprite must render above the move menu');
+  assert(battle.includes('ctx.arc(104, 191, 6'), 'Player ball must stay above the move menu');
 }
 
 function createSandbox() {
@@ -153,6 +156,7 @@ function runSmokeFlow() {
   assert(get('gameState') === 'OVERWORLD', 'Intro dialog should return to overworld');
 
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
+  assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
 
   const trainerCount = get('trainers.length');
   for (let i = 0; i < trainerCount; i++) {

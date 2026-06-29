@@ -72,6 +72,7 @@
 - [x] Confirm-Input UX — Space/B ist jetzt durchgängig als Action/Confirm aktiv (Title, Charakterwahl, Dialoge, Battle-Move, Game-Over/Credits), passend zur Controls-Anzeige ohne neue HUDs.
 - [x] Input-Edge Polish — gleichzeitiges Enter+Space hinterlässt keinen stale Confirm mehr; Credits-Hotkey akzeptiert c/C wie angezeigt.
 - [x] Smoke-Flow Testbarkeit — `scripts/smoke-flow.js` prüft Clean-UI-Renderpfade und den vollständigen Title→Charselect→Overworld→alle Duelle→Champion-Credits→Title Ablauf ohne neue Overlays.
+- [x] Battle-/Title-Readability — Spielerfigur und Ball stehen im Move-Select-Battle vollständig oberhalb des Menüs; die Minimap startet aus und der Titelstatus bleibt kurz, damit die Screens nur klassische Gameboy-Infos zeigen.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
