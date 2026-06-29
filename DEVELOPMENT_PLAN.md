@@ -97,6 +97,7 @@
 - [x] Continue-Save Sanitizer — korrupte/alte Saves mit negativen HP/EN oder ungültiger Position werden beim Laden sofort auf gültige Werte bzw. das Home-Gate geklemmt, bevor HUD/Dialog/Battle sie nutzen.
 - [x] Continue-Save Integrity Polish — Continue ignoriert stale Trainer-IDs, normalisiert String-IDs, bereinigt kaputte Build/Level/Stats/Moves und lädt mit mindestens 1 HP, damit alte/corrupte Slots spielbar bleiben.
 - [x] Victory-Dialog Progress Polish — Siegdialoge nennen den geschlagenen Rivalen und kompakten Fortschritt in der bestehenden Dialogbox; Smoke- und Browser-Flows prüfen das ohne neue HUDs/Overlays.
+- [x] Zero-Energy Battle UX — Spieler mit 0 EN atmen automatisch eine Runde durch statt im Move-Menü festzuhängen; Smoke- und Browser-Flows prüfen den kompakten Message-Box-Flow ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

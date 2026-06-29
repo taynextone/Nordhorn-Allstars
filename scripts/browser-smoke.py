@@ -162,6 +162,13 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(battle.phase === 'select', 'battle should start in move select');
   assert(Object.values(keysPressed).every(v => !v), 'battle start should clear stale pressed input');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'legacy overlays should stay hidden in battle');
+  battle.playerEnergy = 0;
+  battle.selectedMove = 0;
+  executePlayerMove();
+  assert(battle.phase === 'anim' && battle.message === 'You catch breath...', 'zero-energy battle should catch breath instead of trapping the player in the move menu');
+  assert(battle.playerEnergy === PLAYER_ENERGY_REGEN && battle.turnCount === 1, 'catch-breath fallback should restore tuned regen and spend one turn');
+  startBattle(trainers[0]);
+  tick(5);
   out.push('battleStart=' + battle.phase);
 
   battle.playerScore = battle.currentTrainer.ptsToWin;

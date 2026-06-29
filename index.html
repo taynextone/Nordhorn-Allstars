@@ -1481,8 +1481,22 @@ function calculateDamage(move, attacker, defender) {
 
 function executePlayerMove() {
   const move = battle.playerMoves[battle.selectedMove];
-  if (!move || battle.playerEnergy < (move.energy || 0)) {
-    setBattleMessage('Not enough energy!', move ? move.name + ' needs ' + (move.energy || 0) + ' EN' : '', 120);
+  const affordableMove = battle.playerMoves.some(m => battle.playerEnergy >= (m.energy || 0));
+  if (!move) return;
+  if (battle.playerEnergy < (move.energy || 0)) {
+    if (!affordableMove) {
+      // If every move is out of reach, let the player spend the turn catching
+      // breath instead of getting stuck in the move menu. This uses only the
+      // existing compact battle message box, not another HUD/helper overlay.
+      battle.playerEnergy = Math.min(player.maxEnergy, battle.playerEnergy + PLAYER_ENERGY_REGEN);
+      battle.phase = 'anim';
+      battle.animTimer = 45;
+      setBattleMessage('You catch breath...', '+' + PLAYER_ENERGY_REGEN + ' EN', 90);
+      battle.turnCount++;
+      setTimeout(() => endTurn(), 900);
+      return;
+    }
+    setBattleMessage('Not enough energy!', move.name + ' needs ' + (move.energy || 0) + ' EN', 120);
     return;
   }
 
