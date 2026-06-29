@@ -4080,6 +4080,13 @@ function loseBattle() {
 function endBattle() {
   battle.active = false;
   gameState = 'OVERWORLD';
+  const allTrainersBeaten = trainers.every(t => t.beaten);
+  if (allTrainersBeaten) {
+    startDialog('CHAMPION!', 'Alle Rivalen besiegt. Die Credits rollen jetzt.', () => {
+      gameState = 'CREDITS';
+    });
+    return;
+  }
   startDialog('Victory!', 'Coach: Great game! Keep training!', () => {
     gameState = 'OVERWORLD';
   });
