@@ -981,6 +981,35 @@ function clampStat(value, min, max, fallback) {
   return Math.max(min, Math.min(safeMax, safeValue));
 }
 
+function clampInteger(value, min, max, fallback) {
+  return Math.round(clampStat(value, min, max, fallback));
+}
+
+function sanitizePlayerStats(savedStats = {}) {
+  const defaults = { dribbling: 5, shooting: 5, athleticism: 5, defense: 5, courtVision: 5 };
+  return Object.fromEntries(Object.keys(defaults).map(key => [
+    key,
+    clampInteger(savedStats[key], 1, 30, defaults[key])
+  ]));
+}
+
+function sanitizeMoveList(savedMoves, level) {
+  const allMoveNames = new Set(Object.values(MOVE_UNLOCKS).map(move => move.name));
+  const unlockedNames = Object.keys(MOVE_UNLOCKS)
+    .filter(key => parseInt(key) <= level + 1)
+    .map(key => MOVE_UNLOCKS[key].name);
+  const savedValid = Array.isArray(savedMoves)
+    ? savedMoves.filter(name => allMoveNames.has(name))
+    : [];
+  const merged = [...new Set(['Layup', 'Jump Shot', ...savedValid, ...unlockedNames])];
+  return merged.filter(name => allMoveNames.has(name));
+}
+
+function normalizeTrainerId(id) {
+  const numeric = Number(id);
+  return Number.isInteger(numeric) ? numeric : id;
+}
+
 // Build bonuses
 const BUILD_BONUS = {
   shooter: { dribbling: 0, shooting: 3, athleticism: 0, defense: -1, courtVision: 1 },
@@ -1111,31 +1140,34 @@ const SaveSystem = {
       const p = data.player;
       player.x = Number.isFinite(Number(p.x)) ? Number(p.x) : HomeRest.homeX;
       player.y = Number.isFinite(Number(p.y)) ? Number(p.y) : HomeRest.homeY;
-      player.facing = p.facing || 'down';
+      player.facing = ['up', 'down', 'left', 'right'].includes(p.facing) ? p.facing : 'down';
       player.moving = false;
-      player.gender = p.gender || 'boy';
-      player.build = p.build || 'shooter';
-      player.level = p.level || 1;
-      player.exp = p.exp || 0;
-      player.expNext = p.expNext || 20;
-      player.maxHp = Number(p.maxHp) > 0 ? Number(p.maxHp) : 100;
-      player.hp = clampStat(p.hp, 0, player.maxHp, player.maxHp);
-      player.maxEnergy = Number(p.maxEnergy) > 0 ? Number(p.maxEnergy) : 20;
-      player.energy = clampStat(p.energy, 0, player.maxEnergy, player.maxEnergy);
-      player.stats = { ...player.stats, ...(p.stats || {}) };
-      player.moves = Array.isArray(p.moves) ? [...p.moves] : ['Layup', 'Jump Shot'];
-      player.beatenTrainers = Array.isArray(p.beatenTrainers) ? [...new Set(p.beatenTrainers)] : [];
+      player.gender = ['boy', 'girl'].includes(p.gender) ? p.gender : 'boy';
+      player.build = Object.prototype.hasOwnProperty.call(BUILD_BONUS, p.build) ? p.build : 'shooter';
+      player.level = clampInteger(p.level, 1, 50, 1);
+      player.exp = clampInteger(p.exp, 0, 99999, 0);
+      player.expNext = clampInteger(p.expNext, 1, 99999, 20);
+      player.maxHp = Number(p.maxHp) > 0 ? clampInteger(p.maxHp, 1, 999, 100) : 100;
+      player.hp = clampInteger(p.hp, 1, player.maxHp, player.maxHp);
+      player.maxEnergy = Number(p.maxEnergy) > 0 ? clampInteger(p.maxEnergy, 1, 999, 20) : 20;
+      player.energy = clampInteger(p.energy, 0, player.maxEnergy, player.maxEnergy);
+      player.stats = sanitizePlayerStats(p.stats);
+      player.moves = sanitizeMoveList(p.moves, player.level);
+      const knownTrainerIds = new Set(trainers.map(t => t.id));
+      player.beatenTrainers = Array.isArray(p.beatenTrainers)
+        ? [...new Set(p.beatenTrainers.map(normalizeTrainerId).filter(id => knownTrainerIds.has(id)))]
+        : [];
       player.rivalBeaten = !!p.rivalBeaten;
       trainers.forEach(t => { t.beaten = player.beatenTrainers.includes(t.id); });
       if (Array.isArray(data.trainers)) {
         data.trainers.forEach(saved => {
-          const trainer = trainers.find(t => t.id === saved.id);
+          const trainer = saved ? trainers.find(t => t.id === normalizeTrainerId(saved.id)) : null;
           if (trainer) trainer.beaten = !!saved.beaten;
         });
       }
       // Keep old/new save shapes in sync. Some saves contain trainer-state but
-      // not the newer beatenTrainers list; Continue must not lose badge progress
-      // or show a stale title/HUD count after loading those slots.
+      // not the newer beatenTrainers list; Continue must not lose badge progress,
+      // count stale trainer IDs, or resume with NaN stats from corrupt slots.
       player.beatenTrainers = trainers.filter(t => t.beaten).map(t => t.id);
       player.rivalBeaten = trainers.every(t => t.beaten);
       if (!isWalkable(player.x, player.y)) movePlayerToHomeGate();
@@ -1164,12 +1196,20 @@ const SaveSystem = {
       const data = JSON.parse(raw);
       const p = data.player || {};
       const date = data.savedAt ? new Date(data.savedAt) : null;
-      const beatenIds = new Set(Array.isArray(p.beatenTrainers) ? p.beatenTrainers : []);
+      const knownTrainerIds = new Set(trainers.map(t => t.id));
+      const beatenIds = new Set(
+        Array.isArray(p.beatenTrainers)
+          ? p.beatenTrainers.map(normalizeTrainerId).filter(id => knownTrainerIds.has(id))
+          : []
+      );
       if (Array.isArray(data.trainers)) {
-        data.trainers.forEach(saved => { if (saved && saved.beaten) beatenIds.add(saved.id); });
+        data.trainers.forEach(saved => {
+          const id = saved ? normalizeTrainerId(saved.id) : null;
+          if (saved && saved.beaten && knownTrainerIds.has(id)) beatenIds.add(id);
+        });
       }
       return {
-        level: p.level || 1,
+        level: clampInteger(p.level, 1, 50, 1),
         beaten: beatenIds.size,
         time: date ? date.toLocaleDateString('de-DE') : 'unbekannt',
       };

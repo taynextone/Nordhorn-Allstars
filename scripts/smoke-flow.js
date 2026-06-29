@@ -226,12 +226,22 @@ function runSmokeFlow() {
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,
     savedAt: '2026-01-02T00:00:00.000Z',
-    player: { x: 3, y: 4, level: 2, hp: -9, maxHp: -25, energy: -4, maxEnergy: 0, moves: ['Layup'], beatenTrainers: [] },
-    trainers: []
+    player: {
+      x: 3, y: 4, facing: 'sideways', gender: 'robot', build: 'hacker',
+      level: 'bad', hp: -9, maxHp: -25, energy: -4, maxEnergy: 0,
+      stats: { shooting: 'NaN', defense: 9999, dribbling: -7 },
+      moves: ['Layup', 'Glitch Dunk'], beatenTrainers: [999, '1']
+    },
+    trainers: [{ id: '2', beaten: true }, { id: 404, beaten: true }]
   }))`);
+  assert(get('SaveSystem.getInfo().beaten') === 2, 'Continue info should ignore stale trainer IDs but count valid string IDs');
   assert(get('SaveSystem.load()') === true, 'Corrupt vital save should still load through sanitizer');
-  assert(get('player.maxHp') === 100 && get('player.hp') === 0, 'Load should clamp corrupt HP before any HUD/dialog frame');
+  assert(get('player.maxHp') === 100 && get('player.hp') === 1, 'Load should revive corrupt nonpositive HP to one playable point before any HUD/dialog frame');
   assert(get('player.maxEnergy') === 20 && get('player.energy') === 0, 'Load should clamp corrupt energy before battle/overworld use');
+  assert(get('player.level') === 1 && get('player.build') === 'shooter' && get('player.facing') === 'down', 'Load should sanitize corrupt level/build/facing fields');
+  assert(get('Number.isFinite(player.stats.shooting) && player.stats.shooting === 5 && player.stats.defense === 30 && player.stats.dribbling === 1'), 'Load should sanitize corrupt stat values into finite balanced bounds');
+  assert(get('player.moves.includes("Layup") && player.moves.includes("Jump Shot") && !player.moves.includes("Glitch Dunk")'), 'Load should remove invalid saved moves while keeping core playable moves');
+  assert(get('player.beatenTrainers.length') === 2 && get('trainers[1].beaten && trainers[2].beaten') === true, 'Load should sync only known valid trainer IDs from mixed save shapes');
   assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'Load should recover invalid save positions to the home gate immediately');
   assert(get('isWalkable(player.x, player.y)') === true, 'Sanitized save position must be walkable');
   closeDialog();
