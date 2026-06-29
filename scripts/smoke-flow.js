@@ -221,6 +221,10 @@ function runSmokeFlow() {
   assert(get('player.energy') === get('player.maxEnergy'), 'Loss respawn should restore energy');
   assert(get('trainers[0].beaten') === false, 'Loss must not mark trainer beaten');
 
+  run('player.x = 3; player.y = 4; ErrorGuard.validateGameState();');
+  assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'ErrorGuard should recover corrupt positions to the walkable home gate');
+  assert(get('isWalkable(player.x, player.y)') === true, 'ErrorGuard recovery tile must be walkable');
+
   const trainerCount = get('trainers.length');
   for (let i = 0; i < trainerCount; i++) {
     run(`startBattle(trainers[${i}])`);

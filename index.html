@@ -318,8 +318,11 @@ const ErrorGuard = {
 
     if (!Number.isFinite(player.x) || !Number.isFinite(player.y) || !isWalkable(player.x, player.y)) {
       this.record('player-position', 'Recovered invalid position ' + player.x + ',' + player.y);
-      player.x = 5;
-      player.y = 6;
+      // Recover to the same walkable home-gate tile used by new-game, loss,
+      // and HomeRest. The old y=6 fallback was inside the house, which made
+      // ErrorGuard re-trigger every frame after a corrupt save/edge-case warp.
+      player.x = (typeof HomeRest !== 'undefined' ? HomeRest.homeX : 5);
+      player.y = (typeof HomeRest !== 'undefined' ? HomeRest.homeY : 9);
       player.facing = 'down';
     }
 

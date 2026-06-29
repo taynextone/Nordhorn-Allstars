@@ -81,6 +81,7 @@
 - [x] Battle-Result Message Sync — Score-/EXP-Submessages werden wieder in der kompakten Battle-Message-Box gewrappt angezeigt; Title-Hinweis nennt die funktionierenden A/B-Startbuttons.
 - [x] Continue-Save Progress Sync — ältere Saves mit Trainer-State, aber leerer beatenTrainers-Liste, zeigen/laden Fortschritt wieder korrekt ohne neue Overlays.
 - [x] Champion-Dialog Escape Flow — Escape schließt Battle-Result-Dialoge jetzt wie Confirm inklusive Callback, damit der letzte Sieg zuverlässig in die Credits statt zurück in einen fertigen Overworld-State führt.
+- [x] ErrorGuard Home-Gate Recovery — korrupte/ungültige Spielerpositionen werden jetzt auf den begehbaren Home-Gate-Tile zurückgesetzt; Smoke-Flow prüft, dass Recovery nicht mehr in einer Wand/Haustile-Schleife landet.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
