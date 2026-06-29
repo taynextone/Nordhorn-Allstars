@@ -61,6 +61,7 @@
 - [x] Title-Screen-Declutter — überlagernde Coach-/System-Badges entfernt und durch kompakten Status ersetzt; Logo, Menü und Continue sind wieder klar lesbar.
 - [x] Clean-HUD-Pass — Title-Status auf ruhigen Clean-HUD-Hinweis reduziert, Battle-HP/Message/Enemy-Boxen überlappungsfrei angeordnet, Spieler-Sprite aus dem Move-Menü freigelegt und Enter-Input-Bleed beim Battle-Start gefixt.
 - [x] Overlay-Lockdown — alte Coach-/Scout-/Help-Toggles aus dem Runtime-Loop entfernt; Overworld bleibt Karte + Actors + kompaktes Status-HUD, Battle bleibt ohne Zusatz-HUDs.
+- [x] Dialog-Polish — lange Dialog-/Victory-Texte wrappen jetzt in der Gameboy-Box; Escape verlässt Dialoge sauber zurück in den Overworld-State, ohne Battle-Input-Bleed.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 19 Boot-Checks und Title-Screen-Status ergänzt

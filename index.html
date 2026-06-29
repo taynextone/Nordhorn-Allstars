@@ -4118,7 +4118,29 @@ function updateDialog() {
 
   if (wasPressed('Escape')) {
     dialog.active = false;
+    dialog.onComplete = null;
+    if (gameState === 'DIALOG') gameState = 'OVERWORLD';
+    clearPressedInput();
   }
+}
+
+function getWrappedDialogLines(text, maxChars) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+
+  words.forEach(word => {
+    const candidate = line ? line + ' ' + word : word;
+    if (candidate.length > maxChars && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  });
+
+  if (line) lines.push(line);
+  return lines.length ? lines : [''];
 }
 
 function drawDialog() {
@@ -4134,13 +4156,21 @@ function drawDialog() {
   ctx.fillStyle = C.LIGHT;
   ctx.fillRect(6, boxY + 6, VIEW_W - 12, 68);
 
-  // Text
+  // Text — wrap long NPC/victory lines instead of letting them spill off-screen.
   ctx.fillStyle = C.DARKEST;
   ctx.font = '10px monospace';
-  ctx.fillText(dialog.displayed, 14, boxY + 24);
+  const lines = getWrappedDialogLines(dialog.displayed, 46).slice(0, 3);
+  lines.forEach((line, index) => {
+    ctx.fillText(line, 14, boxY + 22 + index * 14);
+  });
 
   if (dialog.subText && dialog.charIndex >= dialog.text.length) {
-    ctx.fillText(dialog.subText, 14, boxY + 44);
+    ctx.font = '9px monospace';
+    const subLines = getWrappedDialogLines(dialog.subText, 52).slice(0, 2);
+    const subStartY = boxY + 24 + lines.length * 14;
+    subLines.forEach((line, index) => {
+      if (subStartY + index * 12 < boxY + 66) ctx.fillText(line, 14, subStartY + index * 12);
+    });
   }
 
   // Continue prompt
@@ -4148,6 +4178,7 @@ function drawDialog() {
     const blink = Math.floor(Date.now() / 300) % 2;
     if (blink) {
       ctx.fillStyle = C.DARKEST;
+      ctx.font = '10px monospace';
       ctx.fillText('▼', VIEW_W - 20, boxY + 60);
     }
   }
