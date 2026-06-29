@@ -62,6 +62,10 @@ function assertCleanRenderPaths() {
   assert(battle.includes('drawMoveSelect()'), 'Battle must keep the move menu');
   assert(battle.includes('drawBattlePlayer(76, 145)'), 'Player sprite must render above the move menu');
   assert(battle.includes('ctx.arc(104, 191, 6'), 'Player ball must stay above the move menu');
+  const moveSelect = getFunctionBody(code, 'drawMoveSelect');
+  assert(moveSelect.includes('const menuY = VIEW_H - 150;'), 'Move menu must stay lifted above the HP/EN HUD');
+  assert(moveSelect.includes('menuY + menuH - 8'), 'Move description must stay inside the command box');
+  assert(!moveSelect.includes('menuY + menuH + 10'), 'Move description must not overlap the HP/EN HUD');
   assert(battle.includes('ctx.arc(VIEW_W / 2, 120, 28'), 'Battle court should keep the clean center-circle polish');
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');

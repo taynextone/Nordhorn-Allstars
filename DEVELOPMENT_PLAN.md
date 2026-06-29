@@ -77,6 +77,7 @@
 - [x] A/B-Control Sync — Tastatur-A und -B bestätigen jetzt wie in den sichtbaren Controls angegeben; Smoke-Flow prüft diese Gameboy-Button-Aliase ohne neue HUDs.
 - [x] Legacy-Coach-Code-Cleanup — alte Coach-/Advisor-/Meter-Modulblöcke durch inerte Flags ersetzt; Smoke-Flow blockiert ihre Rückkehr, damit der Clean-Gameboy-Screen nicht wieder überladen wird.
 - [x] Character-Select Control Polish — sichtbare Gender-/Build-Hinweise nennen jetzt ENTER/A/B-Confirm passend zur Gameboy-Tastensteuerung; Smoke-Guard prüft die Texte ohne neue HUDs.
+- [x] Battle-Command Readability — Move-Beschreibung bleibt jetzt innerhalb der Command-Box oberhalb der HP/EN-Leiste; Smoke-Guard verhindert erneute Battle-HUD-Überlappung.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

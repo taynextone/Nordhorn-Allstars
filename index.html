@@ -2620,11 +2620,11 @@ function drawBattleHUD() {
 }
 
 function drawMoveSelect() {
-  // Move selection menu
+  // Move selection menu: keep the whole command box above the bottom HP/EN HUD.
   const menuX = 20;
-  const menuY = VIEW_H - 140;
+  const menuY = VIEW_H - 150;
   const menuW = 200;
-  const menuH = 60;
+  const menuH = 68;
 
   ctx.fillStyle = C.LIGHT;
   ctx.fillRect(menuX, menuY, menuW, menuH);
@@ -2659,11 +2659,13 @@ function drawMoveSelect() {
     ctx.fillText('EN: ' + (move.energy || 0), menuX + menuW - 50, menuY + 19 + idx * 16);
   }
 
-  // Move description
+  // Move description stays inside the command box, not over the HP/EN panels.
   if (moves[battle.selectedMove]) {
     ctx.fillStyle = C.DARK;
-    ctx.font = '7px monospace';
-    ctx.fillText(moves[battle.selectedMove].desc, menuX + 8, menuY + menuH + 10);
+    ctx.font = '6px monospace';
+    const desc = String(moves[battle.selectedMove].desc || '');
+    const shortDesc = desc.length > 32 ? desc.slice(0, 29) + '...' : desc;
+    ctx.fillText(shortDesc, menuX + 8, menuY + menuH - 8);
   }
 }
 
