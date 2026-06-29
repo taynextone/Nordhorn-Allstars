@@ -4018,6 +4018,12 @@ function winBattle() {
     player.beatenTrainers.push(trainer.id);
   }
 
+  // Carry the played battle back into the overworld before saving.
+  // Earlier builds only persisted score/EXP, so post-fight HP/EN HUDs could
+  // show pre-battle values and make the next duel/rest decision misleading.
+  player.hp = Math.max(1, Math.min(player.maxHp, battle.playerHp));
+  player.energy = Math.max(0, Math.min(player.maxEnergy, battle.playerEnergy));
+
   // EXP gain
   const expGain = trainer.expReward || (15 + trainer.level * 10);
   player.exp += expGain;
@@ -4833,7 +4839,7 @@ function drawBattle() {
   ctx.fillStyle = C.DARK;
   ctx.fillRect(200, 30, 2, 20);
 
-  // Coach overlays intentionally disabled: they overloaded the battle screen.
+  // Extra overlays intentionally disabled: the battle screen stays classic and readable.
 
   // Player side — raised above the command menu so the sprite stays visible.
   drawBattlePlayer(100, 205);

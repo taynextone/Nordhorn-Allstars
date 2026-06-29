@@ -66,6 +66,7 @@
 - [x] Objective-Marker Clean-Rename — aktive Overworld-/Minimap-Zielmarkierung nutzt keinen Radar-Renderpfad mehr; drawOverworld bleibt frei von Coach/Scout/Radar-HUD-Aufrufen.
 - [x] Flow-Smoke UX-Fix — echte Title→Charselect→Dialog→Overworld→Battle→Victory-Prüfung ergänzt; Dialogabschluss leert Confirm-Input und M/Shift+M toggelt die Minimap wie angezeigt.
 - [x] Clean-UI Guard — alter Help/Scout/Coach-Sichtbarkeitszustand wird pro Frame deaktiviert, damit keine legacy Overlays in Overworld/Battle zurückkehren.
+- [x] Battle-State Sync — echter Smoke-Flow bestätigt Title→Battle→Win/Loss; Siege übernehmen verbleibende HP/EN zurück ins Overworld-HUD und Save, damit Rest-/Folgeduell-Entscheidungen stimmen.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
