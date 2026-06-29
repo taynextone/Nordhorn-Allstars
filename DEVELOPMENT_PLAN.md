@@ -63,6 +63,7 @@
 - [x] Overlay-Lockdown — alte Coach-/Scout-/Help-Toggles aus dem Runtime-Loop entfernt; Overworld bleibt Karte + Actors + kompaktes Status-HUD, Battle bleibt ohne Zusatz-HUDs.
 - [x] Dialog-Polish — lange Dialog-/Victory-Texte wrappen jetzt in der Gameboy-Box; Escape verlässt Dialoge sauber zurück in den Overworld-State, ohne Battle-Input-Bleed.
 - [x] Debug-Panel-Declutter — ?modules=1 listet nur noch Core-Systeme statt deaktivierter Coach-/Advisor-HUDs; alte S/T/H-Hilfetexte wurden aus der sichtbaren Controls-Liste entfernt.
+- [x] Objective-Marker Clean-Rename — aktive Overworld-/Minimap-Zielmarkierung nutzt keinen Radar-Renderpfad mehr; drawOverworld bleibt frei von Coach/Scout/Radar-HUD-Aufrufen.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

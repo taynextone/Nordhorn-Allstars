@@ -4431,7 +4431,7 @@ const PerfHUD = {
   }
 };
 
-const QuestRadar = {
+const ObjectiveTracker = {
   getNextTrainer() {
     return trainers.find(t => !t.beaten) || null;
   },
@@ -4459,15 +4459,15 @@ const QuestRadar = {
     ctx.fillStyle = C.DARKEST;
     ctx.font = '7px monospace';
     if (next) {
-      ctx.fillText('QUEST RADAR ' + this.getArrowTo(next), 10, 16);
+      ctx.fillText('NEXT GOAL ' + this.getArrowTo(next), 10, 16);
       ctx.fillText('NEXT: ' + next.name + '  ' + this.getDistanceTo(next) + 'm', 10, 28);
     } else {
-      ctx.fillText('QUEST RADAR ✓', 10, 16);
+      ctx.fillText('NEXT GOAL ✓', 10, 16);
       ctx.fillText('ALL TRAINERS BEATEN', 10, 28);
     }
   },
 
-  renderWorldMarker(camX, camY) {
+  drawWorldMarker(camX, camY) {
     const next = this.getNextTrainer();
     if (!next) return;
     const px = (next.x - camX) * TILE;
@@ -4481,7 +4481,7 @@ const QuestRadar = {
     ctx.textAlign = 'left';
   },
 
-  renderMinimapMarker() {
+  drawMinimapMarker() {
     const next = this.getNextTrainer();
     if (!next) return;
     const mx = MINIMAP_X + next.x * MINIMAP_SCALE;
@@ -4495,6 +4495,11 @@ const QuestRadar = {
     ctx.stroke();
   }
 };
+
+// Backwards-compatible alias for dormant legacy helper objects. Active rendering
+// uses ObjectiveTracker directly so drawOverworld/drawBattle stay free of old
+// Radar/Coach/Scout render calls.
+const QuestRadar = ObjectiveTracker;
 
 function drawOverworld() {
   const camX = Math.max(0, Math.min(MAP_W - VIEW_TILES_W / 1, player.x - Math.floor(VIEW_TILES_W / 2)));
@@ -4525,8 +4530,8 @@ function drawOverworld() {
   // Draw player
   drawPlayer(camX, camY, player.facing, Math.floor(frameCount / 15) % 2);
 
-  // Draw the next objective marker above the current trainer target.
-  QuestRadar.renderWorldMarker(camX, camY);
+  // Draw one small objective marker above the current trainer target.
+  ObjectiveTracker.drawWorldMarker(camX, camY);
 
   // Draw minimap
   if (minimapVisible) drawMinimap();
@@ -4685,7 +4690,7 @@ function drawMinimap() {
   });
 
   // Highlight the next undefeated trainer so the core loop always has direction.
-  QuestRadar.renderMinimapMarker();
+  ObjectiveTracker.drawMinimapMarker();
 
   // Draw player on minimmap (blinking white dot)
   const blink = Math.floor(Date.now() / 300) % 2;
@@ -5248,7 +5253,7 @@ const GameModules = {
     { id: 'credits', label: 'Credits', check: () => typeof drawCredits === 'function' },
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
-    { id: 'quest', label: 'Objective Marker', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderWorldMarker === 'function') },
+    { id: 'quest', label: 'Objective Marker', check: () => !!(ObjectiveTracker && typeof ObjectiveTracker.getNextTrainer === 'function' && typeof ObjectiveTracker.drawWorldMarker === 'function') },
     { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
     { id: 'perf', label: 'Frame Timing', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
