@@ -86,6 +86,8 @@ function assertCleanRenderPaths() {
   assert(battleHud.includes('clampBarWidth(battle.enemyHp, battle.currentTrainer.playerHp, 88)'), 'Enemy HP bar must be clamped');
   assert(battleHud.includes('clampBarWidth(battle.enemyEnergy, battle.enemyMaxEnergy, 88)'), 'Enemy EN bar must be clamped');
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
+  assert(code.includes("trainerName + ' besiegt! Siege: '"), 'Victory dialog should show rival progress in the existing dialog box');
+  assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
   assert(code.includes('function movePlayerToHomeGate()'), 'Return-home flows should share one safe home-gate helper');
   assert(code.includes('ENTER/SPACE/A/B to continue'), 'Game Over hint must mention all working confirm buttons');
   assert(code.includes('const PLAYER_ENERGY_REGEN = 3;'), 'Player energy regen should be a single tuned constant');
@@ -254,6 +256,7 @@ function runSmokeFlow() {
   flushTimers();
   flushTimers();
   assert(get('gameState') === 'DIALOG', 'Enemy HP KO should flow into the victory dialog');
+  assert(get('dialog.subText') === 'Klaus besiegt! Siege: 1/5', 'Victory dialog should name the rival and compact progress without extra HUD');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Enemy HP KO victory dialog should return to overworld');
   assert(get('trainers[0].beaten') === true, 'Enemy HP KO should mark trainer beaten');

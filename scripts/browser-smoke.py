@@ -168,6 +168,7 @@ async def run_cdp_flow(ws_url: str) -> str:
   endTurn();
   flushTimers();
   assert(gameState === 'DIALOG' && dialog.active && dialog.text === 'Victory!', 'victory should show dialog');
+  assert(dialog.subText === 'Klaus besiegt! Siege: 1/5', 'victory dialog should show compact rival progress in the existing dialog box');
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'victory dialog should return to overworld and mark win');
   out.push('firstVictoryWins=' + trainers.filter(t => t.beaten).length);

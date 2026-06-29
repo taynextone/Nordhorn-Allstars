@@ -1745,6 +1745,7 @@ function loseBattle() {
 }
 
 function endBattle() {
+  const defeatedTrainer = battle.currentTrainer;
   battle.active = false;
   gameState = 'OVERWORLD';
   const allTrainersBeaten = trainers.every(t => t.beaten);
@@ -1754,7 +1755,12 @@ function endBattle() {
     });
     return;
   }
-  startDialog('Victory!', 'Coach: Great game! Keep training!', () => {
+
+  // Keep post-battle feedback in the existing dialog box only: name the beaten
+  // rival and show compact progress without adding any battle/coach HUD modules.
+  const beatenCount = trainers.filter(t => t.beaten).length;
+  const trainerName = defeatedTrainer ? defeatedTrainer.name : 'Rivale';
+  startDialog('Victory!', trainerName + ' besiegt! Siege: ' + beatenCount + '/' + trainers.length, () => {
     gameState = 'OVERWORLD';
   });
 }
