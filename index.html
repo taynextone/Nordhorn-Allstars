@@ -2570,6 +2570,11 @@ function drawBattleHUD() {
   const playerBox = { x: 4, y: boxY, w: 188, h: boxH };
   const msgBox = { x: 196, y: boxY, w: 88, h: boxH };
   const enemyBox = { x: VIEW_W - 192, y: boxY, w: 188, h: boxH };
+  const clampBarWidth = (value, max, width) => {
+    const safeMax = Math.max(1, Number(max) || 1);
+    const ratio = Math.max(0, Math.min(1, (Number(value) || 0) / safeMax));
+    return Math.floor(ratio * width);
+  };
 
   function drawPanelBox(box) {
     ctx.fillStyle = C.DARK;
@@ -2592,7 +2597,7 @@ function drawBattleHUD() {
   // HP bar
   ctx.fillStyle = C.DARK;
   ctx.fillRect(playerBox.x + 56, VIEW_H - 64, 92, 8);
-  const hpWidth = Math.max(0, (battle.playerHp / player.maxHp) * 88);
+  const hpWidth = clampBarWidth(battle.playerHp, player.maxHp, 88);
   ctx.fillStyle = hpWidth > 30 ? C.DARK : (hpWidth > 15 ? '#d4600a' : '#ff0000');
   ctx.fillRect(playerBox.x + 58, VIEW_H - 62, hpWidth, 4);
   ctx.fillStyle = C.DARKEST;
@@ -2601,7 +2606,7 @@ function drawBattleHUD() {
   // Energy bar
   ctx.fillStyle = C.DARK;
   ctx.fillRect(playerBox.x + 56, VIEW_H - 48, 92, 8);
-  const enWidth = Math.max(0, (battle.playerEnergy / player.maxEnergy) * 88);
+  const enWidth = clampBarWidth(battle.playerEnergy, player.maxEnergy, 88);
   ctx.fillStyle = '#2a5a9a';
   ctx.fillRect(playerBox.x + 58, VIEW_H - 46, enWidth, 4);
   ctx.fillStyle = C.DARKEST;
@@ -2614,7 +2619,7 @@ function drawBattleHUD() {
 
   ctx.fillStyle = C.DARK;
   ctx.fillRect(enemyBox.x + 56, VIEW_H - 64, 92, 8);
-  const eHpWidth = Math.max(0, (battle.enemyHp / battle.currentTrainer.playerHp) * 88);
+  const eHpWidth = clampBarWidth(battle.enemyHp, battle.currentTrainer.playerHp, 88);
   ctx.fillStyle = eHpWidth > 30 ? C.DARK : (eHpWidth > 15 ? '#d4600a' : '#ff0000');
   ctx.fillRect(enemyBox.x + 58, VIEW_H - 62, eHpWidth, 4);
   ctx.fillStyle = C.DARKEST;
@@ -2622,7 +2627,7 @@ function drawBattleHUD() {
 
   ctx.fillStyle = C.DARK;
   ctx.fillRect(enemyBox.x + 56, VIEW_H - 48, 92, 8);
-  const eEnWidth = Math.max(0, (battle.enemyEnergy / battle.enemyMaxEnergy) * 88);
+  const eEnWidth = clampBarWidth(battle.enemyEnergy, battle.enemyMaxEnergy, 88);
   ctx.fillStyle = '#2a5a9a';
   ctx.fillRect(enemyBox.x + 58, VIEW_H - 46, eEnWidth, 4);
   ctx.fillStyle = C.DARKEST;
