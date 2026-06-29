@@ -70,6 +70,7 @@
 - [x] Champion-Credits Flow — letzter Sieg öffnet einen sauberen Champion-Dialog und wechselt danach direkt in die Credits, statt Spieler ohne Abschluss im Overworld zurückzulassen.
 - [x] Dialog-Prompt Sync — Dialoge setzen den Typing-Status nach natürlichem Textende sauber zurück, damit der Weiter-Pfeil erscheint und Intro-/Victory-/Rest-Flows klar bedienbar bleiben.
 - [x] Confirm-Input UX — Space/B ist jetzt durchgängig als Action/Confirm aktiv (Title, Charakterwahl, Dialoge, Battle-Move, Game-Over/Credits), passend zur Controls-Anzeige ohne neue HUDs.
+- [x] Input-Edge Polish — gleichzeitiges Enter+Space hinterlässt keinen stale Confirm mehr; Credits-Hotkey akzeptiert c/C wie angezeigt.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
