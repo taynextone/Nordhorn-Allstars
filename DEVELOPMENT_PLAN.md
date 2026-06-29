@@ -84,6 +84,7 @@
 - [x] ErrorGuard Home-Gate Recovery — korrupte/ungültige Spielerpositionen werden jetzt auf den begehbaren Home-Gate-Tile zurückgesetzt; Smoke-Flow prüft, dass Recovery nicht mehr in einer Wand/Haustile-Schleife landet.
 - [x] Battle-Regen Label Sync — Spieler-Energie-Regeneration nutzt jetzt eine zentrale Konstante; HUD-Anzeige und echter Turn-Flow werden im Smoke-Test gemeinsam geprüft, ohne neue Overlays.
 - [x] Home-Gate Respawn Sync — New-Game-, Loss- und Game-Over-Rückkehr nutzen denselben begehbaren Home-Gate-Helper; A/B-Confirm-Hinweis ist synchronisiert und im Smoke-Flow abgesichert.
+- [x] Battle-Feedback Readability — Battle-Start- und „Not enough energy“-Hinweise erscheinen jetzt in der bestehenden kompakten Message-Box auch während Move-Select, ohne neue Coach-/HUD-Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

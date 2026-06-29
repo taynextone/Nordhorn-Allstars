@@ -1015,6 +1015,7 @@ let battle = {
   animTimer: 0,
   message: '',
   subMessage: '',
+  feedbackTimer: 0,
   playerEnergy: 20,
   enemyEnergy: 20,
   enemyMaxEnergy: 20,
@@ -1392,6 +1393,7 @@ function startBattle(trainer) {
   battle.enemyMoves = getEnemyMoves(trainer.level);
   battle.message = trainer.name + ' wants to battle!';
   battle.subMessage = 'LV ' + trainer.level + ' ' + trainer.aiStyle + ' - first to ' + trainer.ptsToWin;
+  battle.feedbackTimer = 120;
 }
 
 function calculateDamage(move, attacker, defender) {
@@ -1422,12 +1424,15 @@ function executePlayerMove() {
   const move = battle.playerMoves[battle.selectedMove];
   if (!move || battle.playerEnergy < (move.energy || 0)) {
     battle.message = 'Not enough energy!';
+    battle.subMessage = move ? move.name + ' needs ' + (move.energy || 0) + ' EN' : '';
+    battle.feedbackTimer = 120;
     return;
   }
 
   battle.playerEnergy -= (move.energy || 0);
   battle.phase = 'anim';
   battle.animTimer = 60;
+  battle.feedbackTimer = 0;
 
   if (move.special && move.name === 'Block') {
     // Block reduces next enemy attack
@@ -2622,7 +2627,7 @@ function drawBattleHUD() {
   ctx.fillText((battle.currentTrainer.aiStyle || 'Trainer') + '  Ziel ' + battle.currentTrainer.ptsToWin, enemyBox.x + 8, VIEW_H - 34);
 
   // Message area — centered between HP boxes, no overlap.
-  if (battle.message && battle.phase !== 'select') {
+  if (battle.message && (battle.phase !== 'select' || battle.feedbackTimer > 0)) {
     drawPanelBox(msgBox);
     ctx.fillStyle = C.DARKEST;
     ctx.font = '7px monospace';
@@ -2712,6 +2717,7 @@ function drawMoveSelect() {
 }
 
 function updateBattle() {
+  if (battle.feedbackTimer > 0) battle.feedbackTimer--;
   if (battle.phase === 'select' && battle.playerTurn) {
     if (wasPressed('ArrowUp')) {
       battle.selectedMove = (battle.selectedMove + battle.playerMoves.length - 1) % battle.playerMoves.length;
