@@ -63,6 +63,8 @@ function assertCleanRenderPaths() {
   assert(battle.includes('drawBattlePlayer(76, 145)'), 'Player sprite must render above the move menu');
   assert(battle.includes('ctx.arc(104, 191, 6'), 'Player ball must stay above the move menu');
   assert(battle.includes('ctx.arc(VIEW_W / 2, 120, 28'), 'Battle court should keep the clean center-circle polish');
+  assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
+  assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {

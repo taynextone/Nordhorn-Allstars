@@ -1931,7 +1931,7 @@ function drawCharSelect() {
     ctx.fillText('GIRL', VIEW_W / 2 + 50, 225);
 
     ctx.font = '8px monospace';
-    ctx.fillText('← → to select, ENTER to confirm', VIEW_W / 2, 300);
+    ctx.fillText('← → select, ENTER/A/B confirm', VIEW_W / 2, 300);
   } else if (charSelect.phase === 'build') {
     ctx.fillText('CHOOSE YOUR BUILD', VIEW_W / 2, 80);
 
@@ -1953,7 +1953,7 @@ function drawCharSelect() {
     });
 
     ctx.font = '8px monospace';
-    ctx.fillText('↑ ↓ to select, ENTER to confirm', VIEW_W / 2, 340);
+    ctx.fillText('↑ ↓ select, ENTER/A/B confirm', VIEW_W / 2, 340);
   }
 
   ctx.textAlign = 'left';
