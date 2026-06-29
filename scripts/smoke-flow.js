@@ -219,6 +219,18 @@ function runSmokeFlow() {
   closeDialog();
   run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
 
+  run('startBattle(trainers[0]); battle.enemyHp = 0; battle.playerScore = 0; endTurn();');
+  assert(get('battle.phase') === 'result', 'Enemy HP reaching zero should immediately end the duel');
+  assert(get('battle.message') === 'YOU WIN!', 'Enemy HP KO should use the normal compact victory message');
+  assert(get('battle.subMessage').includes('is out!'), 'Enemy HP KO detail should explain the finish inside the message box');
+  flushTimers();
+  flushTimers();
+  assert(get('gameState') === 'DIALOG', 'Enemy HP KO should flow into the victory dialog');
+  closeDialog();
+  assert(get('gameState') === 'OVERWORLD', 'Enemy HP KO victory dialog should return to overworld');
+  assert(get('trainers[0].beaten') === true, 'Enemy HP KO should mark trainer beaten');
+  run('resetRunProgress(); gameState = "OVERWORLD";');
+
   run('startBattle(trainers[0])');
   tick(1);
   assert(get('gameState') === 'BATTLE', 'Loss smoke should enter battle');

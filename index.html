@@ -1591,8 +1591,11 @@ function endTurn() {
   // Check win/lose
   const ptsToWin = battle.currentTrainer.ptsToWin;
 
-  if (battle.playerScore >= ptsToWin) {
-    setBattleMessage('YOU WIN!', 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore);
+  if (battle.playerScore >= ptsToWin || battle.enemyHp <= 0) {
+    const resultDetail = battle.enemyHp <= 0
+      ? battle.currentTrainer.name + ' is out! Score: ' + battle.playerScore + ' - ' + battle.enemyScore
+      : 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    setBattleMessage('YOU WIN!', resultDetail);
     battle.phase = 'result';
     setTimeout(() => winBattle(), 2500);
     return;

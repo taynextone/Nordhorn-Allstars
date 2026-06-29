@@ -89,6 +89,7 @@
 - [x] Enemy-Turn Message Hygiene — Gegnerzug-Banner nutzt denselben kompakten Message-Helper, damit alte Detailzeilen nicht in den Enemy-Turn leaken; Smoke-Flow deckt den State ab.
 - [x] Battle-Bar Clamp Polish — HP-/EN-Balken werden in der kompakten Battle-HUD-Box hart begrenzt, damit extreme/alte Werte die Gameboy-UI nicht überzeichnen.
 - [x] Title-Control Status Sync — kompakter Titelstatus nennt A/B/ENTER Start konsistent zur echten Gameboy-Button-Steuerung, ohne neue HUDs/Overlays.
+- [x] Enemy-KO Victory Sync — Gegner-HP auf 0 beendet Duelle jetzt sofort als Sieg mit kompakter Message-Box; Smoke-Flow prüft KO→Victory-Dialog→Overworld ohne neue HUDs.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
