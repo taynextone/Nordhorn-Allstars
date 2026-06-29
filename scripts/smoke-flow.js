@@ -31,6 +31,9 @@ function getFunctionBody(source, name) {
 function assertCleanRenderPaths() {
   const overworld = getFunctionBody(code, 'drawOverworld');
   const battle = getFunctionBody(code, 'drawBattle');
+  const runtimeLoop = getFunctionBody(code, 'gameLoop');
+  const overworldUpdate = getFunctionBody(code, 'updateOverworld');
+  const battleUpdate = getFunctionBody(code, 'updateBattle');
   const forbidden = [
     '.renderHUD(', '.renderBattleHUD(', '.renderOverlay(',
     'CoachTip.', 'ScoutCard.', 'ControlsHelp.', 'QuestRadar.',
@@ -46,6 +49,13 @@ function assertCleanRenderPaths() {
   assert(battle.includes('drawMoveSelect()'), 'Battle must keep the move menu');
   assert(battle.includes('drawBattlePlayer(76, 145)'), 'Player sprite must render above the move menu');
   assert(battle.includes('ctx.arc(104, 191, 6'), 'Player ball must stay above the move menu');
+
+  const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
+  for (const token of forbiddenLegacyToggles) {
+    assert(!runtimeLoop.includes(token), 'gameLoop reintroduced legacy overlay toggle: ' + token);
+    assert(!overworldUpdate.includes(token), 'updateOverworld reintroduced legacy overlay toggle: ' + token);
+    assert(!battleUpdate.includes(token), 'updateBattle reintroduced legacy overlay toggle: ' + token);
+  }
 }
 
 function createSandbox() {
@@ -158,6 +168,21 @@ function runSmokeFlow() {
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
 
+  run('startBattle(trainers[0])');
+  tick(1);
+  assert(get('gameState') === 'BATTLE', 'Loss smoke should enter battle');
+  assert(get('battle.phase') === 'select', 'Loss smoke battle should start at move select');
+  run('battle.enemyScore = battle.currentTrainer.ptsToWin; endTurn();');
+  flushTimers();
+  flushTimers();
+  assert(get('gameState') === 'DIALOG', 'Loss should show defeat dialog before returning to overworld');
+  assert(get('dialog.active') === true, 'Loss dialog should be active/readable');
+  closeDialog();
+  assert(get('gameState') === 'OVERWORLD', 'Loss dialog should return to overworld');
+  assert(get('player.hp') === get('player.maxHp'), 'Loss respawn should restore HP');
+  assert(get('player.energy') === get('player.maxEnergy'), 'Loss respawn should restore energy');
+  assert(get('trainers[0].beaten') === false, 'Loss must not mark trainer beaten');
+
   const trainerCount = get('trainers.length');
   for (let i = 0; i < trainerCount; i++) {
     run(`startBattle(trainers[${i}])`);
@@ -180,7 +205,7 @@ function runSmokeFlow() {
     assert(get(`trainers[${i}].beaten`) === true, 'Trainer ' + i + ' should be marked beaten');
   }
 
-  console.log('NORDHORN_SMOKE_FLOW_OK trainers=' + trainerCount + ' finalState=' + get('gameState'));
+  console.log('NORDHORN_SMOKE_FLOW_OK lossDialog=pass trainers=' + trainerCount + ' finalState=' + get('gameState'));
 }
 
 runSmokeFlow();
