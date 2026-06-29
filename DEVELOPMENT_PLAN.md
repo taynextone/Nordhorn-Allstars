@@ -59,6 +59,7 @@
 - [x] Rivalen-Fortschrittsbalken — sichtbares Overworld-HUD mit Siege-Zähler, nächstem Gegner, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Home-Rest-System — Start/Respawn auf begehbarer Home-Gate-Position gefixt, R-Taste heilt HP/EN zuhause, sichtbares HUD/Title-Marker und Module-Check ergänzt.
 - [x] Title-Screen-Declutter — überlagernde Coach-/System-Badges entfernt und durch kompakten Status ersetzt; Logo, Menü und Continue sind wieder klar lesbar.
+- [x] Clean-HUD-Pass — Title-Status auf ruhigen Clean-HUD-Hinweis reduziert, Battle-HP/Message/Enemy-Boxen überlappungsfrei angeordnet, Spieler-Sprite aus dem Move-Menü freigelegt und Enter-Input-Bleed beim Battle-Start gefixt.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 19 Boot-Checks und Title-Screen-Status ergänzt

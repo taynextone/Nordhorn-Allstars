@@ -3723,6 +3723,12 @@ function wasPressed(key) {
   return false;
 }
 
+function clearPressedInput() {
+  // Prevent the confirm key that closes a dialog/menu from immediately firing
+  // the first battle move on the next state. Hold-state movement remains intact.
+  Object.keys(keysPressed).forEach(key => { keysPressed[key] = false; });
+}
+
 // ============================================================
 // BATTLE SYSTEM
 // ============================================================
@@ -3745,6 +3751,7 @@ function getEnemyMoves(enemyLevel) {
 
 function startBattle(trainer) {
   gameState = 'BATTLE';
+  clearPressedInput();
   ControlsHelp.visible = false;
   ScoutCard.visible = false;
   CoachTip.visible = false;
@@ -4233,9 +4240,9 @@ function drawTitleScreen() {
   ctx.fillRect(bx - 104, 370, 208, 28);
   ctx.fillStyle = C.LIGHT;
   ctx.font = '7px monospace';
-  const moduleSummary = GameModules.getSummary();
-  ctx.fillText('SYSTEMS ' + moduleSummary.ready + '/' + moduleSummary.total + ' OK · COMPAT ' + BrowserCompat.summary(), bx, 382);
-  ctx.fillText('H/? HELP · S SCOUT · T TIP · M MAP', bx, 394);
+  // Keep title status calm after the HUD declutter: no coach/module counter spam.
+  ctx.fillText('CLEAN HUD MODE · COMPAT ' + BrowserCompat.summary(), bx, 382);
+  ctx.fillText('ENTER START · M MAP · H/? HELP', bx, 394);
   BrowserCompat.renderPanel();
   GameModules.renderPanel();
 
@@ -4785,8 +4792,8 @@ function drawBattle() {
 
   // Coach overlays intentionally disabled: they overloaded the battle screen.
 
-  // Player side
-  drawBattlePlayer(100, 280);
+  // Player side — raised above the command menu so the sprite stays visible.
+  drawBattlePlayer(100, 205);
 
   // Enemy side
   drawBattleEnemy(320, 80);
@@ -4795,7 +4802,7 @@ function drawBattle() {
   if (battle.hasBall) {
     ctx.fillStyle = '#d4600a';
     ctx.beginPath();
-    ctx.arc(120, 260, 6, 0, Math.PI * 2);
+    ctx.arc(120, 235, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#2a1a0a';
     ctx.lineWidth = 1;
@@ -4878,96 +4885,91 @@ function drawBattleEnemy(x, y) {
 }
 
 function drawBattleHUD() {
-  // Player stats box (bottom left)
-  ctx.fillStyle = C.DARK;
-  ctx.fillRect(4, VIEW_H - 76, 200, 72);
-  ctx.fillStyle = C.MID;
-  ctx.fillRect(5, VIEW_H - 75, 198, 70);
-  ctx.fillStyle = C.DARKEST;
-  ctx.fillRect(6, VIEW_H - 74, 196, 68);
-  ctx.fillStyle = C.LIGHT;
-  ctx.fillRect(8, VIEW_H - 72, 192, 64);
+  // Three compact non-overlapping boxes: player, message, enemy.
+  // This keeps the battle readable without reintroducing coach/advisor overlays.
+  const boxY = VIEW_H - 76;
+  const boxH = 72;
+  const playerBox = { x: 4, y: boxY, w: 188, h: boxH };
+  const msgBox = { x: 196, y: boxY, w: 88, h: boxH };
+  const enemyBox = { x: VIEW_W - 192, y: boxY, w: 188, h: boxH };
 
+  function drawPanelBox(box) {
+    ctx.fillStyle = C.DARK;
+    ctx.fillRect(box.x, box.y, box.w, box.h);
+    ctx.fillStyle = C.MID;
+    ctx.fillRect(box.x + 1, box.y + 1, box.w - 2, box.h - 2);
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(box.x + 2, box.y + 2, box.w - 4, box.h - 4);
+    ctx.fillStyle = C.LIGHT;
+    ctx.fillRect(box.x + 4, box.y + 4, box.w - 8, box.h - 8);
+  }
+
+  drawPanelBox(playerBox);
   ctx.fillStyle = C.DARKEST;
   ctx.font = '8px monospace';
-  ctx.fillText('LV ' + player.level, 14, VIEW_H - 60);
+  ctx.fillText('LV ' + player.level, playerBox.x + 10, VIEW_H - 60);
   ctx.font = '7px monospace';
-  ctx.fillText('REG +3', 164, VIEW_H - 52);
+  ctx.fillText('REG +3', playerBox.x + 146, VIEW_H - 52);
 
   // HP bar
   ctx.fillStyle = C.DARK;
-  ctx.fillRect(60, VIEW_H - 64, 100, 8);
-  const hpWidth = Math.max(0, (battle.playerHp / player.maxHp) * 96);
+  ctx.fillRect(playerBox.x + 56, VIEW_H - 64, 92, 8);
+  const hpWidth = Math.max(0, (battle.playerHp / player.maxHp) * 88);
   ctx.fillStyle = hpWidth > 30 ? C.DARK : (hpWidth > 15 ? '#d4600a' : '#ff0000');
-  ctx.fillRect(62, VIEW_H - 62, hpWidth, 4);
+  ctx.fillRect(playerBox.x + 58, VIEW_H - 62, hpWidth, 4);
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText('HP ' + Math.max(0, battle.playerHp) + '/' + player.maxHp, 14, VIEW_H - 68);
+  ctx.fillText('HP ' + Math.max(0, battle.playerHp) + '/' + player.maxHp, playerBox.x + 10, VIEW_H - 68);
 
   // Energy bar
   ctx.fillStyle = C.DARK;
-  ctx.fillRect(60, VIEW_H - 48, 100, 8);
-  const enWidth = Math.max(0, (battle.playerEnergy / player.maxEnergy) * 96);
+  ctx.fillRect(playerBox.x + 56, VIEW_H - 48, 92, 8);
+  const enWidth = Math.max(0, (battle.playerEnergy / player.maxEnergy) * 88);
   ctx.fillStyle = '#2a5a9a';
-  ctx.fillRect(62, VIEW_H - 46, enWidth, 4);
+  ctx.fillRect(playerBox.x + 58, VIEW_H - 46, enWidth, 4);
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText('EN ' + battle.playerEnergy + '/' + player.maxEnergy, 14, VIEW_H - 52);
+  ctx.fillText('EN ' + battle.playerEnergy + '/' + player.maxEnergy, playerBox.x + 10, VIEW_H - 52);
 
-  // Enemy stats box (top right or bottom right)
-  ctx.fillStyle = C.DARK;
-  ctx.fillRect(VIEW_W - 204, VIEW_H - 76, 200, 72);
-  ctx.fillStyle = C.MID;
-  ctx.fillRect(VIEW_W - 203, VIEW_H - 75, 198, 70);
-  ctx.fillStyle = C.DARKEST;
-  ctx.fillRect(VIEW_W - 202, VIEW_H - 74, 196, 68);
-  ctx.fillStyle = C.LIGHT;
-  ctx.fillRect(VIEW_W - 200, VIEW_H - 72, 192, 64);
-
+  drawPanelBox(enemyBox);
   ctx.fillStyle = C.DARKEST;
   ctx.font = '8px monospace';
-  ctx.fillText('ENEMY', VIEW_W - 196, VIEW_H - 60);
+  ctx.fillText('ENEMY', enemyBox.x + 8, VIEW_H - 60);
 
   ctx.fillStyle = C.DARK;
-  ctx.fillRect(VIEW_W - 140, VIEW_H - 64, 100, 8);
-  const eHpWidth = Math.max(0, (battle.enemyHp / battle.currentTrainer.playerHp) * 96);
+  ctx.fillRect(enemyBox.x + 56, VIEW_H - 64, 92, 8);
+  const eHpWidth = Math.max(0, (battle.enemyHp / battle.currentTrainer.playerHp) * 88);
   ctx.fillStyle = eHpWidth > 30 ? C.DARK : (eHpWidth > 15 ? '#d4600a' : '#ff0000');
-  ctx.fillRect(VIEW_W - 138, VIEW_H - 62, eHpWidth, 4);
+  ctx.fillRect(enemyBox.x + 58, VIEW_H - 62, eHpWidth, 4);
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText('HP ' + Math.max(0, battle.enemyHp), VIEW_W - 196, VIEW_H - 68);
+  ctx.fillText('HP ' + Math.max(0, battle.enemyHp), enemyBox.x + 8, VIEW_H - 68);
 
   ctx.fillStyle = C.DARK;
-  ctx.fillRect(VIEW_W - 140, VIEW_H - 48, 100, 8);
-  const eEnWidth = Math.max(0, (battle.enemyEnergy / battle.enemyMaxEnergy) * 96);
+  ctx.fillRect(enemyBox.x + 56, VIEW_H - 48, 92, 8);
+  const eEnWidth = Math.max(0, (battle.enemyEnergy / battle.enemyMaxEnergy) * 88);
   ctx.fillStyle = '#2a5a9a';
-  ctx.fillRect(VIEW_W - 138, VIEW_H - 46, eEnWidth, 4);
+  ctx.fillRect(enemyBox.x + 58, VIEW_H - 46, eEnWidth, 4);
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText('EN ' + battle.enemyEnergy + '/' + battle.enemyMaxEnergy, VIEW_W - 196, VIEW_H - 52);
+  ctx.fillText('EN ' + battle.enemyEnergy + '/' + battle.enemyMaxEnergy, enemyBox.x + 8, VIEW_H - 52);
   ctx.font = '7px monospace';
-  ctx.fillText((battle.currentTrainer.aiStyle || 'Trainer') + '  Ziel ' + battle.currentTrainer.ptsToWin, VIEW_W - 196, VIEW_H - 34);
+  ctx.fillText((battle.currentTrainer.aiStyle || 'Trainer') + '  Ziel ' + battle.currentTrainer.ptsToWin, enemyBox.x + 8, VIEW_H - 34);
 
-  // Message area
+  // Message area — centered between HP boxes, no overlap.
   if (battle.message && battle.phase !== 'select') {
-    ctx.fillStyle = C.LIGHT;
-    ctx.fillRect(200, VIEW_H - 76, 80, 72);
-    ctx.fillStyle = C.DARK;
-    ctx.fillRect(202, VIEW_H - 74, 76, 68);
-    ctx.fillStyle = C.LIGHT;
-    ctx.fillRect(204, VIEW_H - 72, 72, 64);
+    drawPanelBox(msgBox);
     ctx.fillStyle = C.DARKEST;
     ctx.font = '7px monospace';
-    // Wrap text
     const words = battle.message.split(' ');
     let line = '';
     let lineY = VIEW_H - 60;
     for (let w of words) {
-      if ((line + ' ' + w).length > 12) {
-        ctx.fillText(line, 208, lineY);
+      if ((line + ' ' + w).trim().length > 13) {
+        if (line) ctx.fillText(line, msgBox.x + 8, lineY);
         line = w;
         lineY += 9;
       } else {
         line = (line ? line + ' ' : '') + w;
       }
     }
-    if (line) ctx.fillText(line, 208, lineY);
+    if (line) ctx.fillText(line, msgBox.x + 8, lineY);
   }
 }
 
