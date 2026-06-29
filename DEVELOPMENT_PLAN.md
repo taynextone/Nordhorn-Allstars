@@ -93,6 +93,7 @@
 - [x] Browser-CDP Smoke Testbarkeit — `scripts/browser-smoke.py` lädt die echte Seite in Headless-Chromium und prüft Title→Charselect→Intro→Battle→Victory→Champion-Credits ohne neue HUDs/Overlays.
 - [x] Battle-Hoop Pixel-Polish — flache Hoop-Blöcke durch kleine Backboard/Rim/Netz-Pixelart ersetzt; Smoke-Guard prüft, dass es Court-Art bleibt und keine neuen HUD-/Overlay-Module entstehen.
 - [x] Browser-Smoke Port-Robustheit — Headless-CDP-Test nutzt ohne feste Env-Vorgabe einen freien lokalen Debug-Port, damit echte Start→Credits-Smokes in Cron/Parallel-Läufen nicht an Port-Kollisionen scheitern.
+- [x] Browser-Smoke Noise Guard — Seite liefert ein inline Pixel-Favicon und der CDP-Smoke bricht bei Browser-Console-/Runtime-Fehlern ab, damit echte Deploy-Smokes sauber und aussagekräftig bleiben.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

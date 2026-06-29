@@ -84,6 +84,22 @@ def wait_for_cdp(port: int) -> str:
 async def run_cdp_flow(ws_url: str) -> str:
     async with websockets.connect(ws_url, max_size=2**24) as ws:
         seq = 0
+        page_errors: list[str] = []
+
+        def record_event(msg: dict) -> None:
+            method = msg.get("method")
+            params = msg.get("params", {})
+            if method == "Runtime.exceptionThrown":
+                details = params.get("exceptionDetails", {})
+                page_errors.append(details.get("text") or json.dumps(details, sort_keys=True))
+            elif method == "Runtime.consoleAPICalled" and params.get("type") in {"error", "assert"}:
+                args = params.get("args", [])
+                text = " ".join(str(arg.get("value") or arg.get("description") or arg.get("type")) for arg in args)
+                page_errors.append(text or "console error")
+            elif method == "Log.entryAdded":
+                entry = params.get("entry", {})
+                if entry.get("level") in {"error", "warning"}:
+                    page_errors.append(entry.get("text") or json.dumps(entry, sort_keys=True))
 
         async def send(method: str, params: dict | None = None) -> dict:
             nonlocal seq
@@ -95,13 +111,17 @@ async def run_cdp_flow(ws_url: str) -> str:
                     if "error" in msg:
                         raise RuntimeError(msg["error"])
                     return msg.get("result", {})
+                record_event(msg)
 
         await send("Runtime.enable")
+        await send("Log.enable")
         await send("Page.enable")
         await send("Runtime.evaluate", {
             "expression": "new Promise(r => document.readyState === 'complete' ? r(true) : window.addEventListener('load', () => r(true), {once:true}))",
             "awaitPromise": True,
         })
+        if page_errors:
+            raise RuntimeError("Page emitted errors before smoke flow: " + " | ".join(page_errors))
 
         flow = r"""
 (() => {
@@ -185,6 +205,8 @@ async def run_cdp_flow(ws_url: str) -> str:
             raise RuntimeError(value.get("description") or value.get("value") or "browser smoke JS error")
         if "exceptionDetails" in result:
             raise RuntimeError(result["exceptionDetails"])
+        if page_errors:
+            raise RuntimeError("Page emitted errors during smoke flow: " + " | ".join(page_errors))
         return str(value.get("value", ""))
 
 
