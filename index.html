@@ -4839,6 +4839,23 @@ function drawBattle() {
   // Half court line
   ctx.fillRect(VIEW_W / 2, 20, 2, VIEW_H - 102);
 
+  // Classic court markings only: center circle and painted keys give the
+  // battle floor more structure without adding any coach/advisor overlays.
+  ctx.strokeStyle = C.DARK;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(VIEW_W / 2, 120, 28, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeRect(20, 82, 58, 76);
+  ctx.strokeRect(VIEW_W - 78, 82, 58, 76);
+  ctx.beginPath();
+  ctx.arc(78, 120, 18, -Math.PI / 2, Math.PI / 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(VIEW_W - 78, 120, 18, Math.PI / 2, Math.PI * 1.5);
+  ctx.stroke();
+
   // Three point arc
   ctx.fillRect(20, 60, 60, 2);
   ctx.fillRect(20, VIEW_H - 140, 60, 2);
