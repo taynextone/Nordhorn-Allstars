@@ -75,6 +75,7 @@
 - [x] Battle-/Title-Readability — Spielerfigur und Ball stehen im Move-Select-Battle vollständig oberhalb des Menüs; die Minimap startet aus und der Titelstatus bleibt kurz, damit die Screens nur klassische Gameboy-Infos zeigen.
 - [x] Court-Line Polish — Battle-Court um Center-Circle und Key-Markierungen erweitert; Smoke-Guard prüft die saubere Court-Politur ohne neue Coach-/Advisor-HUDs.
 - [x] A/B-Control Sync — Tastatur-A und -B bestätigen jetzt wie in den sichtbaren Controls angegeben; Smoke-Flow prüft diese Gameboy-Button-Aliase ohne neue HUDs.
+- [x] Legacy-Coach-Code-Cleanup — alte Coach-/Advisor-/Meter-Modulblöcke durch inerte Flags ersetzt; Smoke-Flow blockiert ihre Rückkehr, damit der Clean-Gameboy-Screen nicht wieder überladen wird.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

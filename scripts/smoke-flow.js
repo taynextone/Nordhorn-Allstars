@@ -45,6 +45,19 @@ function assertCleanRenderPaths() {
   }
   assert(overworld.includes('drawCleanOverworldHUD()'), 'Overworld must use the compact clean HUD');
   assert(code.includes('let minimapVisible = false;'), 'Minimap should default off for a clean overworld');
+  const removedLegacyModules = [
+    'const RivalProgress =', 'const BattlePrep =', 'const DuelRiskMeter =',
+    'const RouteCoach =', 'const PossessionCoach =', 'const MomentumMeter =',
+    'const ShotQualityAdvisor =', 'const ZoneDefenseCoach =', 'const PracticePlan =',
+    'const WarmupCoach =', 'const HydrationCoach =', 'const TipoffChecklist =',
+    'const BenchCoach =', 'const RecoveryCoach =', 'const TravelPaceCoach =',
+    'const CrowdEnergyCoach =', 'const FlowStateCoach ='
+  ];
+  for (const token of removedLegacyModules) {
+    assert(!code.includes(token), 'Legacy coach/advisor module should stay removed: ' + token);
+  }
+  assert(!code.includes('renderBattleHUD() {'), 'Legacy battle-HUD module methods must stay removed');
+  assert(!code.includes('renderHUD() {'), 'Legacy overworld-HUD module methods must stay removed');
   assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');
   assert(battle.includes('drawMoveSelect()'), 'Battle must keep the move menu');
   assert(battle.includes('drawBattlePlayer(76, 145)'), 'Player sprite must render above the move menu');
