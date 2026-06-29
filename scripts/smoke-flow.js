@@ -70,6 +70,7 @@ function assertCleanRenderPaths() {
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');
   assert(code.includes('UP/DOWN Select · ENTER/A/B Start · C Credits'), 'Title hint must mention the working A/B start buttons');
+  assert(code.includes('A/B/ENTER START · C CREDITS'), 'Compact title status must stay synced with A/B/ENTER start controls');
   const battleHud = getFunctionBody(code, 'drawBattleHUD');
   assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
