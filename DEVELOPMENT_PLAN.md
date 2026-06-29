@@ -62,9 +62,10 @@
 - [x] Clean-HUD-Pass — Title-Status auf ruhigen Clean-HUD-Hinweis reduziert, Battle-HP/Message/Enemy-Boxen überlappungsfrei angeordnet, Spieler-Sprite aus dem Move-Menü freigelegt und Enter-Input-Bleed beim Battle-Start gefixt.
 - [x] Overlay-Lockdown — alte Coach-/Scout-/Help-Toggles aus dem Runtime-Loop entfernt; Overworld bleibt Karte + Actors + kompaktes Status-HUD, Battle bleibt ohne Zusatz-HUDs.
 - [x] Dialog-Polish — lange Dialog-/Victory-Texte wrappen jetzt in der Gameboy-Box; Escape verlässt Dialoge sauber zurück in den Overworld-State, ohne Battle-Input-Bleed.
+- [x] Debug-Panel-Declutter — ?modules=1 listet nur noch Core-Systeme statt deaktivierter Coach-/Advisor-HUDs; alte S/T/H-Hilfetexte wurden aus der sichtbaren Controls-Liste entfernt.
 
 ## Technische Schulden
-- [x] Code-Refactoring (saubere Module) — sichtbare Module-Registry mit 19 Boot-Checks und Title-Screen-Status ergänzt
+- [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt
 - [x] Battle-Prep HUD — sichtbare HP/EN-Bereitschaftsanzeige für den nächsten Rivalen, Title-Screen-Marker und Module-Check ergänzt.

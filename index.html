@@ -1238,10 +1238,7 @@ const ControlsHelp = {
     ['ENTER / A', 'Start / confirm / shoot'],
     ['SPACE / B', 'Dialog / action'],
     ['M', 'Toggle minimap'],
-    ['S', 'Scout next rival'],
-    ['T', 'Coach tip / next tactic'],
     ['R', 'Rest at home (HP/EN full)'],
-    ['H / ?', 'Show this coach card'],
     ['C', 'Credits from title']
   ],
 
@@ -1272,7 +1269,7 @@ const ControlsHelp = {
     ctx.fillStyle = C.LIGHT;
     ctx.font = '9px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('COACH-CARD: CONTROLS', VIEW_W / 2, y + 20);
+    ctx.fillText('CONTROLS', VIEW_W / 2, y + 20);
     ctx.textAlign = 'left';
     ctx.font = '7px monospace';
     this.rows.forEach((row, index) => {
@@ -1284,7 +1281,7 @@ const ControlsHelp = {
     });
     ctx.fillStyle = C.DARKEST;
     ctx.textAlign = 'center';
-    ctx.fillText('Press H or ? to close', VIEW_W / 2, y + h - 12);
+    ctx.fillText('Clean mode: no coach/scout overlays', VIEW_W / 2, y + h - 12);
     ctx.textAlign = 'left';
   }
 };
@@ -5238,56 +5235,22 @@ const DexData = {
 // ============================================================
 
 const GameModules = {
+  // Keep the debug registry aligned with the clean Gameboy UI. Disabled coach/advisor
+  // modules are intentionally not part of the boot-status panel, even behind ?modules=1.
   modules: [
     { id: 'canvas', label: 'Canvas', check: () => !!(canvas && ctx) },
     { id: 'input', label: 'Input', check: () => typeof wasPressed === 'function' && !!(keys && keysPressed) },
     { id: 'map', label: 'Map', check: () => Array.isArray(worldMap) && worldMap.length === MAP_H && worldMap[0] && worldMap[0].length === MAP_W },
     { id: 'player', label: 'Player', check: () => !!(player && player.stats && Array.isArray(player.moves)) },
-    { id: 'overworld', label: 'Overworld', check: () => typeof drawOverworld === 'function' && typeof updateOverworld === 'function' },
-    { id: 'dialog', label: 'Dialog', check: () => typeof startDialog === 'function' && typeof updateDialog === 'function' && !!dialog },
-    { id: 'battle', label: 'Battle', check: () => typeof startBattle === 'function' && typeof updateBattle === 'function' && !!battle },
+    { id: 'overworld', label: 'Clean Overworld', check: () => typeof drawOverworld === 'function' && typeof updateOverworld === 'function' && typeof drawCleanOverworldHUD === 'function' },
+    { id: 'dialog', label: 'Dialog Flow', check: () => typeof startDialog === 'function' && typeof updateDialog === 'function' && !!dialog },
+    { id: 'battle', label: 'Clean Battle', check: () => typeof startBattle === 'function' && typeof updateBattle === 'function' && typeof drawBattleHUD === 'function' && !!battle },
     { id: 'credits', label: 'Credits', check: () => typeof drawCredits === 'function' },
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
-    { id: 'quest', label: 'Quest Radar', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderHUD === 'function') },
+    { id: 'quest', label: 'Objective Marker', check: () => !!(QuestRadar && typeof QuestRadar.getNextTrainer === 'function' && typeof QuestRadar.renderWorldMarker === 'function') },
     { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
-    { id: 'rivalProgress', label: 'Rival Progress', check: () => !!(RivalProgress && typeof RivalProgress.getStats === 'function' && typeof RivalProgress.renderHUD === 'function') },
-    { id: 'battlePrep', label: 'Battle Prep HUD', check: () => !!(BattlePrep && typeof BattlePrep.getReadiness === 'function' && BattlePrep.getReadiness().score >= 0) },
-    { id: 'duelRisk', label: 'Duel Risk Meter', check: () => !!(DuelRiskMeter && typeof DuelRiskMeter.getAssessment === 'function' && DuelRiskMeter.getAssessment().risk >= 0 && typeof DuelRiskMeter.renderHUD === 'function') },
-    { id: 'routeCoach', label: 'Route Coach', check: () => !!(RouteCoach && typeof RouteCoach.getState === 'function' && typeof RouteCoach.renderHUD === 'function' && RouteCoach.getState().distance >= 0) },
-    { id: 'possessionCoach', label: 'Possession Coach', check: () => !!(PossessionCoach && typeof PossessionCoach.getState === 'function' && typeof PossessionCoach.renderBattleHUD === 'function') },
-    { id: 'momentumMeter', label: 'Momentum Meter', check: () => !!(MomentumMeter && typeof MomentumMeter.getState === 'function' && typeof MomentumMeter.renderBattleHUD === 'function' && MomentumMeter.getState().value >= 0) },
-    { id: 'clutchAlert', label: 'Clutch Alert', check: () => !!(ClutchAlert && typeof ClutchAlert.getState === 'function' && typeof ClutchAlert.renderBattleHUD === 'function' && ClutchAlert.getState().playerNeed >= 0) },
-    { id: 'shotQuality', label: 'Shot Quality', check: () => !!(ShotQualityAdvisor && typeof ShotQualityAdvisor.getState === 'function' && typeof ShotQualityAdvisor.renderBattleHUD === 'function' && ShotQualityAdvisor.getState().chance >= 0) },
-    { id: 'defenseRead', label: 'Defense Read', check: () => !!(DefenseRead && typeof DefenseRead.getState === 'function' && typeof DefenseRead.renderBattleHUD === 'function' && DefenseRead.getState().threat >= 0) },
-    { id: 'comebackCoach', label: 'Comeback Coach', check: () => !!(ComebackCoach && typeof ComebackCoach.getState === 'function' && typeof ComebackCoach.renderBattleHUD === 'function' && ComebackCoach.getState().playerNeed >= 0) },
-    { id: 'staminaCoach', label: 'Stamina Coach', check: () => !!(StaminaCoach && typeof StaminaCoach.getState === 'function' && typeof StaminaCoach.renderBattleHUD === 'function' && StaminaCoach.getState().tank >= 0) },
-    { id: 'winConditionCoach', label: 'Win Condition Coach', check: () => !!(WinConditionCoach && typeof WinConditionCoach.getState === 'function' && typeof WinConditionCoach.renderBattleHUD === 'function' && WinConditionCoach.getState().playerNeed >= 0) },
-    { id: 'timeoutCoach', label: 'Timeout Coach', check: () => !!(TimeoutCoach && typeof TimeoutCoach.getState === 'function' && typeof TimeoutCoach.renderBattleHUD === 'function' && TimeoutCoach.getState().urgency >= 0) },
-    { id: 'foulTroubleCoach', label: 'Foul Trouble Coach', check: () => !!(FoulTroubleCoach && typeof FoulTroubleCoach.getState === 'function' && typeof FoulTroubleCoach.renderBattleHUD === 'function' && FoulTroubleCoach.getState().foulRisk >= 0) },
-    { id: 'pressureReleaseCoach', label: 'Pressure Release Coach', check: () => !!(PressureReleaseCoach && typeof PressureReleaseCoach.getState === 'function' && typeof PressureReleaseCoach.renderBattleHUD === 'function' && PressureReleaseCoach.getState().pressure >= 0) },
-    { id: 'turnoverCoach', label: 'Turnover Coach', check: () => !!(TurnoverCoach && typeof TurnoverCoach.getState === 'function' && typeof TurnoverCoach.renderBattleHUD === 'function' && TurnoverCoach.getState().risk >= 0) },
-    { id: 'assistCoach', label: 'Assist Coach', check: () => !!(AssistCoach && typeof AssistCoach.getState === 'function' && typeof AssistCoach.renderBattleHUD === 'function' && AssistCoach.getState().assistValue >= 0) },
-    { id: 'reboundCoach', label: 'Rebound Coach', check: () => !!(ReboundCoach && typeof ReboundCoach.getState === 'function' && typeof ReboundCoach.renderBattleHUD === 'function' && ReboundCoach.getState().reboundValue >= 0) },
-    { id: 'fastbreakCoach', label: 'Fastbreak Coach', check: () => !!(FastbreakCoach && typeof FastbreakCoach.getState === 'function' && typeof FastbreakCoach.renderBattleHUD === 'function' && FastbreakCoach.getState().breakValue >= 0) },
-    { id: 'mismatchCoach', label: 'Mismatch Coach', check: () => !!(MismatchCoach && typeof MismatchCoach.getState === 'function' && typeof MismatchCoach.renderBattleHUD === 'function' && MismatchCoach.getState().edge >= 0) },
-    { id: 'shotClockCoach', label: 'Shot Clock Coach', check: () => !!(ShotClockCoach && typeof ShotClockCoach.getState === 'function' && typeof ShotClockCoach.renderBattleHUD === 'function' && ShotClockCoach.getState().pressure >= 0) },
-    { id: 'freeThrowCoach', label: 'Free Throw Coach', check: () => !!(FreeThrowCoach && typeof FreeThrowCoach.getState === 'function' && typeof FreeThrowCoach.renderBattleHUD === 'function' && FreeThrowCoach.getState().focus >= 0) },
-    { id: 'pickRollCoach', label: 'Pick-Roll Coach', check: () => !!(PickRollCoach && typeof PickRollCoach.getState === 'function' && typeof PickRollCoach.renderBattleHUD === 'function' && PickRollCoach.getState().screenValue >= 0) },
-    { id: 'spacingCoach', label: 'Spacing Coach', check: () => !!(SpacingCoach && typeof SpacingCoach.getState === 'function' && typeof SpacingCoach.renderBattleHUD === 'function' && SpacingCoach.getState().spacing >= 0) },
-    { id: 'zoneDefenseCoach', label: 'Zone Defense Coach', check: () => !!(ZoneDefenseCoach && typeof ZoneDefenseCoach.getState === 'function' && typeof ZoneDefenseCoach.renderBattleHUD === 'function' && ZoneDefenseCoach.getState().zone >= 0) },
-    { id: 'practicePlan', label: 'Practice Plan', check: () => !!(PracticePlan && typeof PracticePlan.getState === 'function' && typeof PracticePlan.renderHUD === 'function' && PracticePlan.getState().focus >= 0) },
-    { id: 'warmupCoach', label: 'Warmup Coach', check: () => !!(WarmupCoach && typeof WarmupCoach.getState === 'function' && typeof WarmupCoach.renderHUD === 'function' && WarmupCoach.getState().drillScore >= 0) },
-    { id: 'hydrationCoach', label: 'Hydration Coach', check: () => !!(HydrationCoach && typeof HydrationCoach.getState === 'function' && typeof HydrationCoach.renderHUD === 'function' && HydrationCoach.getState().hydration >= 0) },
-    { id: 'tipoffChecklist', label: 'Tipoff Checklist', check: () => !!(TipoffChecklist && typeof TipoffChecklist.getState === 'function' && typeof TipoffChecklist.renderHUD === 'function' && TipoffChecklist.getState().checks >= 0) },
-    { id: 'benchCoach', label: 'Bench Coach', check: () => !!(BenchCoach && typeof BenchCoach.getState === 'function' && typeof BenchCoach.renderHUD === 'function' && BenchCoach.getState().bench >= 0) },
-    { id: 'recoveryCoach', label: 'Recovery Coach', check: () => !!(RecoveryCoach && typeof RecoveryCoach.getState === 'function' && typeof RecoveryCoach.renderHUD === 'function' && RecoveryCoach.getState().recovery >= 0) },
-    { id: 'travelPaceCoach', label: 'Travel Pace Coach', check: () => !!(TravelPaceCoach && typeof TravelPaceCoach.getState === 'function' && typeof TravelPaceCoach.renderHUD === 'function' && TravelPaceCoach.getState().pace >= 0) },
-    { id: 'crowdEnergyCoach', label: 'Crowd Energy Coach', check: () => !!(CrowdEnergyCoach && typeof CrowdEnergyCoach.getState === 'function' && typeof CrowdEnergyCoach.renderHUD === 'function' && CrowdEnergyCoach.getState().energy >= 0) },
-    { id: 'flowStateCoach', label: 'Flow-State Coach', check: () => !!(FlowStateCoach && typeof FlowStateCoach.getState === 'function' && typeof FlowStateCoach.renderHUD === 'function' && FlowStateCoach.getState().flow >= 0) },
-    { id: 'coachTip', label: 'Coach Tips', check: () => !!(CoachTip && CoachTip.tips.length >= 5 && typeof CoachTip.renderOverlay === 'function') },
-    { id: 'controls', label: 'Controls Help', check: () => !!(ControlsHelp && typeof ControlsHelp.renderOverlay === 'function' && ControlsHelp.rows.length >= 7) },
-    { id: 'perf', label: 'Performance HUD', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
+    { id: 'perf', label: 'Frame Timing', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
     { id: 'errors', label: 'Error Guard', check: () => !!(ErrorGuard && typeof ErrorGuard.safe === 'function') },
     { id: 'save', label: 'Save/Continue', check: () => !!(SaveSystem && typeof SaveSystem.save === 'function' && typeof SaveSystem.load === 'function') },
@@ -5366,9 +5329,9 @@ const GameModules = {
 // 5. Input is edge-triggered through keysPressed/wasPressed(). Hold-state keys
 //    are only for movement; menus, dialogs and interactions use one-shot presses.
 // 6. gameLoop() is the state-machine dispatcher. Rendering order matters:
-//    world -> actors -> overlays -> ErrorGuard, so visible diagnostics stay on top.
-// 7. DexData and GameModules are polish/status layers, not core gameplay; if a
-//    badge fails, it should warn visibly without preventing play.
+//    world -> actors -> compact HUD/dialog -> toast/error guard, with coach overlays off.
+// 7. DexData and GameModules are debug/status layers, not core gameplay; if a
+//    debug badge fails, it should warn without preventing play or crowding the game.
 const CodeComments = {
   sections: [
     { id: 'safety', label: 'Browser/Error safety' },
@@ -5377,7 +5340,7 @@ const CodeComments = {
     { id: 'input', label: 'Input edge triggers' },
     { id: 'dialog', label: 'Dialog/state flow' },
     { id: 'battle', label: 'Battle loop' },
-    { id: 'polish', label: 'Dex/modules overlays' }
+    { id: 'polish', label: 'Dex/modules debug' }
   ],
 
   getSummary() {
