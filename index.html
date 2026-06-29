@@ -950,6 +950,8 @@ let frameCount = 0;
 let animFrame = 0;
 let titleSelection = 0; // 0 = New Game, 1 = Continue (when a save exists)
 
+const PLAYER_ENERGY_REGEN = 3;
+
 // Player data
 const player = {
   x: 5, y: 9,
@@ -1600,7 +1602,7 @@ function endTurn() {
     battle.phase = 'select';
     battle.selectedMove = 0;
     // Energy regen
-    battle.playerEnergy = Math.min(player.maxEnergy, battle.playerEnergy + 3);
+    battle.playerEnergy = Math.min(player.maxEnergy, battle.playerEnergy + PLAYER_ENERGY_REGEN);
     battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + (battle.currentTrainer.regen || 3));
   } else {
     battle.playerTurn = false;
@@ -2571,7 +2573,7 @@ function drawBattleHUD() {
   ctx.font = '8px monospace';
   ctx.fillText('LV ' + player.level, playerBox.x + 10, VIEW_H - 60);
   ctx.font = '7px monospace';
-  ctx.fillText('REG +3', playerBox.x + 146, VIEW_H - 52);
+  ctx.fillText('REG +' + PLAYER_ENERGY_REGEN, playerBox.x + 146, VIEW_H - 52);
 
   // HP bar
   ctx.fillStyle = C.DARK;

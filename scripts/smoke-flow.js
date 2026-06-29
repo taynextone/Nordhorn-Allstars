@@ -73,6 +73,9 @@ function assertCleanRenderPaths() {
   const battleHud = getFunctionBody(code, 'drawBattleHUD');
   assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
+  assert(code.includes('const PLAYER_ENERGY_REGEN = 3;'), 'Player energy regen should be a single tuned constant');
+  assert(battleHud.includes("'REG +' + PLAYER_ENERGY_REGEN"), 'Battle HUD regen text must stay synced to the regen constant');
+  assert(!battleHud.includes("'REG +3'"), 'Battle HUD should not hard-code a stale regen label');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {
@@ -210,6 +213,9 @@ function runSmokeFlow() {
   tick(1);
   assert(get('gameState') === 'BATTLE', 'Loss smoke should enter battle');
   assert(get('battle.phase') === 'select', 'Loss smoke battle should start at move select');
+  run('battle.playerEnergy = 0; battle.turnCount = 2; endTurn();');
+  assert(get('battle.playerEnergy') === get('PLAYER_ENERGY_REGEN'), 'Player turn regen should match the HUD regen label');
+  run('battle.playerEnergy = 20; battle.turnCount = 0; battle.phase = "select";');
   run('battle.enemyScore = battle.currentTrainer.ptsToWin; endTurn();');
   flushTimers();
   flushTimers();
