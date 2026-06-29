@@ -177,6 +177,7 @@ function runSmokeFlow() {
     }
   };
   const confirm = (key = 'Enter') => { press(key); tick(1); release(key); };
+  const escape = () => { press('Escape'); tick(1); release('Escape'); };
   const closeDialog = () => { confirm(); confirm(); };
 
   assert(get('gameState') === 'TITLE', 'Boot should start at TITLE');
@@ -231,8 +232,8 @@ function runSmokeFlow() {
     flushTimers();
     flushTimers();
     if (i === trainerCount - 1) {
-      closeDialog();
-      assert(get('gameState') === 'CREDITS', 'Final victory should enter credits');
+      escape();
+      assert(get('gameState') === 'CREDITS', 'Final victory Escape should honor Champion dialog callback and enter credits');
       confirm();
       assert(get('gameState') === 'TITLE', 'Credits confirm should return to title');
     } else {

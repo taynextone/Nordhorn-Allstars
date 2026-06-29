@@ -1706,6 +1706,15 @@ function startDialog(text, subText, onComplete = null) {
   if (gameState !== 'BATTLE') gameState = 'DIALOG';
 }
 
+function finishDialog() {
+  dialog.active = false;
+  const onComplete = dialog.onComplete;
+  dialog.onComplete = null;
+  if (onComplete) onComplete();
+  else if (gameState === 'DIALOG') gameState = 'OVERWORLD';
+  clearPressedInput();
+}
+
 function updateDialog() {
   if (!dialog.active) return;
 
@@ -1727,20 +1736,15 @@ function updateDialog() {
       dialog.charIndex = dialog.text.length;
       dialog.typing = false;
     } else {
-      dialog.active = false;
-      const onComplete = dialog.onComplete;
-      dialog.onComplete = null;
-      if (onComplete) onComplete();
-      else if (gameState === 'DIALOG') gameState = 'OVERWORLD';
-      clearPressedInput();
+      finishDialog();
     }
   }
 
   if (wasPressed('Escape')) {
-    dialog.active = false;
-    dialog.onComplete = null;
-    if (gameState === 'DIALOG') gameState = 'OVERWORLD';
-    clearPressedInput();
+    // Escape is an alternate close button, not a callback skip. This keeps
+    // battle-result flows (especially Champion → Credits) from stranding the
+    // player in the overworld with every rival already beaten.
+    finishDialog();
   }
 }
 
