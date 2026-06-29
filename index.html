@@ -974,6 +974,13 @@ const player = {
   rivalBeaten: false,
 };
 
+function clampStat(value, min, max, fallback) {
+  const numeric = Number(value);
+  const safeMax = Math.max(min, Number(max) || fallback || min);
+  const safeValue = Number.isFinite(numeric) ? numeric : fallback;
+  return Math.max(min, Math.min(safeMax, safeValue));
+}
+
 // Build bonuses
 const BUILD_BONUS = {
   shooter: { dribbling: 0, shooting: 3, athleticism: 0, defense: -1, courtVision: 1 },
@@ -1102,8 +1109,8 @@ const SaveSystem = {
       const data = JSON.parse(raw);
       if (!data || !data.player) return false;
       const p = data.player;
-      player.x = p.x ?? 5;
-      player.y = p.y ?? 9;
+      player.x = Number.isFinite(Number(p.x)) ? Number(p.x) : HomeRest.homeX;
+      player.y = Number.isFinite(Number(p.y)) ? Number(p.y) : HomeRest.homeY;
       player.facing = p.facing || 'down';
       player.moving = false;
       player.gender = p.gender || 'boy';
@@ -1111,10 +1118,10 @@ const SaveSystem = {
       player.level = p.level || 1;
       player.exp = p.exp || 0;
       player.expNext = p.expNext || 20;
-      player.maxHp = p.maxHp || 100;
-      player.hp = Math.min(p.hp ?? player.maxHp, player.maxHp);
-      player.maxEnergy = p.maxEnergy || 20;
-      player.energy = Math.min(p.energy ?? player.maxEnergy, player.maxEnergy);
+      player.maxHp = Number(p.maxHp) > 0 ? Number(p.maxHp) : 100;
+      player.hp = clampStat(p.hp, 0, player.maxHp, player.maxHp);
+      player.maxEnergy = Number(p.maxEnergy) > 0 ? Number(p.maxEnergy) : 20;
+      player.energy = clampStat(p.energy, 0, player.maxEnergy, player.maxEnergy);
       player.stats = { ...player.stats, ...(p.stats || {}) };
       player.moves = Array.isArray(p.moves) ? [...p.moves] : ['Layup', 'Jump Shot'];
       player.beatenTrainers = Array.isArray(p.beatenTrainers) ? [...new Set(p.beatenTrainers)] : [];
@@ -1131,6 +1138,7 @@ const SaveSystem = {
       // or show a stale title/HUD count after loading those slots.
       player.beatenTrainers = trainers.filter(t => t.beaten).map(t => t.id);
       player.rivalBeaten = trainers.every(t => t.beaten);
+      if (!isWalkable(player.x, player.y)) movePlayerToHomeGate();
       gameState = 'OVERWORLD';
       startDialog('Save geladen!', 'Weiter geht es in Nordhorn.');
       this.lastMessage = 'Save loaded';

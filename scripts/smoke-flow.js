@@ -222,6 +222,19 @@ function runSmokeFlow() {
   assert(get('player.beatenTrainers.length') === 2, 'Loaded legacy save should sync beatenTrainers');
   assert(get('trainers[0].beaten && trainers[2].beaten') === true, 'Loaded legacy save should keep trainer beaten flags');
   closeDialog();
+
+  run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
+    version: 2,
+    savedAt: '2026-01-02T00:00:00.000Z',
+    player: { x: 3, y: 4, level: 2, hp: -9, maxHp: -25, energy: -4, maxEnergy: 0, moves: ['Layup'], beatenTrainers: [] },
+    trainers: []
+  }))`);
+  assert(get('SaveSystem.load()') === true, 'Corrupt vital save should still load through sanitizer');
+  assert(get('player.maxHp') === 100 && get('player.hp') === 0, 'Load should clamp corrupt HP before any HUD/dialog frame');
+  assert(get('player.maxEnergy') === 20 && get('player.energy') === 0, 'Load should clamp corrupt energy before battle/overworld use');
+  assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'Load should recover invalid save positions to the home gate immediately');
+  assert(get('isWalkable(player.x, player.y)') === true, 'Sanitized save position must be walkable');
+  closeDialog();
   run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
 
   run('startBattle(trainers[0]); battle.enemyHp = 0; battle.playerScore = 0; endTurn();');
