@@ -4202,7 +4202,7 @@ function drawTitleScreen() {
   ctx.stroke();
 
   // Title — keep the first screen clean and playable. The previous stacked system/coach
-  // badges covered the logo and menu; detailed debug panels remain behind their hotkeys.
+  // badges covered the logo and menu; gameplay stays focused on classic Gameboy UI only.
   ctx.fillStyle = C.DARKEST;
   ctx.font = 'bold 24px monospace';
   ctx.textAlign = 'center';
@@ -4234,15 +4234,14 @@ function drawTitleScreen() {
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
   ctx.fillText('UP/DOWN Select · ENTER Start · C Credits', bx, 344);
-  ControlsHelp.renderHint(bx, 356);
 
   ctx.fillStyle = C.DARKEST;
-  ctx.fillRect(bx - 104, 370, 208, 28);
+  ctx.fillRect(bx - 92, 370, 184, 28);
   ctx.fillStyle = C.LIGHT;
   ctx.font = '7px monospace';
   // Keep title status calm after the HUD declutter: no coach/module counter spam.
-  ctx.fillText('CLEAN HUD MODE · COMPAT ' + BrowserCompat.summary(), bx, 382);
-  ctx.fillText('ENTER START · M MAP · H/? HELP', bx, 394);
+  ctx.fillText('CLEAN HUD · COMPAT ' + BrowserCompat.summary(), bx, 382);
+  ctx.fillText('ENTER START · M MAP', bx, 394);
   BrowserCompat.renderPanel();
   GameModules.renderPanel();
 
@@ -5057,17 +5056,8 @@ function gameLoop() {
     ctx.fillStyle = C.LIGHT;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-    if (gameState === 'OVERWORLD' && (wasPressed('h') || wasPressed('H') || wasPressed('?'))) {
-      ControlsHelp.toggle();
-    }
-
-    if (gameState === 'OVERWORLD' && (wasPressed('s') || wasPressed('S'))) {
-      ScoutCard.toggle();
-    }
-
-    if (gameState === 'OVERWORLD' && (wasPressed('t') || wasPressed('T'))) {
-      CoachTip.toggle();
-    }
+    // Coach/scout/help overlays stay disabled after the clean-HUD pass.
+    // Core controls still work, but the overworld remains map + actors + compact HUD only.
 
     switch (gameState) {
       case 'TITLE':
@@ -5142,9 +5132,6 @@ function gameLoop() {
     }
 
     SaveSystem.renderToast();
-    CoachTip.renderOverlay();
-    ScoutCard.renderOverlay();
-    ControlsHelp.renderOverlay();
     ErrorGuard.renderOverlay();
   }, () => {
     ctx.fillStyle = C.DARKEST;
