@@ -73,6 +73,8 @@ function assertCleanRenderPaths() {
   const battleHud = getFunctionBody(code, 'drawBattleHUD');
   assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
+  assert(code.includes('function movePlayerToHomeGate()'), 'Return-home flows should share one safe home-gate helper');
+  assert(code.includes('ENTER/SPACE/A/B to continue'), 'Game Over hint must mention all working confirm buttons');
   assert(code.includes('const PLAYER_ENERGY_REGEN = 3;'), 'Player energy regen should be a single tuned constant');
   assert(battleHud.includes("'REG +' + PLAYER_ENERGY_REGEN"), 'Battle HUD regen text must stay synced to the regen constant');
   assert(!battleHud.includes("'REG +3'"), 'Battle HUD should not hard-code a stale regen label');
@@ -225,6 +227,8 @@ function runSmokeFlow() {
   assert(get('gameState') === 'OVERWORLD', 'Loss dialog should return to overworld');
   assert(get('player.hp') === get('player.maxHp'), 'Loss respawn should restore HP');
   assert(get('player.energy') === get('player.maxEnergy'), 'Loss respawn should restore energy');
+  assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'Loss respawn should use the safe home-gate helper');
+  assert(get('isWalkable(player.x, player.y)') === true, 'Loss respawn tile must be walkable');
   assert(get('trainers[0].beaten') === false, 'Loss must not mark trainer beaten');
 
   run('player.x = 3; player.y = 4; ErrorGuard.validateGameState();');

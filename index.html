@@ -1183,10 +1183,7 @@ const SaveSystem = {
 };
 
 function resetRunProgress() {
-  player.x = 5;
-  player.y = 9;
-  player.facing = 'down';
-  player.moving = false;
+  movePlayerToHomeGate();
   player.level = 1;
   player.exp = 0;
   player.expNext = 20;
@@ -1278,6 +1275,15 @@ const HomeRest = {
     return true;
   },
 };
+
+function movePlayerToHomeGate() {
+  // Single source of truth for respawns/new runs. Keeping every return-home flow
+  // on the same walkable gate avoids old hard-coded house-tile regressions.
+  player.x = HomeRest.homeX;
+  player.y = HomeRest.homeY;
+  player.facing = 'down';
+  player.moving = false;
+}
 
 function wrapText(text, x, y, maxWidth, lineHeight) {
   const words = String(text).split(' ');
@@ -1665,11 +1671,10 @@ function loseBattle() {
   battle.phase = 'result';
   setTimeout(() => {
     battle.active = false;
-    // Reset to home
+    // Reset to the same safe home gate used by new-game and ErrorGuard.
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
-    player.x = 5;
-    player.y = 9;
+    movePlayerToHomeGate();
     SaveSystem.save('Rest saved');
     gameState = 'OVERWORLD';
     startDialog("You went home to rest...", "Mom: Feel better soon!", () => {
@@ -2799,13 +2804,12 @@ function gameLoop() {
         ctx.fillText('GAME OVER', VIEW_W / 2, VIEW_H / 2 - 20);
         ctx.font = '10px monospace';
         ctx.fillText('You returned home to rest.', VIEW_W / 2, VIEW_H / 2 + 10);
-        ctx.fillText('ENTER/SPACE to continue', VIEW_W / 2, VIEW_H / 2 + 40);
+        ctx.fillText('ENTER/SPACE/A/B to continue', VIEW_W / 2, VIEW_H / 2 + 40);
         ctx.textAlign = 'left';
         if (wasConfirmPressed()) {
           player.hp = player.maxHp;
           player.energy = player.maxEnergy;
-          player.x = 5;
-          player.y = 9;
+          movePlayerToHomeGate();
           gameState = 'OVERWORLD';
         }
         break;
