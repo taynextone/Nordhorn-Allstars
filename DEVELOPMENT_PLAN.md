@@ -64,6 +64,7 @@
 - [x] Dialog-Polish — lange Dialog-/Victory-Texte wrappen jetzt in der Gameboy-Box; Escape verlässt Dialoge sauber zurück in den Overworld-State, ohne Battle-Input-Bleed.
 - [x] Debug-Panel-Declutter — ?modules=1 listet nur noch Core-Systeme statt deaktivierter Coach-/Advisor-HUDs; alte S/T/H-Hilfetexte wurden aus der sichtbaren Controls-Liste entfernt.
 - [x] Objective-Marker Clean-Rename — aktive Overworld-/Minimap-Zielmarkierung nutzt keinen Radar-Renderpfad mehr; drawOverworld bleibt frei von Coach/Scout/Radar-HUD-Aufrufen.
+- [x] Flow-Smoke UX-Fix — echte Title→Charselect→Dialog→Overworld→Battle→Victory-Prüfung ergänzt; Dialogabschluss leert Confirm-Input und M/Shift+M toggelt die Minimap wie angezeigt.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

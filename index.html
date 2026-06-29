@@ -4110,6 +4110,7 @@ function updateDialog() {
       dialog.onComplete = null;
       if (onComplete) onComplete();
       else if (gameState === 'DIALOG') gameState = 'OVERWORLD';
+      clearPressedInput();
     }
   }
 
@@ -4720,7 +4721,7 @@ function updateOverworld() {
   player.moving = false;
 
   // Toggle minimap
-  if (wasPressed('m')) { minimapVisible = !minimapVisible; }
+  if (wasPressed('m') || wasPressed('M')) { minimapVisible = !minimapVisible; }
   if (wasPressed('r') || wasPressed('R')) { HomeRest.rest(); }
 
   if (keysPressed['ArrowLeft'] || keys['ArrowLeft']) { dx = -1; player.facing = 'left'; player.moving = true; }
