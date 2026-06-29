@@ -1623,7 +1623,7 @@ function endTurn() {
   } else {
     battle.playerTurn = false;
     battle.phase = 'anim';
-    battle.message = battle.currentTrainer.name + "'s turn...";
+    setBattleMessage(battle.currentTrainer.name + "'s turn...");
     setTimeout(() => executeEnemyMove(), 800);
   }
 }

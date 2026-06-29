@@ -224,6 +224,9 @@ function runSmokeFlow() {
   assert(get('battle.feedbackTimer') > 0, 'Low-energy message should be readable during select phase');
   run('battle.playerEnergy = 20; battle.selectedMove = 0; executePlayerMove();');
   assert(get('battle.subMessage') === '', 'Next battle action should clear stale low-energy detail text');
+  run('battle.subMessage = "OLD DETAIL"; battle.turnCount = 1; endTurn();');
+  assert(get('battle.message') === "Klaus's turn...", 'Enemy-turn banner should use the compact battle message helper');
+  assert(get('battle.subMessage') === '', 'Enemy-turn banner should clear stale detail text');
   run('battle.playerEnergy = 0; battle.turnCount = 2; endTurn();');
   assert(get('battle.playerEnergy') === get('PLAYER_ENERGY_REGEN'), 'Player turn regen should match the HUD regen label');
   run('battle.playerEnergy = 20; battle.turnCount = 0; battle.phase = "select";');

@@ -86,6 +86,7 @@
 - [x] Home-Gate Respawn Sync — New-Game-, Loss- und Game-Over-Rückkehr nutzen denselben begehbaren Home-Gate-Helper; A/B-Confirm-Hinweis ist synchronisiert und im Smoke-Flow abgesichert.
 - [x] Battle-Feedback Readability — Battle-Start- und „Not enough energy“-Hinweise erscheinen jetzt in der bestehenden kompakten Message-Box auch während Move-Select, ohne neue Coach-/HUD-Overlays.
 - [x] Battle-Message Hygiene — Aktionsmeldungen leeren alte Detailzeilen zentral, damit Intro-/Energy-Hinweise nicht unter späteren Moves stehen bleiben; Smoke-Flow prüft die kompakte Message-Box ohne neue Overlays.
+- [x] Enemy-Turn Message Hygiene — Gegnerzug-Banner nutzt denselben kompakten Message-Helper, damit alte Detailzeilen nicht in den Enemy-Turn leaken; Smoke-Flow deckt den State ab.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
