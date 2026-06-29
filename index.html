@@ -3721,13 +3721,15 @@ function wasPressed(key) {
 }
 
 function wasConfirmPressed() {
-  // Keep the printed controls honest: Enter and Space/B are both confirm/action.
-  // Check every confirm alias before returning so simultaneous Enter+Space presses
-  // cannot leave a stale confirm edge for the next state/menu frame.
+  // Keep the printed controls honest: Enter, Space, A and B are confirm/action.
+  // Check every confirm alias before returning so simultaneous presses cannot
+  // leave a stale confirm edge for the next state/menu frame.
   const enter = wasPressed('Enter');
   const space = wasPressed(' ');
   const legacySpace = wasPressed('Spacebar');
-  return enter || space || legacySpace;
+  const a = wasPressed('a') || wasPressed('A');
+  const b = wasPressed('b') || wasPressed('B');
+  return enter || space || legacySpace || a || b;
 }
 
 function wasCreditsPressed() {

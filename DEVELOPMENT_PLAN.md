@@ -74,6 +74,7 @@
 - [x] Smoke-Flow Testbarkeit — `scripts/smoke-flow.js` prüft Clean-UI-Renderpfade, blockiert legacy Overlay-Toggles und testet Title→Charselect→Overworld→Loss-Dialog→alle Duelle→Champion-Credits→Title ohne neue Overlays.
 - [x] Battle-/Title-Readability — Spielerfigur und Ball stehen im Move-Select-Battle vollständig oberhalb des Menüs; die Minimap startet aus und der Titelstatus bleibt kurz, damit die Screens nur klassische Gameboy-Infos zeigen.
 - [x] Court-Line Polish — Battle-Court um Center-Circle und Key-Markierungen erweitert; Smoke-Guard prüft die saubere Court-Politur ohne neue Coach-/Advisor-HUDs.
+- [x] A/B-Control Sync — Tastatur-A und -B bestätigen jetzt wie in den sichtbaren Controls angegeben; Smoke-Flow prüft diese Gameboy-Button-Aliase ohne neue HUDs.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

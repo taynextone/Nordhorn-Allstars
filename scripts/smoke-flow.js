@@ -153,15 +153,15 @@ function runSmokeFlow() {
       tick(1);
     }
   };
-  const confirm = () => { press('Enter'); tick(1); release('Enter'); };
+  const confirm = (key = 'Enter') => { press(key); tick(1); release(key); };
   const closeDialog = () => { confirm(); confirm(); };
 
   assert(get('gameState') === 'TITLE', 'Boot should start at TITLE');
-  confirm();
-  assert(get('gameState') === 'CHARSELECT', 'Title confirm should open character select');
-  confirm();
-  assert(get('charSelect.phase') === 'build', 'Gender confirm should move to build select');
-  confirm();
+  confirm('a');
+  assert(get('gameState') === 'CHARSELECT', 'Keyboard A should start from title like the printed A-button control');
+  confirm('b');
+  assert(get('charSelect.phase') === 'build', 'Keyboard B should confirm in character select like the printed B-button control');
+  confirm('A');
   assert(get('gameState') === 'DIALOG', 'Build confirm should open intro dialog');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Intro dialog should return to overworld');
