@@ -92,6 +92,7 @@
 - [x] Enemy-KO Victory Sync — Gegner-HP auf 0 beendet Duelle jetzt sofort als Sieg mit kompakter Message-Box; Smoke-Flow prüft KO→Victory-Dialog→Overworld ohne neue HUDs.
 - [x] Browser-CDP Smoke Testbarkeit — `scripts/browser-smoke.py` lädt die echte Seite in Headless-Chromium und prüft Title→Charselect→Intro→Battle→Victory→Champion-Credits ohne neue HUDs/Overlays.
 - [x] Battle-Hoop Pixel-Polish — flache Hoop-Blöcke durch kleine Backboard/Rim/Netz-Pixelart ersetzt; Smoke-Guard prüft, dass es Court-Art bleibt und keine neuen HUD-/Overlay-Module entstehen.
+- [x] Browser-Smoke Port-Robustheit — Headless-CDP-Test nutzt ohne feste Env-Vorgabe einen freien lokalen Debug-Port, damit echte Start→Credits-Smokes in Cron/Parallel-Läufen nicht an Port-Kollisionen scheitern.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

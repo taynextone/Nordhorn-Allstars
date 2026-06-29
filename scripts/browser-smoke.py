@@ -14,6 +14,7 @@ import functools
 import json
 import os
 import shutil
+import socket
 import subprocess
 import tempfile
 import threading
@@ -29,6 +30,12 @@ except ImportError as exc:  # pragma: no cover - environment guard
 
 ROOT = Path(__file__).resolve().parents[1]
 VIEWPORT = "480,432"
+
+
+def free_tcp_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
 
 
 def find_chromium() -> str:
@@ -184,7 +191,7 @@ async def run_cdp_flow(ws_url: str) -> str:
 def main() -> int:
     chromium = find_chromium()
     profile = tempfile.mkdtemp(prefix="nordhorn-chrome-")
-    port = int(os.environ.get("NORDHORN_CDP_PORT", "9231"))
+    port = int(os.environ.get("NORDHORN_CDP_PORT") or free_tcp_port())
     with local_server() as url:
         proc = subprocess.Popen([
             chromium,
