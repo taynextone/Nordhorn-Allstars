@@ -79,6 +79,7 @@
 - [x] Character-Select Control Polish — sichtbare Gender-/Build-Hinweise nennen jetzt ENTER/A/B-Confirm passend zur Gameboy-Tastensteuerung; Smoke-Guard prüft die Texte ohne neue HUDs.
 - [x] Battle-Command Readability — Move-Beschreibung bleibt jetzt innerhalb der Command-Box oberhalb der HP/EN-Leiste; Smoke-Guard verhindert erneute Battle-HUD-Überlappung.
 - [x] Battle-Result Message Sync — Score-/EXP-Submessages werden wieder in der kompakten Battle-Message-Box gewrappt angezeigt; Title-Hinweis nennt die funktionierenden A/B-Startbuttons.
+- [x] Continue-Save Progress Sync — ältere Saves mit Trainer-State, aber leerer beatenTrainers-Liste, zeigen/laden Fortschritt wieder korrekt ohne neue Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

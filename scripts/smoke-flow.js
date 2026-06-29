@@ -192,6 +192,19 @@ function runSmokeFlow() {
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
 
+  run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
+    version: 2,
+    savedAt: '2026-01-01T00:00:00.000Z',
+    player: { level: 3, hp: 77, maxHp: 100, energy: 12, maxEnergy: 20, moves: ['Layup'], beatenTrainers: [] },
+    trainers: [{ id: 0, beaten: true }, { id: 2, beaten: true }]
+  }))`);
+  assert(get('SaveSystem.getInfo().beaten') === 2, 'Continue info should count legacy trainer-state saves');
+  assert(get('SaveSystem.load()') === true, 'Legacy trainer-state save should load');
+  assert(get('player.beatenTrainers.length') === 2, 'Loaded legacy save should sync beatenTrainers');
+  assert(get('trainers[0].beaten && trainers[2].beaten') === true, 'Loaded legacy save should keep trainer beaten flags');
+  closeDialog();
+  run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
+
   run('startBattle(trainers[0])');
   tick(1);
   assert(get('gameState') === 'BATTLE', 'Loss smoke should enter battle');

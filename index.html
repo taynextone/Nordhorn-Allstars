@@ -1110,7 +1110,7 @@ const SaveSystem = {
       player.energy = Math.min(p.energy ?? player.maxEnergy, player.maxEnergy);
       player.stats = { ...player.stats, ...(p.stats || {}) };
       player.moves = Array.isArray(p.moves) ? [...p.moves] : ['Layup', 'Jump Shot'];
-      player.beatenTrainers = Array.isArray(p.beatenTrainers) ? [...p.beatenTrainers] : [];
+      player.beatenTrainers = Array.isArray(p.beatenTrainers) ? [...new Set(p.beatenTrainers)] : [];
       player.rivalBeaten = !!p.rivalBeaten;
       trainers.forEach(t => { t.beaten = player.beatenTrainers.includes(t.id); });
       if (Array.isArray(data.trainers)) {
@@ -1119,6 +1119,11 @@ const SaveSystem = {
           if (trainer) trainer.beaten = !!saved.beaten;
         });
       }
+      // Keep old/new save shapes in sync. Some saves contain trainer-state but
+      // not the newer beatenTrainers list; Continue must not lose badge progress
+      // or show a stale title/HUD count after loading those slots.
+      player.beatenTrainers = trainers.filter(t => t.beaten).map(t => t.id);
+      player.rivalBeaten = trainers.every(t => t.beaten);
       gameState = 'OVERWORLD';
       startDialog('Save geladen!', 'Weiter geht es in Nordhorn.');
       this.lastMessage = 'Save loaded';
@@ -1144,9 +1149,13 @@ const SaveSystem = {
       const data = JSON.parse(raw);
       const p = data.player || {};
       const date = data.savedAt ? new Date(data.savedAt) : null;
+      const beatenIds = new Set(Array.isArray(p.beatenTrainers) ? p.beatenTrainers : []);
+      if (Array.isArray(data.trainers)) {
+        data.trainers.forEach(saved => { if (saved && saved.beaten) beatenIds.add(saved.id); });
+      }
       return {
         level: p.level || 1,
-        beaten: Array.isArray(p.beatenTrainers) ? p.beatenTrainers.length : 0,
+        beaten: beatenIds.size,
         time: date ? date.toLocaleDateString('de-DE') : 'unbekannt',
       };
     } catch (err) { return null; }
