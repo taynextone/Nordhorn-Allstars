@@ -3726,6 +3726,16 @@ function clearPressedInput() {
   Object.keys(keysPressed).forEach(key => { keysPressed[key] = false; });
 }
 
+function enforceCleanGameboyUI() {
+  // Safety net for the post-declutter build: old help/scout/coach objects still
+  // exist for save/debug compatibility, but they must never become visible in
+  // normal play. Keep the actual render path classic: map + actors + compact HUD,
+  // or court + players + score/HP/EN/menu/message.
+  [ControlsHelp, ScoutCard, CoachTip].forEach(panel => {
+    if (panel && panel.visible) panel.visible = false;
+  });
+}
+
 // ============================================================
 // BATTLE SYSTEM
 // ============================================================
@@ -5092,6 +5102,7 @@ function gameLoop() {
 
     // Coach/scout/help overlays stay disabled after the clean-HUD pass.
     // Core controls still work, but the overworld remains map + actors + compact HUD only.
+    enforceCleanGameboyUI();
 
     switch (gameState) {
       case 'TITLE':
