@@ -1334,6 +1334,14 @@ function clearPressedInput() {
   Object.keys(keysPressed).forEach(key => { keysPressed[key] = false; });
 }
 
+function setBattleMessage(message, subMessage = '', feedbackTimer = 0) {
+  // Keep the compact battle message box truthful: every new action replaces the
+  // previous context line so old intro/energy text cannot linger under later moves.
+  battle.message = message;
+  battle.subMessage = subMessage || '';
+  battle.feedbackTimer = feedbackTimer;
+}
+
 function enforceCleanGameboyUI() {
   // Safety net for the post-declutter build: old help/scout/coach objects still
   // exist for save/debug compatibility, but they must never become visible in
@@ -1391,9 +1399,11 @@ function startBattle(trainer) {
   battle.enemyBuffed = false;
   battle.playerMoves = getPlayerMoves();
   battle.enemyMoves = getEnemyMoves(trainer.level);
-  battle.message = trainer.name + ' wants to battle!';
-  battle.subMessage = 'LV ' + trainer.level + ' ' + trainer.aiStyle + ' - first to ' + trainer.ptsToWin;
-  battle.feedbackTimer = 120;
+  setBattleMessage(
+    trainer.name + ' wants to battle!',
+    'LV ' + trainer.level + ' ' + trainer.aiStyle + ' - first to ' + trainer.ptsToWin,
+    120
+  );
 }
 
 function calculateDamage(move, attacker, defender) {
@@ -1423,9 +1433,7 @@ function calculateDamage(move, attacker, defender) {
 function executePlayerMove() {
   const move = battle.playerMoves[battle.selectedMove];
   if (!move || battle.playerEnergy < (move.energy || 0)) {
-    battle.message = 'Not enough energy!';
-    battle.subMessage = move ? move.name + ' needs ' + (move.energy || 0) + ' EN' : '';
-    battle.feedbackTimer = 120;
+    setBattleMessage('Not enough energy!', move ? move.name + ' needs ' + (move.energy || 0) + ' EN' : '', 120);
     return;
   }
 
@@ -1437,7 +1445,7 @@ function executePlayerMove() {
   if (move.special && move.name === 'Block') {
     // Block reduces next enemy attack
     battle.playerBlockNext = true;
-    battle.message = 'You prepare to block!';
+    setBattleMessage('You prepare to block!');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else if (move.special && move.name === 'Steal') {
@@ -1445,17 +1453,17 @@ function executePlayerMove() {
     if (success) {
       const dmg = 8 + Math.floor(Math.random() * 5);
       battle.enemyHp -= dmg;
-      battle.message = 'Steal success! -' + dmg + ' HP';
+      setBattleMessage('Steal success! -' + dmg + ' HP');
       battle.ballOwner = 'player';
       battle.hasBall = true;
     } else {
-      battle.message = 'Steal failed!';
+      setBattleMessage('Steal failed!');
     }
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else if (move.type === 'buff') {
     battle.playerBuffed = true;
-    battle.message = 'Analyzing court... Next shot boosted!';
+    setBattleMessage('Analyzing court... Next shot boosted!');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else {
@@ -1471,11 +1479,11 @@ function executePlayerMove() {
       const points = move.pts;
       battle.enemyHp -= calc.damage;
       battle.playerScore += points;
-      battle.message = move.name + '! ' + points + ' pts! -' + calc.damage + ' HP';
+      setBattleMessage(move.name + '! ' + points + ' pts! -' + calc.damage + ' HP');
       battle.ballOwner = 'enemy'; // opponent gets ball after scoring
       battle.hasBall = false;
     } else {
-      battle.message = move.name + ' missed!';
+      setBattleMessage(move.name + ' missed!');
       battle.ballOwner = 'enemy';
       battle.hasBall = false;
     }
@@ -1518,7 +1526,7 @@ function executeEnemyMove() {
   if (availableMoves.length === 0) {
     // Skip turn to regain energy
     battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5);
-    battle.message = battle.currentTrainer.name + ' rests...';
+    setBattleMessage(battle.currentTrainer.name + ' rests...', '+5 EN');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
     return;
@@ -1531,7 +1539,7 @@ function executeEnemyMove() {
 
   if (move.special && move.name === 'Block') {
     battle.enemyBlockNext = true;
-    battle.message = battle.currentTrainer.name + ' prepares to block!';
+    setBattleMessage(battle.currentTrainer.name + ' prepares to block!');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else if (move.special && move.name === 'Steal') {
@@ -1540,17 +1548,17 @@ function executeEnemyMove() {
       let dmg = 8 + Math.floor(Math.random() * 5);
       if (battle.playerBlockNext) { dmg = Math.floor(dmg / 2); battle.playerBlockNext = false; }
       battle.playerHp -= dmg;
-      battle.message = battle.currentTrainer.name + ' steals! -' + dmg + ' HP';
+      setBattleMessage(battle.currentTrainer.name + ' steals! -' + dmg + ' HP');
       battle.ballOwner = 'enemy';
       battle.hasBall = false;
     } else {
-      battle.message = 'Steal failed!';
+      setBattleMessage('Steal failed!');
     }
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else if (move.type === 'buff') {
     battle.enemyBuffed = true;
-    battle.message = battle.currentTrainer.name + ' analyzes the court...';
+    setBattleMessage(battle.currentTrainer.name + ' analyzes the court...');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else {
@@ -1566,11 +1574,11 @@ function executeEnemyMove() {
       const points = move.pts;
       battle.playerHp -= calc.damage;
       battle.enemyScore += points;
-      battle.message = battle.currentTrainer.name + ': ' + move.name + '! ' + points + ' pts!';
+      setBattleMessage(battle.currentTrainer.name + ': ' + move.name + '! ' + points + ' pts!');
       battle.ballOwner = 'player';
       battle.hasBall = true;
     } else {
-      battle.message = battle.currentTrainer.name + ' missed!';
+      setBattleMessage(battle.currentTrainer.name + ' missed!');
       battle.ballOwner = 'player';
       battle.hasBall = true;
     }
@@ -1584,24 +1592,21 @@ function endTurn() {
   const ptsToWin = battle.currentTrainer.ptsToWin;
 
   if (battle.playerScore >= ptsToWin) {
-    battle.message = 'YOU WIN!';
-    battle.subMessage = 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    setBattleMessage('YOU WIN!', 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore);
     battle.phase = 'result';
     setTimeout(() => winBattle(), 2500);
     return;
   }
 
   if (battle.enemyScore >= ptsToWin) {
-    battle.message = 'You lost...';
-    battle.subMessage = 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    setBattleMessage('You lost...', 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore);
     battle.phase = 'result';
     setTimeout(() => loseBattle(), 2500);
     return;
   }
 
   if (battle.playerHp <= 0) {
-    battle.message = 'You collapsed...';
-    battle.subMessage = 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore;
+    setBattleMessage('You collapsed...', 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore);
     battle.phase = 'result';
     setTimeout(() => loseBattle(), 2500);
     return;
@@ -1639,8 +1644,7 @@ function winBattle() {
   // EXP gain
   const expGain = trainer.expReward || (15 + trainer.level * 10);
   player.exp += expGain;
-  battle.message = 'Gained ' + expGain + ' EXP!';
-  battle.subMessage = '';
+  setBattleMessage('Gained ' + expGain + ' EXP!');
 
   // Check level up
   while (player.exp >= player.expNext) {

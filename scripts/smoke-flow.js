@@ -74,6 +74,7 @@ function assertCleanRenderPaths() {
   assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
   assert(battleHud.includes('battle.feedbackTimer > 0'), 'Select-phase battle feedback must be readable in the core message box');
+  assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
   assert(code.includes('function movePlayerToHomeGate()'), 'Return-home flows should share one safe home-gate helper');
   assert(code.includes('ENTER/SPACE/A/B to continue'), 'Game Over hint must mention all working confirm buttons');
   assert(code.includes('const PLAYER_ENERGY_REGEN = 3;'), 'Player energy regen should be a single tuned constant');
@@ -221,6 +222,8 @@ function runSmokeFlow() {
   assert(get('battle.phase') === 'select', 'Invalid low-energy move should keep the player in command select');
   assert(get('battle.message') === 'Not enough energy!', 'Low-energy move should explain why it failed');
   assert(get('battle.feedbackTimer') > 0, 'Low-energy message should be readable during select phase');
+  run('battle.playerEnergy = 20; battle.selectedMove = 0; executePlayerMove();');
+  assert(get('battle.subMessage') === '', 'Next battle action should clear stale low-energy detail text');
   run('battle.playerEnergy = 0; battle.turnCount = 2; endTurn();');
   assert(get('battle.playerEnergy') === get('PLAYER_ENERGY_REGEN'), 'Player turn regen should match the HUD regen label');
   run('battle.playerEnergy = 20; battle.turnCount = 0; battle.phase = "select";');
