@@ -67,6 +67,10 @@ function assertCleanRenderPaths() {
   assert(moveSelect.includes('menuY + menuH - 8'), 'Move description must stay inside the command box');
   assert(!moveSelect.includes('menuY + menuH + 10'), 'Move description must not overlap the HP/EN HUD');
   assert(battle.includes('ctx.arc(VIEW_W / 2, 120, 28'), 'Battle court should keep the clean center-circle polish');
+  assert(battle.includes("drawBattleHoop(28, 68, 'left')"), 'Battle court should render left pixel hoop as scenery');
+  assert(battle.includes("drawBattleHoop(VIEW_W - 44, 68, 'right')"), 'Battle court should render right pixel hoop as scenery');
+  assert(code.includes('function drawBattleHoop('), 'Pixel hoop renderer must stay as court art, not HUD');
+  assert(!battle.includes('ctx.fillRect(30, 70, 10, 10);'), 'Old flat hoop block should stay replaced by readable pixel hoop art');
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');
   assert(code.includes('UP/DOWN Select · ENTER/A/B Start · C Credits'), 'Title hint must mention the working A/B start buttons');

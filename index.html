@@ -2450,10 +2450,9 @@ function drawBattle() {
   ctx.fillRect(VIEW_W - 80, 60, 60, 2);
   ctx.fillRect(VIEW_W - 80, VIEW_H - 140, 60, 2);
 
-  // Hoops
-  ctx.fillStyle = '#d4600a';
-  ctx.fillRect(30, 70, 10, 10);
-  ctx.fillRect(VIEW_W - 40, 70, 10, 10);
+  // Pixel hoops/backboards are part of the court art, not extra HUD chrome.
+  drawBattleHoop(28, 68, 'left');
+  drawBattleHoop(VIEW_W - 44, 68, 'right');
 
   // Scoreboard
   ctx.fillStyle = C.DARK;
@@ -2510,6 +2509,30 @@ function drawBattle() {
   }
 
   ctx.textAlign = 'left';
+}
+
+function drawBattleHoop(x, y, side) {
+  const poleX = side === 'left' ? x - 6 : x + 20;
+  const rimX = side === 'left' ? x + 13 : x - 3;
+
+  // Stanchion + backboard in the Gameboy palette so it reads as court art.
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(poleX, y - 8, 4, 42);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(x, y, 18, 24);
+  ctx.fillStyle = C.DARK;
+  ctx.fillRect(x, y, 18, 3);
+  ctx.fillRect(x, y + 21, 18, 3);
+  ctx.fillRect(x, y, 3, 24);
+  ctx.fillRect(x + 15, y, 3, 24);
+
+  // Rim and tiny net pixels; no labels/meters, just readable basketball scenery.
+  ctx.fillStyle = '#d4600a';
+  ctx.fillRect(rimX, y + 10, 10, 4);
+  ctx.fillStyle = C.MID;
+  ctx.fillRect(rimX + 1, y + 15, 2, 8);
+  ctx.fillRect(rimX + 5, y + 15, 2, 8);
+  ctx.fillRect(rimX + 9, y + 15, 2, 8);
 }
 
 function drawBattlePlayer(x, y) {
