@@ -4103,7 +4103,7 @@ function startDialog(text, subText, onComplete = null) {
   dialog.displayed = '';
   dialog.charIndex = 0;
   dialog.timer = 0;
-  dialog.typing = true;
+  dialog.typing = dialog.text.length > 0;
   dialog.onComplete = onComplete;
   // Non-battle dialogs must own the state so they can type, accept input,
   // and reliably return to the map after intro/load/victory/defeat flows.
@@ -4119,6 +4119,9 @@ function updateDialog() {
       dialog.timer = 0;
       dialog.displayed += dialog.text[dialog.charIndex];
       dialog.charIndex++;
+      if (dialog.charIndex >= dialog.text.length) {
+        dialog.typing = false;
+      }
     }
   }
 
