@@ -211,7 +211,18 @@ async def run_cdp_flow(ws_url: str) -> str:
   Math.random = () => 0.99;
   executePlayerMove();
   assert(battle.message === 'Layup missed!', 'enemy Block should guard the next player shot');
+  assert(battle.subMessage === 'BLOCK GUARD', 'enemy Block should explain the guarded miss in the compact message box');
   assert(battle.enemyBlockNext === false, 'enemy Block should clear after one guarded attack');
+  startBattle(trainers[0]);
+  tick(5);
+  battle.playerBlockNext = true;
+  battle.enemyMoves = [MOVE_UNLOCKS[1]];
+  battle.enemyEnergy = 99;
+  Math.random = () => 0.99;
+  executeEnemyMove();
+  assert(battle.message === 'Klaus missed!', 'player Block should guard the next rival shot');
+  assert(battle.subMessage === 'BLOCK GUARD', 'player Block should explain the guarded miss in the compact message box');
+  assert(battle.playerBlockNext === false, 'player Block should clear after one guarded rival attack');
   timerQueue.length = 0;
   startBattle(trainers[0]);
   tick(5);

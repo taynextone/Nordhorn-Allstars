@@ -1518,7 +1518,7 @@ function executePlayerMove() {
   if (move.special && move.name === 'Block') {
     // Block reduces next enemy attack
     battle.playerBlockNext = true;
-    setBattleMessage('You prepare to block!');
+    setBattleMessage('You prepare to block!', 'Next rival shot -50%');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else if (move.special && move.name === 'Steal') {
@@ -1547,7 +1547,8 @@ function executePlayerMove() {
 
     let accuracy = calc.accuracy;
     if (battle.playerBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.playerBuffed = false; }
-    if (battle.enemyBlockNext) { accuracy *= 0.5; battle.enemyBlockNext = false; }
+    const enemyBlockWasReady = battle.enemyBlockNext;
+    if (enemyBlockWasReady) { accuracy *= 0.5; battle.enemyBlockNext = false; }
 
     const success = Math.random() < accuracy;
 
@@ -1557,11 +1558,11 @@ function executePlayerMove() {
       battle.playerScore += points;
       // Keep scoring feedback readable in the same compact message box the
       // enemy turn already uses: action on top, HP change as a short subline.
-      setBattleMessage(move.name + '! ' + points + ' pts!', '-' + calc.damage + ' HP');
+      setBattleMessage(move.name + '! ' + points + ' pts!', (enemyBlockWasReady ? 'BLOCK · ' : '') + '-' + calc.damage + ' HP');
       battle.ballOwner = 'enemy'; // opponent gets ball after scoring
       battle.hasBall = false;
     } else {
-      setBattleMessage(move.name + ' missed!');
+      setBattleMessage(move.name + ' missed!', enemyBlockWasReady ? 'BLOCK GUARD' : '');
       battle.ballOwner = 'enemy';
       battle.hasBall = false;
     }
@@ -1619,16 +1620,17 @@ function executeEnemyMove() {
 
   if (move.special && move.name === 'Block') {
     battle.enemyBlockNext = true;
-    setBattleMessage(battle.currentTrainer.name + ' prepares to block!');
+    setBattleMessage(battle.currentTrainer.name + ' prepares to block!', 'Next shot -50%');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
   } else if (move.special && move.name === 'Steal') {
     const success = Math.random() < (0.3 + battle.currentTrainer.level * 0.05);
     if (success) {
       let dmg = 8 + Math.floor(Math.random() * 5);
-      if (battle.playerBlockNext) { dmg = Math.floor(dmg / 2); battle.playerBlockNext = false; }
+      const playerBlockWasReady = battle.playerBlockNext;
+      if (playerBlockWasReady) { dmg = Math.floor(dmg / 2); battle.playerBlockNext = false; }
       battle.playerHp -= dmg;
-      setBattleMessage(battle.currentTrainer.name + ' steals!', '-' + dmg + ' HP');
+      setBattleMessage(battle.currentTrainer.name + ' steals!', (playerBlockWasReady ? 'BLOCK · ' : '') + '-' + dmg + ' HP');
       battle.ballOwner = 'enemy';
       battle.hasBall = false;
     } else {
@@ -1646,7 +1648,8 @@ function executeEnemyMove() {
 
     let accuracy = calc.accuracy;
     if (battle.enemyBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.enemyBuffed = false; }
-    if (battle.playerBlockNext) { accuracy *= 0.5; battle.playerBlockNext = false; }
+    const playerBlockWasReady = battle.playerBlockNext;
+    if (playerBlockWasReady) { accuracy *= 0.5; battle.playerBlockNext = false; }
 
     const success = Math.random() < accuracy;
 
@@ -1656,12 +1659,12 @@ function executeEnemyMove() {
       battle.enemyScore += points;
       setBattleMessage(
         battle.currentTrainer.name + ': ' + move.name + '! ' + points + ' pts!',
-        '-' + calc.damage + ' HP'
+        (playerBlockWasReady ? 'BLOCK · ' : '') + '-' + calc.damage + ' HP'
       );
       battle.ballOwner = 'player';
       battle.hasBall = true;
     } else {
-      setBattleMessage(battle.currentTrainer.name + ' missed!');
+      setBattleMessage(battle.currentTrainer.name + ' missed!', playerBlockWasReady ? 'BLOCK GUARD' : '');
       battle.ballOwner = 'player';
       battle.hasBall = true;
     }

@@ -110,8 +110,10 @@ function assertCleanRenderPaths() {
   assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN')"), 'Enemy rest message should match trainer regen inside the compact message box');
   assert(code.includes("'-' + calc.damage + ' HP'"), 'Enemy scoring moves should show player HP damage in the compact message subline');
   assert(code.includes("setBattleMessage('Steal success!', '-' + dmg + ' HP')"), 'Player steal damage should stay in the compact subline');
-  assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' steals!', '-' + dmg + ' HP')"), 'Enemy steal damage should stay in the compact subline');
-  assert(code.includes('if (battle.enemyBlockNext) { accuracy *= 0.5; battle.enemyBlockNext = false; }'), 'Enemy Block should actually guard against the next player attack');
+  assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' steals!', (playerBlockWasReady ? 'BLOCK · ' : '') + '-' + dmg + ' HP')"), 'Enemy steal damage should stay in the compact subline and show block feedback when guarded');
+  assert(code.includes('const enemyBlockWasReady = battle.enemyBlockNext;'), 'Enemy Block should actually guard against the next player attack');
+  assert(code.includes("setBattleMessage(move.name + ' missed!', enemyBlockWasReady ? 'BLOCK GUARD' : '')"), 'Enemy Block should explain guarded misses in the compact battle message box');
+  assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' missed!', playerBlockWasReady ? 'BLOCK GUARD' : '')"), 'Player Block should explain guarded rival misses in the compact battle message box');
   const drawTile = getFunctionBody(code, 'drawTile');
   assert(drawTile.includes('Tiny court-paint pixels'), 'Overworld court tiles should keep pixel-art court polish without new HUDs');
   assert(drawTile.includes('ctx.fillRect(sx, sy + 7, TILE, 2);'), 'Court tiles should include horizontal court-paint lines');
@@ -369,7 +371,13 @@ function runSmokeFlow() {
   timers.length = 0;
   run('battle.enemyBlockNext = true; battle.playerEnergy = 20; battle.selectedMove = 0; Math.random = () => 0.99; executePlayerMove();');
   assert(get('battle.message') === 'Layup missed!', 'Enemy Block should reduce the next player shot instead of being a dead flag');
+  assert(get('battle.subMessage') === 'BLOCK GUARD', 'Enemy Block should show compact guard feedback without adding a HUD');
   assert(get('battle.enemyBlockNext') === false, 'Enemy Block should clear after guarding one player attack');
+  timers.length = 0;
+  run('battle.playerBlockNext = true; battle.enemyMoves = [MOVE_UNLOCKS[1]]; battle.enemyEnergy = 99; Math.random = () => 0.99; executeEnemyMove();');
+  assert(get('battle.message') === 'Klaus missed!', 'Player Block should reduce the next rival shot');
+  assert(get('battle.subMessage') === 'BLOCK GUARD', 'Player Block should show compact guard feedback without adding a HUD');
+  assert(get('battle.playerBlockNext') === false, 'Player Block should clear after guarding one rival attack');
   timers.length = 0;
   run('battle.enemyEnergy = 0; battle.turnCount = 1; battle.playerTurn = false; battle.phase = "anim"; executeEnemyMove();');
   assert(get('battle.enemyEnergy') === 0, 'Exhausted enemy rest should not add a hard-coded energy burst before end-turn regen');
