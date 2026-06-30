@@ -227,6 +227,10 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(compactLines.length === 3, 'compact battle text should stay inside the core message box line count');
   assert(compactLines.every(line => line.length <= 13), 'compact battle text should split long tokens before HP/EN box overlap');
   assert(compactLines[2].endsWith('…'), 'compact battle text should mark truncation without a new HUD');
+  const dialogLines = getWrappedDialogLines('Donaudampfschifffahrtsgesellschaftskapitaen Nordhornverteidigung bleibt stabil weiter weiter', 18, 3);
+  assert(dialogLines.length === 3, 'dialog text should stay inside the visible dialog line count');
+  assert(dialogLines.every(line => line.length <= 18), 'dialog text should split long German-style tokens before overflow');
+  assert(dialogLines[2].endsWith('…'), 'dialog text should mark truncation in-box instead of silent clipping');
   timerQueue.length = 0;
   startBattle(trainers[0]);
   tick(5);

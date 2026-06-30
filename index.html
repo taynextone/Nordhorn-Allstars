@@ -1898,8 +1898,21 @@ function updateDialog() {
   }
 }
 
-function getWrappedDialogLines(text, maxChars) {
-  const words = String(text || '').split(/\s+/).filter(Boolean);
+function getWrappedDialogLines(text, maxChars, maxLines = Infinity) {
+  // Dialog boxes are wider than battle messages, but German compound words or
+  // future rival nicknames can still exceed one line. Split long tokens before
+  // wrapping so post-fight/story text stays inside the classic Gameboy dialog.
+  const words = [];
+  String(text || '').split(/\s+/).filter(Boolean).forEach(word => {
+    if (word.length <= maxChars) {
+      words.push(word);
+      return;
+    }
+    for (let i = 0; i < word.length; i += maxChars) {
+      words.push(word.slice(i, i + maxChars));
+    }
+  });
+
   const lines = [];
   let line = '';
 
@@ -1914,7 +1927,13 @@ function getWrappedDialogLines(text, maxChars) {
   });
 
   if (line) lines.push(line);
-  return lines.length ? lines : [''];
+  if (!lines.length) return [''];
+  if (lines.length > maxLines) {
+    const compact = lines.slice(0, maxLines);
+    compact[maxLines - 1] = compact[maxLines - 1].slice(0, Math.max(1, maxChars - 1)) + '…';
+    return compact;
+  }
+  return lines;
 }
 
 function drawDialog() {
@@ -1933,14 +1952,14 @@ function drawDialog() {
   // Text — wrap long NPC/victory lines instead of letting them spill off-screen.
   ctx.fillStyle = C.DARKEST;
   ctx.font = '10px monospace';
-  const lines = getWrappedDialogLines(dialog.displayed, 46).slice(0, 3);
+  const lines = getWrappedDialogLines(dialog.displayed, 46, 3);
   lines.forEach((line, index) => {
     ctx.fillText(line, 14, boxY + 22 + index * 14);
   });
 
   if (dialog.subText && dialog.charIndex >= dialog.text.length) {
     ctx.font = '9px monospace';
-    const subLines = getWrappedDialogLines(dialog.subText, 52).slice(0, 2);
+    const subLines = getWrappedDialogLines(dialog.subText, 52, 2);
     const subStartY = boxY + 24 + lines.length * 14;
     subLines.forEach((line, index) => {
       if (subStartY + index * 12 < boxY + 66) ctx.fillText(line, 14, subStartY + index * 12);

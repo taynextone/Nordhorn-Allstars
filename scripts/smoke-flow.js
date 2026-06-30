@@ -98,6 +98,10 @@ function assertCleanRenderPaths() {
   assert(battleHud.includes('clampBarWidth(battle.playerEnergy, player.maxEnergy, 88)'), 'Player EN bar must be clamped');
   assert(battleHud.includes('clampBarWidth(battle.enemyHp, battle.currentTrainer.playerHp, 88)'), 'Enemy HP bar must be clamped');
   assert(battleHud.includes('clampBarWidth(battle.enemyEnergy, battle.enemyMaxEnergy, 88)'), 'Enemy EN bar must be clamped');
+  assert(code.includes('function getWrappedDialogLines(text, maxChars, maxLines = Infinity)'), 'Dialog wrapper should expose max-line clamping for readable dialog boxes');
+  assert(code.includes('future rival nicknames can still exceed one line'), 'Dialog wrapper should document long-token overflow protection');
+  assert(code.includes('getWrappedDialogLines(dialog.displayed, 46, 3)'), 'Main dialog text should clamp with an in-box ellipsis instead of silent slicing');
+  assert(code.includes('getWrappedDialogLines(dialog.subText, 52, 2)'), 'Dialog subtext should clamp with an in-box ellipsis instead of silent slicing');
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
   assert(code.includes("trainerName + ' besiegt! Siege: '"), 'Victory dialog should show rival progress in the existing dialog box');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
@@ -393,6 +397,10 @@ function runSmokeFlow() {
   assert(get('_compactLines.length') === 3, 'Compact battle text should clamp to the message box line count');
   assert(get('_compactLines.every(line => line.length <= 13)') === true, 'Compact battle text should split long tokens before they overflow HP/EN boxes');
   assert(get('_compactLines[2].endsWith("…")') === true, 'Compact battle text should mark truncated overflow in-box');
+  run(`var _dialogLines = getWrappedDialogLines('Donaudampfschifffahrtsgesellschaftskapitaen Nordhornverteidigung bleibt stabil weiter weiter', 18, 3);`);
+  assert(get('_dialogLines.length') === 3, 'Dialog text should clamp to its visible Gameboy box line count');
+  assert(get('_dialogLines.every(line => line.length <= 18)') === true, 'Dialog text should split long German-style tokens before they overflow the box');
+  assert(get('_dialogLines[2].endsWith("…")') === true, 'Dialog text should mark truncated overflow in-box instead of silently dropping it');
   run('battle.playerEnergy = 20; battle.turnCount = 0; battle.phase = "select";');
   run('battle.enemyScore = battle.currentTrainer.ptsToWin; endTurn();');
   flushTimers();

@@ -117,6 +117,7 @@
 - [x] Steal-Damage Readability — erfolgreiche Spieler-/Gegner-Steals trennen Treffertext und HP-Schaden jetzt ebenfalls in Mainline/Subline der bestehenden Battle-Message-Box; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Block-Feedback Readability — Block-Effekte erklären vorbereitete und abgefangene Würfe jetzt in der bestehenden kompakten Battle-Message-Box; VM-/Browser-Smokes prüfen Spieler- und Rivalen-Block ohne neue HUDs/Overlays.
 - [x] Battle-Message Overflow Guard — lange Aktionswörter/-Labels werden in der bestehenden Message-Box hart auf Zeilenbreite gesplittet und gekürzt, damit sie nie in HP/EN-Boxen laufen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] Dialog-Overflow Guard — lange Story-/Rivalenwörter werden in der bestehenden Gameboy-Dialogbox hart umbrochen und mit Ellipse gekürzt, damit Victory-/NPC-Texte lesbar bleiben ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
