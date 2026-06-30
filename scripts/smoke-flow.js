@@ -95,6 +95,8 @@ function assertCleanRenderPaths() {
   assert(code.includes('const PLAYER_ENERGY_REGEN = 3;'), 'Player energy regen should be a single tuned constant');
   assert(battleHud.includes("'REG +' + PLAYER_ENERGY_REGEN"), 'Battle HUD regen text must stay synced to the regen constant');
   assert(!battleHud.includes("'REG +3'"), 'Battle HUD should not hard-code a stale regen label');
+  assert(!code.includes("battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5)"), 'Enemy rest should not double-stack hard-coded +5 energy with normal regen');
+  assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN')"), 'Enemy rest message should match trainer regen inside the compact message box');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {
@@ -301,6 +303,13 @@ function runSmokeFlow() {
   run('battle.subMessage = "OLD DETAIL"; battle.turnCount = 1; endTurn();');
   assert(get('battle.message') === "Klaus's turn...", 'Enemy-turn banner should use the compact battle message helper');
   assert(get('battle.subMessage') === '', 'Enemy-turn banner should clear stale detail text');
+  timers.length = 0;
+  run('battle.enemyEnergy = 0; battle.turnCount = 1; battle.playerTurn = false; battle.phase = "anim"; executeEnemyMove();');
+  assert(get('battle.enemyEnergy') === 0, 'Exhausted enemy rest should not add a hard-coded energy burst before end-turn regen');
+  assert(get('battle.subMessage') === '+3 EN', 'Exhausted enemy rest message should match trainer regen');
+  flushTimers();
+  assert(get('battle.enemyEnergy') === 3, 'Exhausted enemy rest should receive exactly one normal trainer regen tick');
+  assert(get('battle.phase') === 'select' && get('battle.playerTurn') === true, 'Enemy rest should hand control back to player cleanly');
   run('battle.playerEnergy = 0; battle.turnCount = 2; endTurn();');
   assert(get('battle.playerEnergy') === get('PLAYER_ENERGY_REGEN'), 'Player turn regen should match the HUD regen label');
   run('battle.playerEnergy = 20; battle.turnCount = 0; battle.phase = "select";');

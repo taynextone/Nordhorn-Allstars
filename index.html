@@ -1599,9 +1599,11 @@ function chooseEnemyMove(availableMoves) {
 function executeEnemyMove() {
   const availableMoves = battle.enemyMoves.filter(m => battle.enemyEnergy >= (m.energy || 0));
   if (availableMoves.length === 0) {
-    // Skip turn to regain energy
-    battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5);
-    setBattleMessage(battle.currentTrainer.name + ' rests...', '+5 EN');
+    // Skip the action and let the normal end-turn regeneration apply exactly once.
+    // Earlier builds added +5 here and then applied trainer regen again in endTurn,
+    // making exhausted rivals bounce back too hard without any readable reason.
+    const regen = battle.currentTrainer.regen || 3;
+    setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN');
     battle.turnCount++;
     setTimeout(() => endTurn(), 1000);
     return;
