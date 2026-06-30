@@ -366,6 +366,9 @@ function runSmokeFlow() {
   assert(get('gameState') === 'BATTLE', 'Loss smoke should enter battle');
   assert(get('battle.phase') === 'select', 'Loss smoke battle should start at move select');
   assert(get('battle.feedbackTimer') > 0, 'Battle intro message should be visible without adding a HUD');
+  run('keysPressed.a = true; keysPressed.A = true; keysPressed.b = true; keysPressed.B = true;');
+  assert(get('wasConfirmPressed()') === true, 'Simultaneous A/B aliases should confirm once');
+  assert(get('!keysPressed.a && !keysPressed.A && !keysPressed.b && !keysPressed.B') === true, 'Confirm aliases must all clear without short-circuit input bleed');
   run('battle.playerEnergy = 4; battle.selectedMove = 1; executePlayerMove();');
   assert(get('battle.phase') === 'select', 'Invalid low-energy move should keep the player in command select when a cheaper move is available');
   assert(get('battle.message') === 'Not enough energy!', 'Low-energy move should explain why it failed');

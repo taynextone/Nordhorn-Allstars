@@ -200,6 +200,12 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(gameState === 'BATTLE', 'startBattle should enter battle');
   assert(battle.phase === 'select', 'battle should start in move select');
   assert(Object.values(keysPressed).every(v => !v), 'battle start should clear stale pressed input');
+  keysPressed.a = true;
+  keysPressed.A = true;
+  keysPressed.b = true;
+  keysPressed.B = true;
+  assert(wasConfirmPressed() === true, 'simultaneous A/B aliases should confirm once');
+  assert(!keysPressed.a && !keysPressed.A && !keysPressed.b && !keysPressed.B, 'confirm aliases should all clear without input bleed');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'legacy overlays should stay hidden in battle');
   battle.playerEnergy = 4;
   battle.selectedMove = 1;

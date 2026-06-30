@@ -122,6 +122,7 @@
 - [x] Dormant-FPS-HUD Cleanup — ungenutztes PerfHUD-/FPS-Stat-HUD-Modul aus Runtime und Smoke-Guards entfernt, damit der Overworld-Screen sauber Karte + Actors + kompaktes Status-HUD bleibt.
 - [x] New-Run Clean-State Reset — neuer Spielstart setzt Minimap-, Konami- und Easter-Egg-Zustand zurück, damit nach Continue/Credits keine optionalen Zustände in den frischen Gameboy-Screen leaken.
 - [x] Mobile-Touch Control Wiring — sichtbare Touch-Buttons sind jetzt wirklich mit der Keyboard-Input-Pipeline verbunden; MINI toggelt nur die kompakte Minimap und OVR öffnet die separate Übersicht ohne neue HUD-/Coach-Overlays.
+- [x] Confirm-Alias Input Hygiene — gleichzeitige A/a/B/b-Confirm-Edges werden vollständig geleert, damit keine Tastatur-/Touch-Hybrid-Eingabe in den nächsten Dialog- oder Battle-State blutet.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

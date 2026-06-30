@@ -1429,13 +1429,16 @@ function wasPressed(key) {
 function wasConfirmPressed() {
   // Keep the printed controls honest: Enter, Space, A and B are confirm/action.
   // Check every confirm alias before returning so simultaneous presses cannot
-  // leave a stale confirm edge for the next state/menu frame.
+  // leave a stale confirm edge for the next state/menu frame. Do not short-circuit
+  // A/a or B/b pairs; browser automation and touch+keyboard hybrids can set both.
   const enter = wasPressed('Enter');
   const space = wasPressed(' ');
   const legacySpace = wasPressed('Spacebar');
-  const a = wasPressed('a') || wasPressed('A');
-  const b = wasPressed('b') || wasPressed('B');
-  return enter || space || legacySpace || a || b;
+  const lowerA = wasPressed('a');
+  const upperA = wasPressed('A');
+  const lowerB = wasPressed('b');
+  const upperB = wasPressed('B');
+  return enter || space || legacySpace || lowerA || upperA || lowerB || upperB;
 }
 
 function wasCreditsPressed() {
