@@ -108,6 +108,7 @@
 - [x] Battle-Name Clamp Polish — lange Rivalennamen werden in Scoreboard, Sprite-Label und HP/EN-Box zentral gekürzt, damit der Battle-Screen lesbar bleibt ohne neue HUDs/Overlays.
 - [x] Nordhorn-Map-Overview Pass — echte Kartenreferenz in eine Gameboy-abstrahierte Nordhorn-Struktur mit Zentrum, Vechte/Kanal, Blumensiedlung, Tierpark, Kloster-Frenswegen, Industrie/Gravemeier und Lingen-Ausgang übersetzt; O-Taste öffnet eine separate Übersichtskarte, M bleibt kompakte Minimap.
 - [x] Overview-Control Sync — Übersichtskarte nennt jetzt A/B/ENTER als echte Zurück-Buttons und VM-/Browser-Smokes prüfen O→Overview→B-zurück ohne neue HUD-/Overlay-Module.
+- [x] Overview-Target Polish — separate O-Übersicht zeigt kleine Trainerpunkte und NEXT-Markierung, während Overworld/Battle weiterhin frei von zusätzlichen Coach-/HUD-Renderpfaden bleiben.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

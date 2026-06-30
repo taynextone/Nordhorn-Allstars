@@ -115,6 +115,8 @@ function assertCleanRenderPaths() {
   assert(code.includes("label: 'TIERPARK'"), 'Overview landmarks should include Tierpark/Park area');
   assert(code.includes("label: '→ LINGEN'"), 'Overview landmarks should include the route toward Lingen');
   assert(code.includes('function drawOverviewMap()'), 'Full overview map screen should exist');
+  assert(code.includes('drawOverviewTargets(mapX, mapY, scale)'), 'Overview map should show tiny trainer target dots only on the separate map screen');
+  assert(code.includes("ctx.fillText('NEXT', nx, ny - 9);"), 'Overview map should identify the next unbeaten rival without adding overworld/battle HUDs');
   assert(code.includes("ctx.fillText('M: Mini  O: Overview'"), 'Overworld hint should advertise mini map and overview map without HUD spam');
   assert(code.includes("O / ESC / A/B/ENTER: BACK"), 'Overview back hint should match the actual confirm aliases');
 
@@ -238,6 +240,7 @@ function runSmokeFlow() {
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
   assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
   assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
+  assert(get('ObjectiveTracker.getNextTrainer().name') === 'Klaus', 'Fresh overview routing should target the first unbeaten rival');
   press('o');
   tick(1);
   release('o');
