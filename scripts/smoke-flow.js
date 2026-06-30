@@ -282,7 +282,8 @@ function runSmokeFlow() {
   flushTimers();
   flushTimers();
   assert(get('gameState') === 'DIALOG', 'Enemy HP KO should flow into the victory dialog');
-  assert(get('dialog.subText') === 'Klaus besiegt! Siege: 1/5', 'Victory dialog should name the rival and compact progress without extra HUD');
+  assert(get('dialog.subText').startsWith('Klaus besiegt! Siege: 1/5'), 'Victory dialog should name the rival and compact progress without extra HUD');
+  assert(get('dialog.subText').includes('Wohnhof'), 'Victory dialog should include the new local story flavor in the existing dialog box');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Enemy HP KO victory dialog should return to overworld');
   assert(get('trainers[0].beaten') === true, 'Enemy HP KO should mark trainer beaten');

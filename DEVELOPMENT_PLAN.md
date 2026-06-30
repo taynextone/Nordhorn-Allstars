@@ -103,6 +103,7 @@
 - [x] Enemy-Rest Regen Sync — erschöpfte Rivalen bekommen nur noch den normalen Trainer-Regen-Tick statt zusätzlichem hartcodiertem +5-Boost; Smoke-Flow prüft den kompakten Message-Box-Hinweis ohne neue HUDs/Overlays.
 - [x] Enemy-Turn Damage Readability — erfolgreiche Gegnerwürfe zeigen den HP-Schaden jetzt als kompakte Subline in der bestehenden Battle-Message-Box; Smoke-Flow prüft das ohne neue HUDs/Overlays.
 - [x] Battle-Scoreboard Readability — das Duell-Scoreboard zeigt Zielscore und gekürzte Rivalennamen in der bestehenden Core-Anzeige, ohne Coach-/Advisor-Overlays.
+- [x] Story-Atmosphäre Pass — Intro, Home-/Loss-/Champion-Texte, Rivalen-Dialoge, Siegzeilen, Credits und Spieler-Liste stärker auf Nordhorn-vs-Lingen und lokale Court-Stimmung getrimmt, ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

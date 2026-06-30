@@ -440,26 +440,27 @@ function drawCredits() {
     '',
     'Nordhorn Basketball Community',
     '',
-    'All the courts & players',
-    'who inspired this game',
+    'Vechte wind, asphalt courts',
+    'and every late-night baller',
     '',
     '--- TRAINERS ---',
     '',
-    'Klaus - The Rival',
-    'Anna - The Student',
-    'Markus - The Guardian',
-    'Sophie - The Fighter',
-    'Coach Mihler - The Master',
+    'Klaus - Wohnhof-Rookie',
+    'Anna - Park-Shooter',
+    'Markus - Schulhof-Wall',
+    'Sophie - Spielplatz-Nerven',
+    'Coach Mihler - Hallenmeister',
     '',
     '--- LOCATIONS ---',
     '',
     'Nordhorn',
     'Lingen',
-    'The Ems River',
-    'The Stadium',
+    'Vechteufer',
+    'Schulhof & Park',
+    'Stadionhalle',
     '',
     '',
-    'Thank you for playing!',
+    'Nordhorn bleibt Champion.',
     '',
     '',
     '© 2025 NORDHORN ALL STARS',
@@ -1042,11 +1043,11 @@ const MOVE_UNLOCKS = {
 
 // Trainers
 const trainers = [
-  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#404040', body: '#404040', pants: '#202020' }, dialogue: "Hey! You think you can handle a basketball? Let's see!", beaten: false, playerHp: 75, enemyEnergy: 16, level: 1, ptsToWin: 11, offense: 2, defense: 1, regen: 3, expReward: 22, aiStyle: 'Rookie' },
-  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#ff6b6b', body: '#ff6b6b', pants: '#402020' }, dialogue: "Hallo! Time for a little one-on-one!", beaten: false, playerHp: 92, enemyEnergy: 18, level: 2, ptsToWin: 15, offense: 4, defense: 2, regen: 3, expReward: 30, aiStyle: 'Shooter' },
-  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#2ecc71', body: '#2ecc71', pants: '#1a3a1a' }, dialogue: "Schalibim! Nobody gets past me!", beaten: false, playerHp: 108, enemyEnergy: 20, level: 3, ptsToWin: 18, offense: 5, defense: 4, regen: 3, expReward: 40, aiStyle: 'Defender' },
-  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#e67e22', body: '#e67e22', pants: '#3a2a1a' }, dialogue: "Ready for some real competition?", beaten: false, playerHp: 122, enemyEnergy: 23, level: 4, ptsToWin: 21, offense: 7, defense: 5, regen: 4, expReward: 52, aiStyle: 'Playmaker' },
-  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#9b59b6', body: '#9b59b6', pants: '#2a1a3a' }, dialogue: "I am Coach Mihler. You have trained hard. Now face me!", beaten: false, playerHp: 145, enemyEnergy: 26, level: 5, ptsToWin: 21, offense: 9, defense: 7, regen: 4, expReward: 68, aiStyle: 'Coach' },
+  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#404040', body: '#404040', pants: '#202020' }, dialogue: 'Klaus vom Wohnhof: Neuer Ball, neues Gesicht. Nordhorn testet dich zuerst bei mir!', victoryLine: 'Klaus nickt: Der Wohnhof spricht jetzt von dir.', beaten: false, playerHp: 75, enemyEnergy: 16, level: 1, ptsToWin: 11, offense: 2, defense: 1, regen: 3, expReward: 22, aiStyle: 'Rookie' },
+  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#ff6b6b', body: '#ff6b6b', pants: '#402020' }, dialogue: 'Anna vom Park: Zwischen Vechte-Wind und Asphalt zählt nur ein sauberer Wurf.', victoryLine: 'Anna lächelt: Dein Wurf hat Park-Niveau.', beaten: false, playerHp: 92, enemyEnergy: 18, level: 2, ptsToWin: 15, offense: 4, defense: 2, regen: 3, expReward: 30, aiStyle: 'Shooter' },
+  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#2ecc71', body: '#2ecc71', pants: '#1a3a1a' }, dialogue: 'Markus am Schulhof: Schalibim! Wer nach Lingen will, muss erst durch meine Defense.', victoryLine: 'Markus lacht: Deine Handles sind kein Zaubertrick.', beaten: false, playerHp: 108, enemyEnergy: 20, level: 3, ptsToWin: 18, offense: 5, defense: 4, regen: 3, expReward: 40, aiStyle: 'Defender' },
+  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#e67e22', body: '#e67e22', pants: '#3a2a1a' }, dialogue: 'Sophie vom Spielplatz: Hier gewinnt, wer Ruhe behält, wenn alle Kinder schreien.', victoryLine: 'Sophie zeigt Respekt: Du hast Nerven aus Stahl.', beaten: false, playerHp: 122, enemyEnergy: 23, level: 4, ptsToWin: 21, offense: 7, defense: 5, regen: 4, expReward: 52, aiStyle: 'Playmaker' },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#9b59b6', body: '#9b59b6', pants: '#2a1a3a' }, dialogue: 'Coach Mihler: Nordhorns Halle ist still. Lingen hört zu. Zeig, dass du bereit bist.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 145, enemyEnergy: 26, level: 5, ptsToWin: 21, offense: 9, defense: 7, regen: 4, expReward: 68, aiStyle: 'Coach' },
 ];
 
 // Battle state
@@ -1183,7 +1184,7 @@ const SaveSystem = {
       player.rivalBeaten = trainers.every(t => t.beaten);
       if (!isWalkable(player.x, player.y)) movePlayerToHomeGate();
       gameState = 'OVERWORLD';
-      startDialog('Save geladen!', 'Weiter geht es in Nordhorn.');
+      startDialog('Save geladen!', 'Nordhorn wartet. Die Lingen-Rivalen auch.');
       this.lastMessage = 'Save loaded';
       this.toastTimer = 120;
       return true;
@@ -1331,7 +1332,7 @@ const HomeRest = {
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
     SaveSystem.save('Rested at home');
-    startDialog('HOME COURT', 'Mom: HP and energy restored.');
+    startDialog('HOME COURT', 'Mama: Trink was. Nordhorn braucht dich fit.');
     gameState = 'DIALOG';
     return true;
   },
@@ -1768,7 +1769,7 @@ function loseBattle() {
     movePlayerToHomeGate();
     SaveSystem.save('Rest saved');
     gameState = 'OVERWORLD';
-    startDialog("You went home to rest...", "Mom: Feel better soon!", () => {
+    startDialog('Du schleppst dich nach Hause...', 'Mama: Erst atmen. Dann wieder raus auf den Court.', () => {
       gameState = 'OVERWORLD';
     });
   }, 2000);
@@ -1780,7 +1781,7 @@ function endBattle() {
   gameState = 'OVERWORLD';
   const allTrainersBeaten = trainers.every(t => t.beaten);
   if (allTrainersBeaten) {
-    startDialog('CHAMPION!', 'Alle Rivalen besiegt. Die Credits rollen jetzt.', () => {
+    startDialog('CHAMPION!', 'Nordhorn jubelt. Sogar Lingen schweigt für einen Moment.', () => {
       gameState = 'CREDITS';
     });
     return;
@@ -1790,7 +1791,7 @@ function endBattle() {
   // rival and show compact progress without adding any battle/coach HUD modules.
   const beatenCount = trainers.filter(t => t.beaten).length;
   const trainerName = defeatedTrainer ? defeatedTrainer.name : 'Rivale';
-  startDialog('Victory!', trainerName + ' besiegt! Siege: ' + beatenCount + '/' + trainers.length, () => {
+  startDialog('Victory!', trainerName + ' besiegt! Siege: ' + beatenCount + '/' + trainers.length + '. ' + (defeatedTrainer && defeatedTrainer.victoryLine ? defeatedTrainer.victoryLine : ''), () => {
     gameState = 'OVERWORLD';
   });
 }
@@ -2112,7 +2113,7 @@ function updateCharSelect() {
     }
     if (wasConfirmPressed()) {
       applyCharacterCreation();
-      startDialog('Welcome to Nordhorn!', 'Mom: Have a sweet time!');
+      startDialog('Willkommen in Nordhorn!', 'Mama: Die Courts rufen. Hol dir Respekt, bevor Lingen lacht.');
     }
   }
 }
@@ -2977,19 +2978,19 @@ function gameLoop() {
 
 const DexData = {
   allTrainers: [
-    { id: 'tim', name: 'Tim', build: 'SHOOTER', level: 3, location: 'Nordhorn — Wohnhof-Court', badge: 'ANFÄNGER', badgeColor: '#9bbc0f', reward: 'Layup-Verständnis', flavor: 'Dein alter Schulfreund. Schnell, aber nicht stark.' },
-    { id: 'lisa', name: 'Lisa', build: 'ALLROUNDER', level: 4, location: 'Nordhorn — Schulhof-Court', badge: 'SCHÜLER', badgeColor: '#8bac0f', reward: 'Ausgewogene Skills', flavor: 'Tochter des Schulhof-Vorstehens. Sehr ordentlich.' },
-    { id: 'mohammed', name: 'Mohammed', build: 'ALLROUNDER', level: 5, location: 'Nordhorn — Park-Court', badge: 'NATUR', badgeColor: '#306230', reward: 'Stadtkenntnis', flavor: 'Implantat aus dem Stadion. Liebt Pick & Roll.' },
-    { id: 'coach', name: 'Coach Müller', build: 'VERTEIDIGER', level: 6, location: 'Nordhorn — Stadion-Court', badge: 'PROFI', badgeColor: '#0f380f', reward: 'Professionelle Verteidigung', flavor: '30 Jahre am Court. Trainer des Stadion-Teams.' },
-    { id: 'erik', name: 'Erik', build: 'SHOOTER', level: 7, location: 'Nordhorn — Spielplatz-Court', badge: 'KAMPF', badgeColor: '#c4944a', reward: 'Kampfgeist', flavor: 'Punchy. Kann treten UND werfen.' },
+    { id: 'tim', name: 'Tim', build: 'SHOOTER', level: 3, location: 'Nordhorn — Wohnhof-Court', badge: 'ANFÄNGER', badgeColor: '#9bbc0f', reward: 'Layup-Verständnis', flavor: 'Kennt jeden Riss im Wohnhof-Asphalt und jeden Namen im Viertel.' },
+    { id: 'lisa', name: 'Lisa', build: 'ALLROUNDER', level: 4, location: 'Nordhorn — Schulhof-Court', badge: 'SCHÜLER', badgeColor: '#8bac0f', reward: 'Ausgewogene Skills', flavor: 'Organisiert Schulhofspiele, als wären es Playoffs.' },
+    { id: 'mohammed', name: 'Mohammed', build: 'ALLROUNDER', level: 5, location: 'Nordhorn — Park-Court', badge: 'NATUR', badgeColor: '#306230', reward: 'Stadtkenntnis', flavor: 'Spielt ruhig, liest Räume schnell und kennt jede Abkürzung am Park.' },
+    { id: 'coach', name: 'Coach Müller', build: 'VERTEIDIGER', level: 6, location: 'Nordhorn — Stadion-Court', badge: 'PROFI', badgeColor: '#0f380f', reward: 'Professionelle Verteidigung', flavor: 'Alte Schule: keine Ausreden, saubere Defense, Blick Richtung Lingen.' },
+    { id: 'erik', name: 'Erik', build: 'SHOOTER', level: 7, location: 'Nordhorn — Spielplatz-Court', badge: 'KAMPF', badgeColor: '#c4944a', reward: 'Kampfgeist', flavor: 'Laut, nervig, clutch. Spielt besser, wenn alle zugucken.' },
     { id: 'buecherei', name: 'Bibliothekar Klaus', build: 'VERTEIDIGER', level: 8, location: 'Nordhorn — Bücherei-Court', badge: 'WEISHEIT', badgeColor: '#6b5335', reward: 'Gedächtnis & Defense', flavor: 'Ein Bücherwurm mit Block-Finsternis. Kennt jede Spielregel.' },
     { id: 'hausberg', name: 'Bergsteiger Armin', build: 'VERTEIDIGER', level: 9, location: 'Nordhorn — Hausberg-Court', badge: 'STÄRKE', badgeColor: '#aa3333', reward: 'Krafttraining', flavor: '40 Jahre Bergziege. Arm wie ein Bullenbericht.' },
     { id: 'meister', name: 'Meister Wu', build: 'ALLROUNDER', level: 10, location: 'Nordhorn — Meister-Court', badge: 'MEISTER', badgeColor: '#aaaa33', reward: 'Meister-Move', flavor: 'Champions-League-Erfahrung. Höchste Anforderungen.' },
-    { id: 'koenig', name: 'KÖNIG', build: 'ALLROUNDER', level: 20, location: 'Nordhorn — Königs-Court', badge: 'KÖNIG', badgeColor: '#ff44ff', reward: 'Champion-Titel', flavor: 'Der unangefochtene Meister von Nordhorn. 12 Jahre unbesiegt.', isFinalBoss: true },
-    { id: 'klaus', name: 'Klaus', build: 'SHOOTER', level: 9, location: 'Lingen — Bahnhof-Court', badge: 'RIVALE', badgeColor: '#cc4444', reward: 'Duell-Erfahrung', flavor: 'Willkommen in Lingen! Direkt am Bahnhof.' },
-    { id: 'sven', name: 'Sven', build: 'VERTEIDIGER', level: 11, location: 'Lingen — Industrie-Court', badge: 'STAHL', badgeColor: '#888899', reward: 'Stahlhart', flavor: 'Fabrikarbeiter. Schichtarbeit und Ballcatch.' },
-    { id: 'rashta', name: 'Rashta', build: 'ALLROUNDER', level: 13, location: 'Lingen — Hafen-Court', badge: 'STURM', badgeColor: '#4466aa', reward: 'Sturm-Basketball', flavor: 'Hafenliebe. Ballspiele auch bei Wind.' },
-    { id: 'maxim', name: 'Maxim', build: 'ALLROUNDER', level: 16, location: 'Lingen — Arena Lingen', badge: 'CHAMPION', badgeColor: '#ddaa22', reward: 'Champion von Lingen', flavor: '6 Jahre unbesiegt. Der stärkste Spieler Lingens.' }
+    { id: 'koenig', name: 'KÖNIG', build: 'ALLROUNDER', level: 20, location: 'Nordhorn — Königs-Court', badge: 'KÖNIG', badgeColor: '#ff44ff', reward: 'Champion-Titel', flavor: 'Wartet, bis Nordhorn und Lingen deinen Namen kennen.', isFinalBoss: true },
+    { id: 'klaus', name: 'Klaus', build: 'SHOOTER', level: 9, location: 'Lingen — Bahnhof-Court', badge: 'RIVALE', badgeColor: '#cc4444', reward: 'Duell-Erfahrung', flavor: 'Erster Gruß aus Lingen: laut, direkt und direkt am Bahnhof.' },
+    { id: 'sven', name: 'Sven', build: 'VERTEIDIGER', level: 11, location: 'Lingen — Industrie-Court', badge: 'STAHL', badgeColor: '#888899', reward: 'Stahlhart', flavor: 'Schichtarbeiter-Beine, harte Screens, keine Show.' },
+    { id: 'rashta', name: 'Rashta', build: 'ALLROUNDER', level: 13, location: 'Lingen — Hafen-Court', badge: 'STURM', badgeColor: '#4466aa', reward: 'Sturm-Basketball', flavor: 'Spielt gegen Wind, Regen und schlechte Laune.' },
+    { id: 'maxim', name: 'Maxim', build: 'ALLROUNDER', level: 16, location: 'Lingen — Arena Lingen', badge: 'CHAMPION', badgeColor: '#ddaa22', reward: 'Champion von Lingen', flavor: 'Lingens Stolz. Will Nordhorns Courts zum Schweigen bringen.' }
   ],
 
   getAllTrainers() {
