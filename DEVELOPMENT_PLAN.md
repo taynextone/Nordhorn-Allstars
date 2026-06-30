@@ -106,6 +106,7 @@
 - [x] Story-Atmosphäre Pass — Intro, Home-/Loss-/Champion-Texte, Rivalen-Dialoge, Siegzeilen, Credits und Spieler-Liste stärker auf Nordhorn-vs-Lingen und lokale Court-Stimmung getrimmt, ohne neue HUDs/Overlays.
 - [x] Overworld-Court Pixel-Polish — Court-Tiles haben jetzt kleine Linien-/Center-Paint-Pixel für bessere Lesbarkeit der Spielflächen; Smoke-Guard prüft die Map-Politur ohne Coach-/Advisor-Overlay-Rückkehr.
 - [x] Battle-Name Clamp Polish — lange Rivalennamen werden in Scoreboard, Sprite-Label und HP/EN-Box zentral gekürzt, damit der Battle-Screen lesbar bleibt ohne neue HUDs/Overlays.
+- [x] Nordhorn-Map-Overview Pass — echte Kartenreferenz in eine Gameboy-abstrahierte Nordhorn-Struktur mit Zentrum, Vechte/Kanal, Blumensiedlung, Tierpark, Kloster-Frenswegen, Industrie/Gravemeier und Lingen-Ausgang übersetzt; O-Taste öffnet eine separate Übersichtskarte, M bleibt kompakte Minimap.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

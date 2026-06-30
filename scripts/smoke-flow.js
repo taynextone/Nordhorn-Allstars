@@ -110,6 +110,12 @@ function assertCleanRenderPaths() {
   assert(drawTile.includes('Tiny court-paint pixels'), 'Overworld court tiles should keep pixel-art court polish without new HUDs');
   assert(drawTile.includes('ctx.fillRect(sx, sy + 7, TILE, 2);'), 'Court tiles should include horizontal court-paint lines');
   assert(drawTile.includes('ctx.fillRect(sx + 6, sy + 6, 4, 4);'), 'Court tiles should include tiny center-paint pixels');
+  assert(code.includes('const MAP_LANDMARKS = ['), 'Nordhorn overview should define reusable map landmarks');
+  assert(code.includes("label: 'KLOSTER'"), 'Overview landmarks should include Kloster Frenswegen inspiration');
+  assert(code.includes("label: 'TIERPARK'"), 'Overview landmarks should include Tierpark/Park area');
+  assert(code.includes("label: '→ LINGEN'"), 'Overview landmarks should include the route toward Lingen');
+  assert(code.includes('function drawOverviewMap()'), 'Full overview map screen should exist');
+  assert(code.includes("ctx.fillText('M: Mini  O: Overview'"), 'Overworld hint should advertise mini map and overview map without HUD spam');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {
@@ -229,6 +235,16 @@ function runSmokeFlow() {
 
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
+  assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
+  assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
+  press('o');
+  tick(1);
+  release('o');
+  assert(get('gameState') === 'OVERVIEW', 'O should open the full Nordhorn overview screen from overworld');
+  press('Escape');
+  tick(1);
+  release('Escape');
+  assert(get('gameState') === 'OVERWORLD', 'Escape should close the overview screen back to overworld');
 
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,

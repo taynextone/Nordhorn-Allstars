@@ -291,7 +291,7 @@ const C = {
 const ErrorGuard = {
   errors: [],
   overlayTimer: 0,
-  validStates: ['TITLE', 'CHARSELECT', 'OVERWORLD', 'BATTLE', 'DIALOG', 'LOST', 'CREDITS'],
+  validStates: ['TITLE', 'CHARSELECT', 'OVERWORLD', 'OVERVIEW', 'BATTLE', 'DIALOG', 'LOST', 'CREDITS'],
 
   record(source, error) {
     const message = error && error.message ? error.message : String(error || 'Unknown error');
@@ -498,171 +498,143 @@ function drawCredits() {
 // Generate map procedurally
 let worldMap = [];
 function generateMap() {
-  // Fill with grass
+  // Real-map-inspired Nordhorn layout: compact Gameboy abstraction of
+  // Zentrum, Vechte/Kanal water, Blumensiedlung, Tierpark/Park,
+  // Industrie/Gravemeier, Kloster Frenswegen and the road toward Lingen.
   for (let y = 0; y < MAP_H; y++) {
     worldMap[y] = [];
-    for (let x = 0; x < MAP_W; x++) {
-      worldMap[y][x] = T.GRASS;
-    }
+    for (let x = 0; x < MAP_W; x++) worldMap[y][x] = T.GRASS;
   }
 
-  // Water border (river Ems on east side)
-  for (let y = 0; y < MAP_H; y++) {
-    for (let x = 60; x < MAP_W; x++) {
-      worldMap[y][x] = T.WATER;
+  const setRect = (x1, y1, x2, y2, tile) => {
+    for (let y = y1; y <= y2; y++) {
+      for (let x = x1; x <= x2; x++) {
+        if (x >= 0 && x < MAP_W && y >= 0 && y < MAP_H) worldMap[y][x] = tile;
+      }
     }
-  }
-  // Some water variation
-  for (let y = 10; y < 50; y++) {
-    worldMap[y][59] = T.WATER;
-    if (y > 15 && y < 45) worldMap[y][58] = T.WATER;
-  }
+  };
+  const setLineH = (x1, x2, y, tile) => setRect(x1, y, x2, y, tile);
+  const setLineV = (x, y1, y2, tile) => setRect(x, y1, x, y2, tile);
+  const setBuilding = (x1, y1, x2, y2, doorX) => {
+    setRect(x1, y1, x2, y2, T.BUILD);
+    setLineH(x1, x2, y1 - 1, T.ROOF);
+    if (doorX !== undefined) worldMap[y2][doorX] = T.DOOR;
+  };
+  const setCourt = (x1, y1, x2, y2) => {
+    setRect(x1, y1, x2, y2, T.COURT);
+    const midX = Math.floor((x1 + x2) / 2);
+    const midY = Math.floor((y1 + y2) / 2);
+    setLineV(midX, y1, y2, T.PATH);
+    setLineH(x1, x2, midY, T.PATH);
+  };
 
-  // Main path (horizontal through center)
-  for (let x = 0; x < 60; x++) {
-    worldMap[28][x] = T.PATH;
-    worldMap[29][x] = T.PATH;
+  // Vechte/Kanal inspired water: east river plus curved inner canal and ponds.
+  setRect(62, 0, 69, 59, T.WATER);
+  for (let y = 4; y < MAP_H - 3; y++) {
+    const x = 54 + Math.floor(Math.sin(y / 5) * 4);
+    setRect(x, y, x + 2, y, T.WATER);
   }
-  // Vertical path
-  for (let y = 5; y < 55; y++) {
-    worldMap[y][25] = T.PATH;
-    worldMap[y][26] = T.PATH;
-  }
-  // Path to stadium
-  for (let y = 5; y < 28; y++) {
-    worldMap[y][40] = T.PATH;
-    worldMap[y][41] = T.PATH;
-  }
-  // Path to school
-  for (let x = 26; x < 50; x++) {
-    worldMap[10][x] = T.PATH;
-    worldMap[11][x] = T.PATH;
-  }
+  setRect(47, 17, 52, 22, T.WATER); // Tierpark pond
+  setRect(13, 33, 18, 37, T.WATER); // Wohnhof pond
 
-  // Home (player's house) - top-left area
-  // Roof
-  for (let x = 3; x < 9; x++) worldMap[3][x] = T.ROOF;
-  // Walls
-  for (let y = 4; y < 8; y++) {
-    for (let x = 3; x < 9; x++) {
-      worldMap[y][x] = T.BUILD;
-    }
-  }
-  worldMap[7][5] = T.DOOR;
-  worldMap[7][6] = T.DOOR;
-  // Fence around yard
-  for (let x = 2; x < 10; x++) worldMap[8][x] = T.FENCE;
-  // Yard gate: keeps the starting path playable instead of trapping the player behind the fence.
-  worldMap[8][5] = T.PATH;
-  worldMap[8][6] = T.PATH;
-  for (let y = 3; y < 8; y++) { worldMap[y][2] = T.FENCE; worldMap[y][9] = T.FENCE; }
-  worldMap[2][5] = T.FENCE; worldMap[2][6] = T.FENCE;
+  // Main Nordhorn roads from the screenshot: west/east axis, north/south spine,
+  // ring around the centre and routes to landmarks.
+  setRect(0, 27, 61, 29, T.PATH);
+  setRect(23, 6, 26, 54, T.PATH);
+  setRect(32, 11, 35, 50, T.PATH);
+  setRect(6, 13, 52, 15, T.PATH);
+  setRect(8, 43, 58, 45, T.PATH);
+  setRect(9, 21, 41, 22, T.PATH);
+  setRect(4, 7, 24, 9, T.PATH);
+  setRect(44, 23, 57, 25, T.PATH);
+  setRect(2, 50, 24, 52, T.PATH);
+  setRect(57, 27, 61, 29, T.BRIDGE);
+  setRect(54, 13, 57, 15, T.BRIDGE);
+  setRect(52, 43, 57, 45, T.BRIDGE);
 
-  // School (top-right area for Nordhorn gymnasium)
-  for (let x = 1; x < 22; x++) worldMap[13][x] = T.PATH;
-  for (let x = 42; x < 56; x++) {
-    for (let y = 5; y < 12; y++) {
-      worldMap[y][x] = T.BUILD;
-    }
-  }
-  for (let x = 42; x < 56; x++) worldMap[4][x] = T.ROOF;
-  worldMap[11][48] = T.DOOR;
-  worldMap[11][49] = T.DOOR;
-  worldMap[11][43] = T.DOOR;
-  // School yard
-  for (let x = 52; x < 57; x++) {
-    for (let y = 13; y < 18; y++) {
-      worldMap[y][x] = T.COURT;
-    }
-  }
+  // HOME / Zentrum-West / Blumensiedlung start.
+  setBuilding(3, 4, 8, 8, 5);
+  setRect(2, 9, 9, 9, T.FENCE);
+  worldMap[9][5] = T.PATH;
+  setLineV(2, 4, 8, T.FENCE);
+  setLineV(9, 4, 8, T.FENCE);
+  setBuilding(12, 5, 17, 8, 14);
+  setBuilding(5, 16, 10, 19, 7);
+  setCourt(14, 31, 21, 38);
 
-  // Basketball courts (community courts)
-  for (let x = 12; x < 21; x++) {
-    for (let y = 40; y < 48; y++) {
-      worldMap[y][x] = T.COURT;
-    }
-  }
-  // Court lines
-  worldMap[40][14] = T.PATH;
-  worldMap[40][15] = T.PATH;
-  worldMap[40][18] = T.PATH;
-  worldMap[40][19] = T.PATH;
+  // Nordhorn Zentrum: market blocks, library and school/gym area.
+  setBuilding(28, 18, 33, 24, 30);
+  setBuilding(36, 18, 42, 24, 39);
+  setBuilding(28, 31, 34, 36, 31);
+  setBuilding(36, 31, 42, 36, 39);
+  setBuilding(41, 7, 55, 12, 48);
+  setCourt(50, 14, 57, 20);
 
-  // Library (near center)
-  for (let x = 35; x < 42; x++) {
-    for (let y = 30; y < 36; y++) {
-      worldMap[y][x] = T.BUILD;
-    }
-  }
-  for (let x = 35; x < 42; x++) worldMap[29][x] = T.ROOF;
-  worldMap[35][38] = T.DOOR;
-  worldMap[35][37] = T.DOOR;
+  // Tierpark / Park court in the east, framed by water and trees.
+  setCourt(47, 25, 56, 32);
+  setRect(44, 18, 46, 31, T.TREE);
+  setRect(53, 17, 58, 22, T.TREE);
+  setBuilding(51, 34, 57, 38, 54);
 
-  // Stadium (big court at bottom)
-  for (let x = 30; x < 52; x++) {
-    for (let y = 45; y < 55; y++) {
-      worldMap[y][x] = T.BUILD;
-    }
-  }
-  for (let x = 30; x < 52; x++) worldMap[44][x] = T.ROOF;
-  for (let x = 30; x < 52; x++) worldMap[54][x] = T.DOOR;
-  // Stadium court inside
-  for (let x = 34; x < 48; x++) {
-    for (let y = 47; y < 53; y++) {
-      worldMap[y][x] = T.COURT;
-    }
-  }
+  // Kloster Frenswegen north-west: quiet training landmark.
+  setBuilding(10, 2, 20, 5, 15);
+  setRect(8, 1, 22, 1, T.TREE);
+  setRect(8, 6, 22, 7, T.TREE);
+  setRect(18, 8, 23, 10, T.FLOWER);
 
-  // Trees scattered around
-  const treePositions = [
-    [10,3],[11,3],[12,3],[13,3],[14,3],
-    [18,22],[19,22],[20,22],[18,23],[19,23],[20,23],
-    [5,15],[6,15],[5,16],[6,16],
-    [30,15],[31,15],[32,15],[30,16],[31,16],[32,16],
-    [50,25],[51,25],[52,25],[50,26],[51,26],[52,26],
-    [15,5],[16,5],
-    [55,35],[56,35],[57,35],[55,36],[56,36],[57,36],
-    [8,50],[9,50],[10,50],[11,50],[8,51],[9,51],[10,51],[11,51],
-    [20,52],[21,52],[22,52],[23,52],[20,53],[21,53],[22,53],[23,53],
-    // Trees along paths
-    [25,20],[26,20],[25,35],[26,35],
-    [15,28],[16,28],[17,28],
-    [35,28],[36,28],
-    [45,15],[46,15],[45,16],[46,16],
-    // More trees
-    [3,25],[4,25],[3,26],[4,26],
-    [22,55],[23,55],[24,55],
-  ];
-  treePositions.forEach(([x,y]) => {
-    if (y < MAP_H && x < MAP_W && worldMap[y][x] === T.GRASS)
-      worldMap[y][x] = T.TREE;
+  // Industrie / Gravemeier-inspired south-east hard-court zone.
+  setBuilding(43, 47, 58, 55, 50);
+  setRect(43, 46, 58, 46, T.WALL);
+  setLineV(43, 47, 55, T.WALL);
+  setLineV(58, 47, 55, T.WALL);
+  setCourt(31, 47, 40, 54);
+  setBuilding(6, 46, 13, 50, 9);
+
+  [[16,39],[17,39],[48,33],[49,33],[31,26],[32,26],[10,53],[11,53]].forEach(([x,y]) => worldMap[y][x] = T.BENCH);
+  [[18,12],[19,12],[28,14],[38,14],[45,34],[46,34],[7,34],[8,34],[16,6],[19,6],[52,40],[53,40]].forEach(([x,y]) => {
+    if (worldMap[y] && worldMap[y][x] === T.GRASS) worldMap[y][x] = T.FLOWER;
   });
 
-  // Flowers
-  const flowerPositions = [
-    [4,5],[7,5],[2,12],[8,12],[12,55],[18,52],[30,8],[35,50],[42,52],[50,50],
-    [15,7],[22,5],[48,30],[55,8],[6,8],[38,55]
+  const treeBlobs = [
+    [1,22,6,26], [3,31,9,38], [1,53,8,58], [27,4,36,8],
+    [37,2,40,7], [59,32,61,40], [25,55,36,58], [20,16,22,20],
+    [43,39,50,42], [5,10,8,12], [12,23,17,25]
   ];
-  flowerPositions.forEach(([x,y]) => {
-    if (y < MAP_H && x < MAP_W && worldMap[y][x] === T.GRASS)
-      worldMap[y][x] = T.FLOWER;
+  treeBlobs.forEach(([x1,y1,x2,y2]) => setRect(x1,y1,x2,y2,T.TREE));
+
+  // Re-open all landmark routes after scenery passes so the map remains playable.
+  setRect(0, 27, 61, 29, T.PATH);
+  setRect(23, 6, 26, 54, T.PATH);
+  setRect(32, 11, 35, 50, T.PATH);
+  setRect(6, 13, 52, 15, T.PATH);
+  setRect(8, 43, 58, 45, T.PATH);
+  setRect(9, 21, 41, 22, T.PATH);
+  setRect(4, 7, 24, 9, T.PATH);
+  setRect(44, 23, 57, 25, T.PATH);
+  setRect(2, 50, 24, 52, T.PATH);
+  setRect(57, 27, 61, 29, T.BRIDGE);
+  setRect(54, 13, 57, 15, T.BRIDGE);
+  setRect(52, 43, 57, 45, T.BRIDGE);
+
+  // Keep all trainer tiles reachable/visible on the new Nordhorn abstraction.
+  trainers.forEach(t => {
+    if (worldMap[t.y] && worldMap[t.y][t.x] !== T.WATER) worldMap[t.y][t.x] = T.PATH;
   });
-
-  // Benches
-  worldMap[37][38] = T.BENCH;
-  worldMap[37][39] = T.BENCH;
-  worldMap[40][16] = T.BENCH;
-
-  // Bridge over river
-  worldMap[28][57] = T.BRIDGE;
-  worldMap[29][57] = T.BRIDGE;
-  worldMap[28][58] = T.BRIDGE;
-  worldMap[29][58] = T.BRIDGE;
-
-  // Wall around stadium
-  for (let x = 30; x < 52; x++) { worldMap[45][x] = T.WALL; worldMap[53][x] = T.WALL; }
-  for (let y = 45; y < 55; y++) { worldMap[y][30] = T.WALL; worldMap[y][51] = T.WALL; }
+  worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
+  MinimapCache.dirty = true;
 }
+
+const MAP_LANDMARKS = [
+  { id: 'home', label: 'HOME', x: 5, y: 3, kind: 'start' },
+  { id: 'kloster', label: 'KLOSTER', x: 15, y: 1, kind: 'quiet' },
+  { id: 'blume', label: 'BLUMEN', x: 17, y: 30, kind: 'court' },
+  { id: 'zentrum', label: 'ZENTRUM', x: 35, y: 17, kind: 'hub' },
+  { id: 'schule', label: 'SCHULE', x: 48, y: 6, kind: 'court' },
+  { id: 'tierpark', label: 'TIERPARK', x: 52, y: 23, kind: 'park' },
+  { id: 'stadion', label: 'HALLE', x: 40, y: 43, kind: 'boss' },
+  { id: 'industrie', label: 'INDUSTRIE', x: 50, y: 45, kind: 'hard' },
+  { id: 'lingen', label: '→ LINGEN', x: 8, y: 53, kind: 'route' },
+];
 
 // ============================================================
 // DRAWING FUNCTIONS
@@ -958,7 +930,7 @@ function drawTrainerSprite(trainer, camX, camY) {
 // GAME STATE
 // ============================================================
 
-let gameState = 'TITLE'; // TITLE, CHARSELECT, OVERWORLD, BATTLE, DIALOG, LOST, CREDITS
+let gameState = 'TITLE'; // TITLE, CHARSELECT, OVERWORLD, OVERVIEW, BATTLE, DIALOG, LOST, CREDITS
 let frameCount = 0;
 let animFrame = 0;
 let titleSelection = 0; // 0 = New Game, 1 = Continue (when a save exists)
@@ -2273,57 +2245,31 @@ function drawOverworld() {
   // Draw minimap
   if (minimapVisible) drawMinimap();
 
-  // Draw minimap hint
+  // Draw minimap/overview hint. M stays tiny map; O opens a separate overview screen.
   ctx.font = '6px monospace';
   ctx.textAlign = 'right';
   ctx.fillStyle = C.DARK;
-  ctx.fillText('M: Map', VIEW_W - 10, VIEW_H - 6);
+  ctx.fillText('M: Mini  O: Overview', VIEW_W - 10, VIEW_H - 6);
   ctx.textAlign = 'left';
 
-  // Draw area labels
-  ctx.font = '8px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = C.DARKEST;
-
-  // Home label
-  const homeLabelX = (6 - camX) * TILE;
-  const homeLabelY = (2 - camY) * TILE;
-  if (homeLabelX > 0 && homeLabelX < VIEW_W) {
-    ctx.fillText('HOME', homeLabelX, homeLabelY);
-  }
-
-  // School label
-  const schoolLabelX = (48 - camX) * TILE;
-  const schoolLabelY = (3 - camY) * TILE;
-  if (schoolLabelX > 0 && schoolLabelX < VIEW_W) {
-    ctx.fillText('GYMNASIUM', schoolLabelX, schoolLabelY);
-  }
-
-  // Courts label
-  const courtsLabelX = (16 - camX) * TILE;
-  const courtsLabelY = (39 - camY) * TILE;
-  if (courtsLabelX > 0 && courtsLabelX < VIEW_W) {
-    ctx.fillText('COURTS', courtsLabelX, courtsLabelY);
-  }
-
-  // Library label
-  const libLabelX = (38 - camX) * TILE;
-  const libLabelY = (28 - camY) * TILE;
-  if (libLabelX > 0 && libLabelX < VIEW_W) {
-    ctx.fillText('LIBRARY', libLabelX, libLabelY);
-  }
-
-  // Stadium label
-  const stadLabelX = (40 - camX) * TILE;
-  const stadLabelY = (43 - camY) * TILE;
-  if (stadLabelX > 0 && stadLabelX < VIEW_W) {
-    ctx.fillText('STADIUM', stadLabelX, stadLabelY);
-  }
-
-  ctx.textAlign = 'left';
+  drawLandmarkLabels(camX, camY);
 
   // Minimal Gameboy HUD — keep the playfield clean.
   drawCleanOverworldHUD();
+}
+
+function drawLandmarkLabels(camX, camY) {
+  ctx.font = '7px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = C.DARKEST;
+  MAP_LANDMARKS.forEach(mark => {
+    const sx = (mark.x - camX) * TILE;
+    const sy = (mark.y - camY) * TILE;
+    if (sx > 8 && sx < VIEW_W - 8 && sy > 8 && sy < VIEW_H - 8) {
+      ctx.fillText(mark.label, sx, sy);
+    }
+  });
+  ctx.textAlign = 'left';
 }
 
 
@@ -2444,6 +2390,57 @@ function drawMinimap() {
   ctx.textAlign = 'left';
 }
 
+function drawOverviewMap() {
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = 'bold 13px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('NORDHORN OVERVIEW', VIEW_W / 2, 24);
+
+  const scale = 5;
+  const mapW = MAP_W * scale;
+  const mapH = MAP_H * scale;
+  const mapX = Math.floor((VIEW_W - mapW) / 2);
+  const mapY = 42;
+
+  ctx.fillStyle = C.DARKEST;
+  ctx.fillRect(mapX - 4, mapY - 4, mapW + 8, mapH + 8);
+  ctx.fillStyle = C.LIGHT;
+  ctx.fillRect(mapX - 2, mapY - 2, mapW + 4, mapH + 4);
+
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const tile = worldMap[y][x];
+      ctx.fillStyle = MINIMAP_COLORS[tile] || C.LIGHT;
+      ctx.fillRect(mapX + x * scale, mapY + y * scale, scale, scale);
+    }
+  }
+
+  MAP_LANDMARKS.forEach(mark => {
+    const mx = mapX + mark.x * scale;
+    const my = mapY + mark.y * scale;
+    ctx.fillStyle = mark.kind === 'route' ? C.DARK : C.DARKEST;
+    ctx.fillRect(mx - 2, my - 2, 5, 5);
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(mark.label, mx + 5, my + 2);
+  });
+
+  const px = mapX + player.x * scale;
+  const py = mapY + player.y * scale;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(px - 2, py - 2, 5, 5);
+  ctx.fillStyle = C.DARKEST;
+  ctx.font = '7px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('YOU', px, py - 6);
+
+  ctx.font = '8px monospace';
+  ctx.fillText('O / ESC / ENTER: BACK', VIEW_W / 2, VIEW_H - 18);
+  ctx.textAlign = 'left';
+}
+
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = worldMap[y][x];
@@ -2456,8 +2453,9 @@ function updateOverworld() {
   let dx = 0, dy = 0;
   player.moving = false;
 
-  // Toggle minimap
+  // Toggle minimap / full overview map
   if (wasPressed('m') || wasPressed('M')) { minimapVisible = !minimapVisible; }
+  if (wasPressed('o') || wasPressed('O')) { gameState = 'OVERVIEW'; clearPressedInput(); return; }
   if (wasPressed('r') || wasPressed('R')) { HomeRest.rest(); }
 
   if (keysPressed['ArrowLeft'] || keys['ArrowLeft']) { dx = -1; player.facing = 'left'; player.moving = true; }
@@ -2933,6 +2931,14 @@ function gameLoop() {
       case 'OVERWORLD':
         updateOverworld();
         drawOverworld();
+        break;
+
+      case 'OVERVIEW':
+        drawOverviewMap();
+        if (wasPressed('o') || wasPressed('O') || wasPressed('Escape') || wasConfirmPressed()) {
+          gameState = 'OVERWORLD';
+          clearPressedInput();
+        }
         break;
 
       case 'DIALOG':
