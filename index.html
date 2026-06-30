@@ -2279,24 +2279,8 @@ function drawOverworld() {
   ctx.fillText('M: Mini  O: Overview', VIEW_W - 10, VIEW_H - 6);
   ctx.textAlign = 'left';
 
-  drawLandmarkLabels(camX, camY);
-
   // Minimal Gameboy HUD — keep the playfield clean.
   drawCleanOverworldHUD();
-}
-
-function drawLandmarkLabels(camX, camY) {
-  ctx.font = '7px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = C.DARKEST;
-  MAP_LANDMARKS.forEach(mark => {
-    const sx = (mark.x - camX) * TILE;
-    const sy = (mark.y - camY) * TILE;
-    if (sx > 8 && sx < VIEW_W - 8 && sy > 8 && sy < VIEW_H - 8) {
-      ctx.fillText(mark.label, sx, sy);
-    }
-  });
-  ctx.textAlign = 'left';
 }
 
 

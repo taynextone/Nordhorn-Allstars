@@ -73,6 +73,7 @@ function assertCleanRenderPaths() {
   assert(!battle.includes('ctx.fillRect(30, 70, 10, 10);'), 'Old flat hoop block should stay replaced by readable pixel hoop art');
   assert(code.includes('ctx.fillRect(128, 18, 224, 40);'), 'Core scoreboard should keep its readable compact geometry');
   assert(code.includes("ctx.fillText('FIRST ' + battle.currentTrainer.ptsToWin, 240, 46);"), 'Core scoreboard should show the target score without a new overlay');
+  assert(!overworld.includes('drawLandmarkLabels'), 'Overworld must not draw full landmark text labels over the playfield');
   assert(code.includes('function shortenBattleLabel('), 'Battle labels should share one compact truncation helper');
   assert(code.includes('const enemyScoreName = shortenBattleLabel(battle.currentTrainer.name, 12);'), 'Long trainer names should be shortened in the scoreboard');
   assert(code.includes('ctx.fillText(shortenBattleLabel(trainer.name, 12), x + 24, y + 68);'), 'Long trainer names should be shortened below battle sprites');
@@ -115,6 +116,8 @@ function assertCleanRenderPaths() {
   assert(code.includes("label: 'TIERPARK'"), 'Overview landmarks should include Tierpark/Park area');
   assert(code.includes("label: '→ LINGEN'"), 'Overview landmarks should include the route toward Lingen');
   assert(code.includes('function drawOverviewMap()'), 'Full overview map screen should exist');
+  const overview = getFunctionBody(code, 'drawOverviewMap');
+  assert(overview.includes('MAP_LANDMARKS.forEach'), 'Landmark labels should live on the separate overview map only');
   assert(code.includes('drawOverviewTargets(mapX, mapY, scale)'), 'Overview map should show tiny trainer target dots only on the separate map screen');
   assert(code.includes("ctx.fillText('NEXT', nx, ny - 9);"), 'Overview map should identify the next unbeaten rival without adding overworld/battle HUDs');
   assert(code.includes("ctx.fillText('M: Mini  O: Overview'"), 'Overworld hint should advertise mini map and overview map without HUD spam');
