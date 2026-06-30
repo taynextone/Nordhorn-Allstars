@@ -187,6 +187,11 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(battle.phase === 'select', 'battle should start in move select');
   assert(Object.values(keysPressed).every(v => !v), 'battle start should clear stale pressed input');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'legacy overlays should stay hidden in battle');
+  battle.playerEnergy = 4;
+  battle.selectedMove = 1;
+  executePlayerMove();
+  assert(battle.phase === 'select' && battle.message === 'Not enough energy!', 'low-energy selected move should stay in command select with compact feedback');
+  assert(battle.selectedMove === 0 && battle.subMessage.includes('try Layup'), 'low-energy feedback should point to an affordable move without adding a HUD');
   battle.playerEnergy = 0;
   battle.selectedMove = 0;
   executePlayerMove();

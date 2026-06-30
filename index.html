@@ -1500,7 +1500,13 @@ function executePlayerMove() {
       setTimeout(() => endTurn(), 900);
       return;
     }
-    setBattleMessage('Not enough energy!', move.name + ' needs ' + (move.energy || 0) + ' EN', 120);
+    // Keep low-energy turns playable: if the highlighted move is too expensive
+    // but a cheaper move is available, snap the cursor there and explain it in
+    // the existing compact message box instead of leaving the player guessing.
+    const fallbackIndex = battle.playerMoves.findIndex(m => battle.playerEnergy >= (m.energy || 0));
+    if (fallbackIndex >= 0 && fallbackIndex !== battle.selectedMove) battle.selectedMove = fallbackIndex;
+    const fallbackMove = battle.playerMoves[battle.selectedMove];
+    setBattleMessage('Not enough energy!', move.name + ' needs ' + (move.energy || 0) + ' EN - try ' + fallbackMove.name, 120);
     return;
   }
 

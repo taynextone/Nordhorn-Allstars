@@ -335,6 +335,8 @@ function runSmokeFlow() {
   run('battle.playerEnergy = 4; battle.selectedMove = 1; executePlayerMove();');
   assert(get('battle.phase') === 'select', 'Invalid low-energy move should keep the player in command select when a cheaper move is available');
   assert(get('battle.message') === 'Not enough energy!', 'Low-energy move should explain why it failed');
+  assert(get('battle.selectedMove') === 0, 'Low-energy move should snap the cursor to the first affordable command');
+  assert(get('battle.subMessage').includes('try Layup'), 'Low-energy hint should name the affordable fallback inside the compact message box');
   assert(get('battle.feedbackTimer') > 0, 'Low-energy message should be readable during select phase');
   run('battle.playerEnergy = 0; battle.selectedMove = 0; executePlayerMove();');
   assert(get('battle.phase') === 'anim', 'Zero-energy player should catch breath instead of getting stuck in command select');
