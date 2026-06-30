@@ -56,6 +56,7 @@ function assertCleanRenderPaths() {
   for (const token of removedLegacyModules) {
     assert(!code.includes(token), 'Legacy coach/advisor module should stay removed: ' + token);
   }
+  assert(!code.includes('QuestRadar'), 'Legacy radar alias should stay removed; use ObjectiveTracker directly');
   assert(!code.includes('renderBattleHUD() {'), 'Legacy battle-HUD module methods must stay removed');
   assert(!code.includes('renderHUD() {'), 'Legacy overworld-HUD module methods must stay removed');
   assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');

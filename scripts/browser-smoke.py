@@ -143,6 +143,7 @@ async def run_cdp_flow(ws_url: str) -> str:
 
   assert(gameState === 'TITLE', 'boot state should be TITLE');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'legacy overlays should boot hidden');
+  assert(typeof QuestRadar === 'undefined', 'legacy radar alias should not be exposed in the clean UI build');
   out.push('boot=' + gameState);
 
   press('a');

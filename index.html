@@ -2302,11 +2302,6 @@ const ObjectiveTracker = {
   }
 };
 
-// Backwards-compatible alias for dormant legacy helper objects. Active rendering
-// uses ObjectiveTracker directly so drawOverworld/drawBattle stay free of old
-// Radar/Coach/Scout render calls.
-const QuestRadar = ObjectiveTracker;
-
 function drawOverworld() {
   const camX = Math.max(0, Math.min(MAP_W - VIEW_TILES_W / 1, player.x - Math.floor(VIEW_TILES_W / 2)));
   const camY = Math.max(0, Math.min(MAP_H - VIEW_TILES_H / 1, player.y - Math.floor(VIEW_TILES_H / 2)));
