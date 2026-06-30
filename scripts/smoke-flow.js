@@ -323,9 +323,14 @@ function runSmokeFlow() {
     trainers: [{ id: 0, beaten: true }, { id: 2, beaten: true }]
   }))`);
   assert(get('SaveSystem.getInfo().beaten') === 2, 'Continue info should count legacy trainer-state saves');
+  run('minimapVisible = true; konamiIndex = 6; easterEggActive = true; ControlsHelp.visible = true; ScoutCard.visible = true; CoachTip.visible = true; keysPressed.Enter = true;');
   assert(get('SaveSystem.load()') === true, 'Legacy trainer-state save should load');
   assert(get('player.beatenTrainers.length') === 2, 'Loaded legacy save should sync beatenTrainers');
   assert(get('trainers[0].beaten && trainers[2].beaten') === true, 'Loaded legacy save should keep trainer beaten flags');
+  assert(get('minimapVisible') === false, 'Continue should reset optional minimap state to the clean default view');
+  assert(get('konamiIndex') === 0 && get('easterEggActive') === false, 'Continue should not inherit transient Konami/easter-egg state');
+  assert(get('!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible'), 'Continue should keep legacy overlay flags hidden');
+  assert(get('!keysPressed.Enter'), 'Continue should clear stale confirm input before the load dialog');
   closeDialog();
 
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({

@@ -1213,6 +1213,15 @@ const SaveSystem = {
       player.beatenTrainers = trainers.filter(t => t.beaten).map(t => t.id);
       player.rivalBeaten = trainers.every(t => t.beaten);
       if (!isWalkable(player.x, player.y)) movePlayerToHomeGate();
+      // Continue should resume gameplay, not transient view/debug state from the
+      // current browser session. Keep the loaded run on the clean Gameboy view.
+      minimapVisible = false;
+      konamiIndex = 0;
+      easterEggActive = false;
+      [ControlsHelp, ScoutCard, CoachTip].forEach(panel => {
+        if (panel) panel.visible = false;
+      });
+      clearPressedInput();
       gameState = 'OVERWORLD';
       startDialog('Save geladen!', 'Nordhorn wartet. Die Lingen-Rivalen auch.');
       this.lastMessage = 'Save loaded';

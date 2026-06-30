@@ -176,7 +176,31 @@ async def run_cdp_flow(ws_url: str) -> str:
   SaveSystem.clear();
   resetRunProgress();
   gameState = 'OVERWORLD';
-  out.push('homeRest=no-op+heal');
+  localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
+    version: 2,
+    savedAt: '2026-01-03T00:00:00.000Z',
+    player: { level: 2, hp: 80, maxHp: 100, energy: 10, maxEnergy: 20, moves: ['Layup', 'Jump Shot'], beatenTrainers: [] },
+    trainers: [{ id: 0, beaten: true }]
+  }));
+  minimapVisible = true;
+  konamiIndex = 5;
+  easterEggActive = true;
+  ControlsHelp.visible = true;
+  ScoutCard.visible = true;
+  CoachTip.visible = true;
+  keysPressed.Enter = true;
+  assert(SaveSystem.load() === true, 'continue save should load during browser smoke');
+  assert(gameState === 'DIALOG' && dialog.active, 'continue should show the existing load dialog box');
+  assert(minimapVisible === false, 'continue should reset minimap to clean default');
+  assert(konamiIndex === 0 && easterEggActive === false, 'continue should clear transient Konami state');
+  assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'continue should keep legacy overlay flags hidden');
+  assert(!keysPressed.Enter, 'continue should clear stale confirm input before dialog flow');
+  closeDialog();
+  assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'continue dialog should close back to loaded overworld progress');
+  SaveSystem.clear();
+  resetRunProgress();
+  gameState = 'OVERWORLD';
+  out.push('continue=clean');
 
   TouchControls.press('o', null);
   tick(1);
