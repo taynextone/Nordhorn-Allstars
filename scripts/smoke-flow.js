@@ -73,7 +73,10 @@ function assertCleanRenderPaths() {
   assert(!battle.includes('ctx.fillRect(30, 70, 10, 10);'), 'Old flat hoop block should stay replaced by readable pixel hoop art');
   assert(code.includes('ctx.fillRect(128, 18, 224, 40);'), 'Core scoreboard should keep its readable compact geometry');
   assert(code.includes("ctx.fillText('FIRST ' + battle.currentTrainer.ptsToWin, 240, 46);"), 'Core scoreboard should show the target score without a new overlay');
-  assert(code.includes('enemyScoreName = battle.currentTrainer.name.length > 12'), 'Long trainer names should be shortened in the scoreboard');
+  assert(code.includes('function shortenBattleLabel('), 'Battle labels should share one compact truncation helper');
+  assert(code.includes('const enemyScoreName = shortenBattleLabel(battle.currentTrainer.name, 12);'), 'Long trainer names should be shortened in the scoreboard');
+  assert(code.includes('ctx.fillText(shortenBattleLabel(trainer.name, 12), x + 24, y + 68);'), 'Long trainer names should be shortened below battle sprites');
+  assert(code.includes('ctx.fillText(shortenBattleLabel(battle.currentTrainer.name, 12), enemyBox.x + 8, VIEW_H - 60);'), 'Enemy HP/EN box should show the compact trainer label');
   assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');

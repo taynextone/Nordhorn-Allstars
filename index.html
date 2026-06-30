@@ -1374,6 +1374,14 @@ function wrapText(text, x, y, maxWidth, lineHeight) {
   if (line) ctx.fillText(line, x, y);
 }
 
+function shortenBattleLabel(name, maxChars = 12) {
+  // Shared battle-name clamp for the small Gameboy court: long rival names must
+  // never bleed into the scoreboard, sprites or HP/EN boxes. This is text polish
+  // only, not another HUD layer.
+  const label = String(name || 'Trainer');
+  return label.length > maxChars ? label.slice(0, maxChars - 1) + '…' : label;
+}
+
 const CoachTip = { visible: false };
 
 function wasPressed(key) {
@@ -2561,9 +2569,7 @@ function drawBattle() {
 
   ctx.font = '8px monospace';
   ctx.textAlign = 'center';
-  const enemyScoreName = battle.currentTrainer.name.length > 12
-    ? battle.currentTrainer.name.slice(0, 11) + '…'
-    : battle.currentTrainer.name;
+  const enemyScoreName = shortenBattleLabel(battle.currentTrainer.name, 12);
   ctx.fillText(enemyScoreName, 184, 33);
   ctx.fillText('YOU', 296, 33);
   ctx.font = '12px monospace';
@@ -2689,7 +2695,7 @@ function drawBattleEnemy(x, y) {
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(trainer.name, x + 24, y + 68);
+  ctx.fillText(shortenBattleLabel(trainer.name, 12), x + 24, y + 68);
   ctx.textAlign = 'left';
 }
 
@@ -2746,7 +2752,7 @@ function drawBattleHUD() {
   drawPanelBox(enemyBox);
   ctx.fillStyle = C.DARKEST;
   ctx.font = '8px monospace';
-  ctx.fillText('ENEMY', enemyBox.x + 8, VIEW_H - 60);
+  ctx.fillText(shortenBattleLabel(battle.currentTrainer.name, 12), enemyBox.x + 8, VIEW_H - 60);
 
   ctx.fillStyle = C.DARK;
   ctx.fillRect(enemyBox.x + 56, VIEW_H - 64, 92, 8);
