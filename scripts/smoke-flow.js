@@ -258,6 +258,9 @@ function runSmokeFlow() {
 
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
+  run('minimapVisible = true; konamiIndex = 4; easterEggActive = true; resetRunProgress(); gameState = "OVERWORLD";');
+  assert(get('minimapVisible') === false, 'New runs should reset optional minimap state to the clean default view');
+  assert(get('konamiIndex') === 0 && get('easterEggActive') === false, 'New runs should not inherit old Konami/easter-egg state');
   assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
   assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
   assert(get('ObjectiveTracker.getNextTrainer().name') === 'Klaus', 'Fresh overview routing should target the first unbeaten rival');

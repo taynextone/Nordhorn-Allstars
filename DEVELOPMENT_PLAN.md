@@ -120,6 +120,7 @@
 - [x] Dialog-Overflow Guard — lange Story-/Rivalenwörter werden in der bestehenden Gameboy-Dialogbox hart umbrochen und mit Ellipse gekürzt, damit Victory-/NPC-Texte lesbar bleiben ohne neue HUDs/Overlays.
 - [x] Legacy-Radar-Alias Cleanup — letzter `QuestRadar`-Kompatibilitätsalias entfernt; VM-/Browser-Smokes prüfen, dass ObjectiveTracker direkt genutzt wird und keine Radar-/Coach-Renderpfade zurückkehren.
 - [x] Dormant-FPS-HUD Cleanup — ungenutztes PerfHUD-/FPS-Stat-HUD-Modul aus Runtime und Smoke-Guards entfernt, damit der Overworld-Screen sauber Karte + Actors + kompaktes Status-HUD bleibt.
+- [x] New-Run Clean-State Reset — neuer Spielstart setzt Minimap-, Konami- und Easter-Egg-Zustand zurück, damit nach Continue/Credits keine optionalen Zustände in den frischen Gameboy-Screen leaken.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

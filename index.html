@@ -1240,6 +1240,11 @@ function resetRunProgress() {
   player.beatenTrainers = [];
   player.rivalBeaten = false;
   trainers.forEach(t => { t.beaten = false; });
+  // Starting over should always return to the clean default Gameboy view.
+  // Do not carry optional map/debug/easter-egg state from a finished or loaded run.
+  minimapVisible = false;
+  konamiIndex = 0;
+  easterEggActive = false;
 }
 
 // ============================================================
