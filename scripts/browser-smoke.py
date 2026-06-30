@@ -144,6 +144,7 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(gameState === 'TITLE', 'boot state should be TITLE');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'legacy overlays should boot hidden');
   assert(typeof QuestRadar === 'undefined', 'legacy radar alias should not be exposed in the clean UI build');
+  assert(typeof TouchControls === 'object' && typeof setupTouchControls === 'function', 'mobile touch controls should be wired at runtime');
   out.push('boot=' + gameState);
 
   press('a');
@@ -156,6 +157,18 @@ async def run_cdp_flow(ws_url: str) -> str:
   closeDialog();
   assert(gameState === 'OVERWORLD' && !dialog.active, 'intro dialog should close to overworld');
   out.push('intro=OVERWORLD');
+
+  TouchControls.press('o', null);
+  tick(1);
+  TouchControls.release('o', null);
+  assert(gameState === 'OVERVIEW', 'touch OVR control should open the separate overview map');
+  press('b');
+  assert(gameState === 'OVERWORLD', 'touch-opened overview should close through existing confirm flow');
+  TouchControls.press('m', null);
+  tick(1);
+  TouchControls.release('m', null);
+  assert(minimapVisible === true, 'touch MINI control should toggle the compact minimap only');
+  minimapVisible = false;
 
   press('O');
   assert(gameState === 'OVERVIEW', 'O should open the separate overview map from overworld');

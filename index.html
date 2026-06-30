@@ -168,8 +168,8 @@ body {
     <div class="action-btn btn-b" data-key=" ">B</div>
   </div>
   <div class="menu-btns">
-    <div class="menu-btn" data-key="m">MENU</div>
-    <div class="menu-btn" data-key="x">SND</div>
+    <div class="menu-btn" data-key="m">MINI</div>
+    <div class="menu-btn" data-key="o">OVR</div>
   </div>
 </div>
 
@@ -1291,6 +1291,66 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => {
   keys[e.key] = false;
 });
+
+const TouchControls = {
+  activeKeys: new Set(),
+
+  shouldShow() {
+    return window.location.search.indexOf('touch=1') !== -1
+      || ('ontouchstart' in window)
+      || (navigator.maxTouchPoints || 0) > 0;
+  },
+
+  press(key, element) {
+    if (!keys[key]) keysPressed[key] = true;
+    keys[key] = true;
+    this.activeKeys.add(key);
+    if (element && element.classList) element.classList.add('pressed');
+    ErrorGuard.safe('touch-input', () => checkEasterEgg(key));
+  },
+
+  release(key, element) {
+    keys[key] = false;
+    this.activeKeys.delete(key);
+    if (element && element.classList) element.classList.remove('pressed');
+  },
+
+  releaseAll() {
+    this.activeKeys.forEach(key => { keys[key] = false; });
+    this.activeKeys.clear();
+    document.querySelectorAll('#touchControls .pressed').forEach(btn => btn.classList.remove('pressed'));
+  }
+};
+
+function setupTouchControls() {
+  const root = document.getElementById('touchControls');
+  if (!root) return false;
+  const enabled = TouchControls.shouldShow();
+  if (enabled) root.classList.add('active');
+
+  root.querySelectorAll('[data-key]').forEach(button => {
+    const key = button.getAttribute('data-key');
+    const down = (event) => {
+      if (event && event.preventDefault) event.preventDefault();
+      TouchControls.press(key, button);
+    };
+    const up = (event) => {
+      if (event && event.preventDefault) event.preventDefault();
+      TouchControls.release(key, button);
+    };
+    button.addEventListener('pointerdown', down);
+    button.addEventListener('pointerup', up);
+    button.addEventListener('pointercancel', up);
+    button.addEventListener('pointerleave', up);
+    // Older mobile browsers without PointerEvent still get working buttons.
+    button.addEventListener('touchstart', down, { passive: false });
+    button.addEventListener('touchend', up, { passive: false });
+    button.addEventListener('mousedown', down);
+    button.addEventListener('mouseup', up);
+  });
+  window.addEventListener('blur', () => TouchControls.releaseAll());
+  return enabled;
+}
 
 // Legacy coach/advisor overlay modules were removed after the clean-UI pass.
 // Keep only inert visibility flags for old save/debug paths that may still clear them;
@@ -3237,6 +3297,7 @@ const CodeComments = {
 
 generateMap();
 MinimapCache.dirty = true;
+setupTouchControls();
 gameLoop();
 
 </script>

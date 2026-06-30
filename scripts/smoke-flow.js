@@ -138,7 +138,12 @@ function assertCleanRenderPaths() {
   assert(code.includes('drawOverviewTargets(mapX, mapY, scale)'), 'Overview map should show tiny trainer target dots only on the separate map screen');
   assert(code.includes("ctx.fillText('NEXT', nx, ny - 9);"), 'Overview map should identify the next unbeaten rival without adding overworld/battle HUDs');
   assert(code.includes("ctx.fillText('M: Mini  O: Overview'"), 'Overworld hint should advertise mini map and overview map without HUD spam');
-  assert(code.includes("O / ESC / A/B/ENTER: BACK"), 'Overview back hint should match the actual confirm aliases');
+  assert(code.includes('O / ESC / A/B/ENTER: BACK'), 'Overview back hint should match the actual confirm aliases');
+  assert(html.includes('data-key="m">MINI</div>'), 'Mobile menu button should correctly advertise compact minimap toggle');
+  assert(html.includes('data-key="o">OVR</div>'), 'Mobile menu button should expose the separate overview map');
+  assert(code.includes('function setupTouchControls()'), 'Mobile touch controls should be wired, not just static HTML');
+  assert(code.includes('setupTouchControls();'), 'Runtime init should activate touch controls when touch is available');
+  assert(code.includes('TouchControls.press(key, button)'), 'Touch buttons should feed the same edge-triggered input path as keyboard controls');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {
@@ -264,6 +269,17 @@ function runSmokeFlow() {
   assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
   assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
   assert(get('ObjectiveTracker.getNextTrainer().name') === 'Klaus', 'Fresh overview routing should target the first unbeaten rival');
+  run('TouchControls.press("o", null);');
+  tick(1);
+  run('TouchControls.release("o", null);');
+  assert(get('gameState') === 'OVERVIEW', 'Touch OVR button should open the overview map using the same clean state flow');
+  confirm('b');
+  assert(get('gameState') === 'OVERWORLD', 'Touch-opened overview should close with the existing B/confirm flow');
+  run('TouchControls.press("m", null);');
+  tick(1);
+  run('TouchControls.release("m", null);');
+  assert(get('minimapVisible') === true, 'Touch MINI button should toggle only the compact minimap, not a new overlay');
+  run('minimapVisible = false;');
   press('o');
   tick(1);
   release('o');
