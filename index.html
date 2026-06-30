@@ -1553,7 +1553,9 @@ function executePlayerMove() {
       const points = move.pts;
       battle.enemyHp -= calc.damage;
       battle.playerScore += points;
-      setBattleMessage(move.name + '! ' + points + ' pts! -' + calc.damage + ' HP');
+      // Keep scoring feedback readable in the same compact message box the
+      // enemy turn already uses: action on top, HP change as a short subline.
+      setBattleMessage(move.name + '! ' + points + ' pts!', '-' + calc.damage + ' HP');
       battle.ballOwner = 'enemy'; // opponent gets ball after scoring
       battle.hasBall = false;
     } else {

@@ -199,6 +199,12 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(battle.playerEnergy === PLAYER_ENERGY_REGEN && battle.turnCount === 1, 'catch-breath fallback should restore tuned regen and spend one turn');
   startBattle(trainers[0]);
   tick(5);
+  Math.random = () => 0;
+  executePlayerMove();
+  assert(battle.message === 'Layup! 2 pts!', 'player scoring should keep the main message compact');
+  assert(/^-[0-9]+ HP$/.test(battle.subMessage), 'player scoring should show rival HP damage in the compact subline');
+  startBattle(trainers[0]);
+  tick(5);
   battle.enemyBlockNext = true;
   battle.playerEnergy = 20;
   battle.selectedMove = 0;

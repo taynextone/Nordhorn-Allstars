@@ -346,8 +346,9 @@ function runSmokeFlow() {
   assert(get('battle.turnCount') === 1, 'Catch-breath fallback should consume exactly one player turn');
   flushTimers();
   flushTimers();
-  run('battle.playerEnergy = 20; battle.selectedMove = 0; battle.playerTurn = true; battle.phase = "select"; battle.turnCount = 0; executePlayerMove();');
-  assert(get('battle.subMessage') === '', 'Next battle action should clear stale low-energy detail text');
+  run('battle.playerEnergy = 20; battle.selectedMove = 0; battle.playerTurn = true; battle.phase = "select"; battle.turnCount = 0; Math.random = () => 0; executePlayerMove();');
+  assert(get('battle.message') === 'Layup! 2 pts!', 'Player scoring should keep the main battle message compact');
+  assert(/^-[0-9]+ HP$/.test(get('battle.subMessage')), 'Player scoring should show rival HP damage in the compact message subline');
   run('battle.subMessage = "OLD DETAIL"; battle.turnCount = 1; endTurn();');
   assert(get('battle.message') === "Klaus's turn...", 'Enemy-turn banner should use the compact battle message helper');
   assert(get('battle.subMessage') === '', 'Enemy-turn banner should clear stale detail text');
