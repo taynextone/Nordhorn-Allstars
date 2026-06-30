@@ -199,6 +199,16 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(battle.playerEnergy === PLAYER_ENERGY_REGEN && battle.turnCount === 1, 'catch-breath fallback should restore tuned regen and spend one turn');
   startBattle(trainers[0]);
   tick(5);
+  battle.enemyBlockNext = true;
+  battle.playerEnergy = 20;
+  battle.selectedMove = 0;
+  Math.random = () => 0.99;
+  executePlayerMove();
+  assert(battle.message === 'Layup missed!', 'enemy Block should guard the next player shot');
+  assert(battle.enemyBlockNext === false, 'enemy Block should clear after one guarded attack');
+  timerQueue.length = 0;
+  startBattle(trainers[0]);
+  tick(5);
   out.push('battleStart=' + battle.phase);
 
   battle.playerScore = battle.currentTrainer.ptsToWin;

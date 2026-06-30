@@ -1545,6 +1545,7 @@ function executePlayerMove() {
 
     let accuracy = calc.accuracy;
     if (battle.playerBuffed) { accuracy = Math.min(0.95, accuracy + 0.2); battle.playerBuffed = false; }
+    if (battle.enemyBlockNext) { accuracy *= 0.5; battle.enemyBlockNext = false; }
 
     const success = Math.random() < accuracy;
 

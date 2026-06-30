@@ -109,6 +109,7 @@ function assertCleanRenderPaths() {
   assert(!code.includes("battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5)"), 'Enemy rest should not double-stack hard-coded +5 energy with normal regen');
   assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN')"), 'Enemy rest message should match trainer regen inside the compact message box');
   assert(code.includes("'-' + calc.damage + ' HP'"), 'Enemy scoring moves should show player HP damage in the compact message subline');
+  assert(code.includes('if (battle.enemyBlockNext) { accuracy *= 0.5; battle.enemyBlockNext = false; }'), 'Enemy Block should actually guard against the next player attack');
   const drawTile = getFunctionBody(code, 'drawTile');
   assert(drawTile.includes('Tiny court-paint pixels'), 'Overworld court tiles should keep pixel-art court polish without new HUDs');
   assert(drawTile.includes('ctx.fillRect(sx, sy + 7, TILE, 2);'), 'Court tiles should include horizontal court-paint lines');
@@ -354,6 +355,10 @@ function runSmokeFlow() {
   run('battle.enemyEnergy = 99; battle.enemyMoves = [MOVE_UNLOCKS[1]]; Math.random = () => 0; executeEnemyMove();');
   assert(get('battle.message') === 'Klaus: Layup! 2 pts!', 'Enemy scoring should keep the main message compact');
   assert(/^-[0-9]+ HP$/.test(get('battle.subMessage')), 'Enemy scoring should show player HP damage in the compact message subline');
+  timers.length = 0;
+  run('battle.enemyBlockNext = true; battle.playerEnergy = 20; battle.selectedMove = 0; Math.random = () => 0.99; executePlayerMove();');
+  assert(get('battle.message') === 'Layup missed!', 'Enemy Block should reduce the next player shot instead of being a dead flag');
+  assert(get('battle.enemyBlockNext') === false, 'Enemy Block should clear after guarding one player attack');
   timers.length = 0;
   run('battle.enemyEnergy = 0; battle.turnCount = 1; battle.playerTurn = false; battle.phase = "anim"; executeEnemyMove();');
   assert(get('battle.enemyEnergy') === 0, 'Exhausted enemy rest should not add a hard-coded energy burst before end-turn regen');

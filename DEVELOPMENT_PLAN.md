@@ -112,6 +112,7 @@
 - [x] Overworld-Label Declutter — Landmark-Namen bleiben auf der separaten O-Übersicht; der normale Overworld-Screen zeigt wieder nur Karte, Actors, Zielmarker und kompaktes Status-HUD.
 - [x] Move-List Scroll Cue — Battle-Move-Menü zeigt bei mehr als drei Moves einen winzigen Positionshinweis innerhalb der bestehenden Command-Box, damit freigeschaltete Moves auffindbar bleiben ohne neue HUDs/Overlays.
 - [x] Low-Energy Move UX — zu teure gewählte Moves springen auf den ersten bezahlbaren Move und erklären den Fallback in der bestehenden Battle-Message-Box, ohne neue HUDs/Overlays.
+- [x] Enemy-Block Battle Sync — gegnerischer Block halbiert jetzt wirklich die nächste Spielerwurf-Chance und wird danach geleert; VM-/Browser-Smokes prüfen den kompakten Flow ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
