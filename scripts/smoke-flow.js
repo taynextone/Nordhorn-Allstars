@@ -363,6 +363,10 @@ function runSmokeFlow() {
 
   run('startBattle(trainers[0]); battle.enemyHp = 0; battle.playerScore = 0; endTurn();');
   assert(get('battle.phase') === 'result', 'Enemy HP reaching zero should immediately end the duel');
+  assert(get('battle.resultLocked') === true, 'Battle results should lock after the first scheduled finish');
+  const timersAfterResult = timers.length;
+  run('endTurn(); endTurn();');
+  assert(timers.length === timersAfterResult, 'Repeated endTurn calls during result must not queue duplicate victory dialogs');
   assert(get('battle.message') === 'YOU WIN!', 'Enemy HP KO should use the normal compact victory message');
   assert(get('battle.subMessage').includes('is out!'), 'Enemy HP KO detail should explain the finish inside the message box');
   flushTimers();

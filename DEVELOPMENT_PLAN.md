@@ -125,7 +125,9 @@
 - [x] Confirm-Alias Input Hygiene — gleichzeitige A/a/B/b-Confirm-Edges werden vollständig geleert, damit keine Tastatur-/Touch-Hybrid-Eingabe in den nächsten Dialog- oder Battle-State blutet.
 - [x] Reference-Rival Sprite Pass — die gelieferten Gegnerbilder wurden als stilisierte Gameboy-Spriteprofile umgesetzt: grünes Cap #8 Klaus, Hijab/Green-Vest Anna, Blue-Defender #33 Markus, Purple/Green-Grayhair Sophie und Coach-Clipboard Mihler; Battle-Gegner rendern weiter gespiegelt nach links.
 - [x] Flow/Balance Pass — Clean-HUD zeigt jetzt kompaktes NEXT-Ziel mit Richtung/Distanz; Moves kosten etwas weniger EN und Trainer-Zielscore/HP/EXP sind flüssiger gestaffelt, damit die 5-Duelle-Route weniger zäh wird.
+- [x] Simulation-Balance Pass — VM-Battle-Probe misst Winrate/Turnlänge über 80 Seeds pro Rivalen; Trainer-HP, Zielscore, Offense/Defense und EXP wurden auf eine fairere Kurve von Wohnhof-Rookie bis Coach Mihler nachgezogen.
 - [x] Champion-Save Progress Sync — Siegmarkierung läuft über einen kleinen deduplizierenden Helper; der Champion-Flag wird vor dem Save synchronisiert und VM-/Browser-Smokes prüfen eindeutige Trainer-IDs ohne neue HUDs/Overlays.
+- [x] Battle-Result Lock — Ergebniszustände sperren nach dem ersten Win/Loss-Trigger weitere `endTurn()`-Callbacks, damit Victory-/Loss-Dialoge nicht doppelt geplant werden; Smoke-Flow prüft das ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
