@@ -1526,7 +1526,9 @@ function executePlayerMove() {
     if (success) {
       const dmg = 8 + Math.floor(Math.random() * 5);
       battle.enemyHp -= dmg;
-      setBattleMessage('Steal success! -' + dmg + ' HP');
+      // Keep steal damage as a compact subline like normal made shots, so the
+      // center message box stays readable and never needs another battle HUD.
+      setBattleMessage('Steal success!', '-' + dmg + ' HP');
       battle.ballOwner = 'player';
       battle.hasBall = true;
     } else {
@@ -1626,7 +1628,7 @@ function executeEnemyMove() {
       let dmg = 8 + Math.floor(Math.random() * 5);
       if (battle.playerBlockNext) { dmg = Math.floor(dmg / 2); battle.playerBlockNext = false; }
       battle.playerHp -= dmg;
-      setBattleMessage(battle.currentTrainer.name + ' steals! -' + dmg + ' HP');
+      setBattleMessage(battle.currentTrainer.name + ' steals!', '-' + dmg + ' HP');
       battle.ballOwner = 'enemy';
       battle.hasBall = false;
     } else {

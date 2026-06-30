@@ -215,6 +215,26 @@ async def run_cdp_flow(ws_url: str) -> str:
   timerQueue.length = 0;
   startBattle(trainers[0]);
   tick(5);
+  player.level = 5;
+  player.moves = getUnlockedMoveNames(player.level);
+  battle.playerMoves = getPlayerMoves();
+  battle.playerEnergy = 20;
+  battle.selectedMove = battle.playerMoves.findIndex(m => m.name === 'Steal');
+  Math.random = () => 0;
+  executePlayerMove();
+  assert(battle.message === 'Steal success!', 'player Steal should keep the main message compact');
+  assert(/^-[0-9]+ HP$/.test(battle.subMessage), 'player Steal should show rival HP damage in the compact subline');
+  timerQueue.length = 0;
+  battle.playerHp = player.maxHp;
+  battle.enemyMoves = [MOVE_UNLOCKS[5]];
+  battle.enemyEnergy = 99;
+  Math.random = () => 0;
+  executeEnemyMove();
+  assert(battle.message === 'Klaus steals!', 'enemy Steal should keep the main message compact');
+  assert(/^-[0-9]+ HP$/.test(battle.subMessage), 'enemy Steal should show player HP damage in the compact subline');
+  timerQueue.length = 0;
+  startBattle(trainers[0]);
+  tick(5);
   out.push('battleStart=' + battle.phase);
 
   battle.playerScore = battle.currentTrainer.ptsToWin;

@@ -109,6 +109,8 @@ function assertCleanRenderPaths() {
   assert(!code.includes("battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5)"), 'Enemy rest should not double-stack hard-coded +5 energy with normal regen');
   assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN')"), 'Enemy rest message should match trainer regen inside the compact message box');
   assert(code.includes("'-' + calc.damage + ' HP'"), 'Enemy scoring moves should show player HP damage in the compact message subline');
+  assert(code.includes("setBattleMessage('Steal success!', '-' + dmg + ' HP')"), 'Player steal damage should stay in the compact subline');
+  assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' steals!', '-' + dmg + ' HP')"), 'Enemy steal damage should stay in the compact subline');
   assert(code.includes('if (battle.enemyBlockNext) { accuracy *= 0.5; battle.enemyBlockNext = false; }'), 'Enemy Block should actually guard against the next player attack');
   const drawTile = getFunctionBody(code, 'drawTile');
   assert(drawTile.includes('Tiny court-paint pixels'), 'Overworld court tiles should keep pixel-art court polish without new HUDs');
@@ -356,6 +358,14 @@ function runSmokeFlow() {
   run('battle.enemyEnergy = 99; battle.enemyMoves = [MOVE_UNLOCKS[1]]; Math.random = () => 0; executeEnemyMove();');
   assert(get('battle.message') === 'Klaus: Layup! 2 pts!', 'Enemy scoring should keep the main message compact');
   assert(/^-[0-9]+ HP$/.test(get('battle.subMessage')), 'Enemy scoring should show player HP damage in the compact message subline');
+  timers.length = 0;
+  run('player.level = 5; player.moves = getUnlockedMoveNames(player.level); battle.playerMoves = getPlayerMoves(); battle.enemyHp = battle.currentTrainer.playerHp; battle.playerEnergy = 20; battle.selectedMove = battle.playerMoves.findIndex(m => m.name === "Steal"); Math.random = () => 0; executePlayerMove();');
+  assert(get('battle.message') === 'Steal success!', 'Player Steal should keep its main message short');
+  assert(/^-[0-9]+ HP$/.test(get('battle.subMessage')), 'Player Steal should show rival HP damage in the compact subline');
+  timers.length = 0;
+  run('battle.playerHp = player.maxHp; battle.enemyMoves = [MOVE_UNLOCKS[5]]; battle.enemyEnergy = 99; Math.random = () => 0; executeEnemyMove();');
+  assert(get('battle.message') === 'Klaus steals!', 'Enemy Steal should keep its main message short');
+  assert(/^-[0-9]+ HP$/.test(get('battle.subMessage')), 'Enemy Steal should show player HP damage in the compact subline');
   timers.length = 0;
   run('battle.enemyBlockNext = true; battle.playerEnergy = 20; battle.selectedMove = 0; Math.random = () => 0.99; executePlayerMove();');
   assert(get('battle.message') === 'Layup missed!', 'Enemy Block should reduce the next player shot instead of being a dead flag');
