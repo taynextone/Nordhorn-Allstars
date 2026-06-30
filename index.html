@@ -2863,12 +2863,23 @@ function drawMoveSelect() {
     ctx.fillText('EN: ' + (move.energy || 0), menuX + menuW - 50, menuY + 19 + idx * 16);
   }
 
+  // Tiny in-menu scroll cue: high-level players can have more than three moves,
+  // so show position without adding a separate HUD/panel or cluttering the court.
+  if (moves.length > maxDisplay) {
+    ctx.fillStyle = C.DARK;
+    ctx.font = '6px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText((battle.selectedMove + 1) + '/' + moves.length, menuX + menuW - 10, menuY + menuH - 8);
+    ctx.textAlign = 'left';
+  }
+
   // Move description stays inside the command box, not over the HP/EN panels.
   if (moves[battle.selectedMove]) {
     ctx.fillStyle = C.DARK;
     ctx.font = '6px monospace';
     const desc = String(moves[battle.selectedMove].desc || '');
-    const shortDesc = desc.length > 32 ? desc.slice(0, 29) + '...' : desc;
+    const maxDescChars = moves.length > maxDisplay ? 26 : 32;
+    const shortDesc = desc.length > maxDescChars ? desc.slice(0, maxDescChars - 3) + '...' : desc;
     ctx.fillText(shortDesc, menuX + 8, menuY + menuH - 8);
   }
 }

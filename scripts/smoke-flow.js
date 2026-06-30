@@ -65,6 +65,8 @@ function assertCleanRenderPaths() {
   const moveSelect = getFunctionBody(code, 'drawMoveSelect');
   assert(moveSelect.includes('const menuY = VIEW_H - 150;'), 'Move menu must stay lifted above the HP/EN HUD');
   assert(moveSelect.includes('menuY + menuH - 8'), 'Move description must stay inside the command box');
+  assert(moveSelect.includes("(battle.selectedMove + 1) + '/' + moves.length"), 'Scrollable move lists should show a tiny in-menu position cue');
+  assert(moveSelect.includes('const maxDescChars = moves.length > maxDisplay ? 26 : 32;'), 'Move descriptions should leave room for the in-menu cue');
   assert(!moveSelect.includes('menuY + menuH + 10'), 'Move description must not overlap the HP/EN HUD');
   assert(battle.includes('ctx.arc(VIEW_W / 2, 120, 28'), 'Battle court should keep the clean center-circle polish');
   assert(battle.includes("drawBattleHoop(28, 68, 'left')"), 'Battle court should render left pixel hoop as scenery');
