@@ -156,6 +156,12 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(gameState === 'OVERWORLD' && !dialog.active, 'intro dialog should close to overworld');
   out.push('intro=OVERWORLD');
 
+  press('O');
+  assert(gameState === 'OVERVIEW', 'O should open the separate overview map from overworld');
+  press('b');
+  assert(gameState === 'OVERWORLD', 'A/B/Enter-style confirm should close overview map as hinted');
+  out.push('overview=back');
+
   startBattle(trainers[0]);
   player.level = 2;
   player.exp = player.expNext;

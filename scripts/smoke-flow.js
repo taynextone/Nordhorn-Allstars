@@ -116,6 +116,7 @@ function assertCleanRenderPaths() {
   assert(code.includes("label: '→ LINGEN'"), 'Overview landmarks should include the route toward Lingen');
   assert(code.includes('function drawOverviewMap()'), 'Full overview map screen should exist');
   assert(code.includes("ctx.fillText('M: Mini  O: Overview'"), 'Overworld hint should advertise mini map and overview map without HUD spam');
+  assert(code.includes("O / ESC / A/B/ENTER: BACK"), 'Overview back hint should match the actual confirm aliases');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {
@@ -245,6 +246,12 @@ function runSmokeFlow() {
   tick(1);
   release('Escape');
   assert(get('gameState') === 'OVERWORLD', 'Escape should close the overview screen back to overworld');
+  press('O');
+  tick(1);
+  release('O');
+  assert(get('gameState') === 'OVERVIEW', 'Shift+O should open the full Nordhorn overview screen from overworld');
+  confirm('b');
+  assert(get('gameState') === 'OVERWORLD', 'A/B/Enter-style confirm should close the overview screen as hinted');
 
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,
