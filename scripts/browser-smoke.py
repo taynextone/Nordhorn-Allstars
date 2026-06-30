@@ -223,6 +223,10 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(battle.message === 'Klaus missed!', 'player Block should guard the next rival shot');
   assert(battle.subMessage === 'BLOCK GUARD', 'player Block should explain the guarded miss in the compact message box');
   assert(battle.playerBlockNext === false, 'player Block should clear after one guarded rival attack');
+  const compactLines = getCompactBattleTextLines('Supercalifragilistic-Anklebreaker message keeps going forever', 13, 3);
+  assert(compactLines.length === 3, 'compact battle text should stay inside the core message box line count');
+  assert(compactLines.every(line => line.length <= 13), 'compact battle text should split long tokens before HP/EN box overlap');
+  assert(compactLines[2].endsWith('…'), 'compact battle text should mark truncation without a new HUD');
   timerQueue.length = 0;
   startBattle(trainers[0]);
   tick(5);

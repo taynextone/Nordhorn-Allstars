@@ -1394,6 +1394,43 @@ function setBattleMessage(message, subMessage = '', feedbackTimer = 0) {
   battle.feedbackTimer = feedbackTimer;
 }
 
+function getCompactBattleTextLines(text, maxChars = 13, maxLines = 3) {
+  // The battle message box is intentionally narrow between the HP/EN panels.
+  // Split overlong words/tokens as well as normal sentences so a single long
+  // rival name or combo label can never spill into the player/enemy boxes.
+  const rawWords = String(text || '').split(/\s+/).filter(Boolean);
+  const words = [];
+  rawWords.forEach(word => {
+    if (word.length <= maxChars) {
+      words.push(word);
+      return;
+    }
+    for (let i = 0; i < word.length; i += maxChars) {
+      words.push(word.slice(i, i + maxChars));
+    }
+  });
+
+  const lines = [];
+  let line = '';
+  words.forEach(word => {
+    const candidate = line ? line + ' ' + word : word;
+    if (candidate.length > maxChars && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  });
+  if (line) lines.push(line);
+
+  if (lines.length > maxLines) {
+    const compact = lines.slice(0, maxLines);
+    compact[maxLines - 1] = compact[maxLines - 1].slice(0, Math.max(1, maxChars - 1)) + '…';
+    return compact;
+  }
+  return lines;
+}
+
 function enforceCleanGameboyUI() {
   // Safety net for the post-declutter build: old help/scout/coach objects still
   // exist for save/debug compatibility, but they must never become visible in
@@ -2804,27 +2841,11 @@ function drawBattleHUD() {
     ctx.font = '7px monospace';
 
     const drawWrappedBattleText = (text, startY, maxLines) => {
-      const words = String(text || '').split(' ').filter(Boolean);
-      let line = '';
       let lineY = startY;
-      let linesDrawn = 0;
-      for (let w of words) {
-        if ((line + ' ' + w).trim().length > 13) {
-          if (line && linesDrawn < maxLines) {
-            ctx.fillText(line, msgBox.x + 8, lineY);
-            lineY += 9;
-            linesDrawn++;
-          }
-          line = w;
-        } else {
-          line = (line ? line + ' ' : '') + w;
-        }
-      }
-      if (line && linesDrawn < maxLines) {
+      getCompactBattleTextLines(text, 13, maxLines).forEach(line => {
         ctx.fillText(line, msgBox.x + 8, lineY);
         lineY += 9;
-        linesDrawn++;
-      }
+      });
       return lineY;
     };
 

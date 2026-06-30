@@ -90,6 +90,8 @@ function assertCleanRenderPaths() {
   const battleHud = getFunctionBody(code, 'drawBattleHUD');
   assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
+  assert(code.includes('function getCompactBattleTextLines('), 'Battle message wrapping should be testable and shared');
+  assert(battleHud.includes('getCompactBattleTextLines(text, 13, maxLines)'), 'Battle message box must use the compact anti-overflow wrapper');
   assert(battleHud.includes('battle.feedbackTimer > 0'), 'Select-phase battle feedback must be readable in the core message box');
   assert(battleHud.includes('const clampBarWidth ='), 'Battle HP/EN bars must clamp to their compact boxes');
   assert(battleHud.includes('clampBarWidth(battle.playerHp, player.maxHp, 88)'), 'Player HP bar must be clamped');
@@ -387,6 +389,10 @@ function runSmokeFlow() {
   assert(get('battle.phase') === 'select' && get('battle.playerTurn') === true, 'Enemy rest should hand control back to player cleanly');
   run('battle.playerEnergy = 0; battle.turnCount = 2; endTurn();');
   assert(get('battle.playerEnergy') === get('PLAYER_ENERGY_REGEN'), 'Player turn regen should match the HUD regen label');
+  run(`var _compactLines = getCompactBattleTextLines('Supercalifragilistic-Anklebreaker message keeps going forever', 13, 3);`);
+  assert(get('_compactLines.length') === 3, 'Compact battle text should clamp to the message box line count');
+  assert(get('_compactLines.every(line => line.length <= 13)') === true, 'Compact battle text should split long tokens before they overflow HP/EN boxes');
+  assert(get('_compactLines[2].endsWith("…")') === true, 'Compact battle text should mark truncated overflow in-box');
   run('battle.playerEnergy = 20; battle.turnCount = 0; battle.phase = "select";');
   run('battle.enemyScore = battle.currentTrainer.ptsToWin; endTurn();');
   flushTimers();
