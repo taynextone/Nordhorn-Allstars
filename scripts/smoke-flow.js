@@ -71,8 +71,13 @@ function assertCleanRenderPaths() {
   assert(battle.includes("drawBattleHoop(VIEW_W - 44, 68, 'right')"), 'Battle court should render right pixel hoop as scenery');
   assert(code.includes('function drawBattleHoop('), 'Pixel hoop renderer must stay as court art, not HUD');
   assert(!battle.includes('ctx.fillRect(30, 70, 10, 10);'), 'Old flat hoop block should stay replaced by readable pixel hoop art');
+  assert(code.includes('ctx.fillRect(128, 18, 224, 40);'), 'Core scoreboard should keep its readable compact geometry');
+  assert(code.includes("ctx.fillText('FIRST ' + battle.currentTrainer.ptsToWin, 240, 46);"), 'Core scoreboard should show the target score without a new overlay');
+  assert(code.includes('enemyScoreName = battle.currentTrainer.name.length > 12'), 'Long trainer names should be shortened in the scoreboard');
+  assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');
+
   assert(code.includes('UP/DOWN Select · ENTER/A/B Start · C Credits'), 'Title hint must mention the working A/B start buttons');
   assert(code.includes('A/B/ENTER START · C CREDITS'), 'Compact title status must stay synced with A/B/ENTER start controls');
   assert(html.includes('<link rel="icon" href="data:image/svg+xml,'), 'HTML should ship an inline pixel favicon so browser smoke stays free of 404 noise');

@@ -2539,21 +2539,29 @@ function drawBattle() {
   drawBattleHoop(28, 68, 'left');
   drawBattleHoop(VIEW_W - 44, 68, 'right');
 
-  // Scoreboard
+  // Scoreboard — compact core UI only: names, target score and current points.
+  // The taller box keeps numbers readable without adding coach/advisor chrome.
   ctx.fillStyle = C.DARK;
-  ctx.fillRect(140, 22, 200, 30);
+  ctx.fillRect(128, 18, 224, 40);
   ctx.fillStyle = C.LIGHT;
-  ctx.fillRect(142, 24, 196, 26);
+  ctx.fillRect(130, 20, 220, 36);
   ctx.fillStyle = C.DARKEST;
 
-  ctx.font = '10px monospace';
+  ctx.font = '8px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(battle.currentTrainer.name, 190, 38);
-  ctx.fillText('YOU', 290, 38);
-  ctx.fillText(String(battle.enemyScore), 190, 44);
-  ctx.fillText(String(battle.playerScore), 290, 44);
+  const enemyScoreName = battle.currentTrainer.name.length > 12
+    ? battle.currentTrainer.name.slice(0, 11) + '…'
+    : battle.currentTrainer.name;
+  ctx.fillText(enemyScoreName, 184, 33);
+  ctx.fillText('YOU', 296, 33);
+  ctx.font = '12px monospace';
+  ctx.fillText(String(battle.enemyScore), 184, 50);
+  ctx.fillText(String(battle.playerScore), 296, 50);
+  ctx.font = '7px monospace';
+  ctx.fillText('FIRST ' + battle.currentTrainer.ptsToWin, 240, 46);
   ctx.fillStyle = C.DARK;
-  ctx.fillRect(200, 30, 2, 20);
+  ctx.fillRect(236, 26, 2, 26);
+  ctx.fillRect(242, 26, 2, 26);
 
   // Extra overlays intentionally disabled: the battle screen stays classic and readable.
 
