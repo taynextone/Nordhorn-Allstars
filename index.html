@@ -803,6 +803,7 @@ function drawHoopsterSprite(x, y, opts = {}) {
   const pants = opts.pants || '#2040a0';
   const number = opts.number || '';
   const pose = opts.pose || 'idle';
+  const accessory = opts.accessory || '';
   const px = Math.floor(x);
   const py = Math.floor(y - bob * scale);
   const rect = (rx, ry, rw, rh) => ctx.fillRect(px + rx * scale, py + ry * scale, rw * scale, rh * scale);
@@ -855,11 +856,42 @@ function drawHoopsterSprite(x, y, opts = {}) {
   ctx.fillStyle = skin;
   rect(4, 3, 8, 6);
   ctx.fillStyle = hair;
-  rect(3, 1, 10, 3);
-  rect(2, 2, 12, 2);
-  if (opts.headband) {
+  if (accessory === 'hijab') {
+    rect(3, 1, 10, 9);
+    ctx.fillStyle = trim;
+    rect(4, 8, 8, 2);
+  } else if (accessory === 'hoodie') {
+    rect(2, 1, 12, 5);
+    rect(3, 4, 10, 4);
+    ctx.fillStyle = jersey;
+    rect(2, 6, 12, 3);
+  } else if (accessory === 'cap') {
+    rect(3, 1, 10, 3);
+    rect(facing === 'left' ? 1 : 10, 3, 5, 2);
+  } else if (accessory === 'grayHair') {
+    ctx.fillStyle = '#c8c8b8';
+    rect(2, 1, 12, 3);
+    rect(1, 3, 4, 5);
+    rect(11, 3, 4, 5);
+  } else if (accessory === 'coach') {
+    ctx.fillStyle = '#d8d8c8';
+    rect(3, 1, 10, 3);
+    ctx.fillStyle = hair;
+    rect(2, 3, 12, 2);
+  } else {
+    rect(3, 1, 10, 3);
+    rect(2, 2, 12, 2);
+  }
+  if (opts.headband && accessory !== 'hijab' && accessory !== 'hoodie') {
     ctx.fillStyle = opts.headband;
     rect(3, 4, 10, 1);
+  }
+  if (accessory === 'coach') {
+    // Tiny clipboard from the reference coach image; stays part of the sprite.
+    ctx.fillStyle = '#f8f0c8';
+    rect(facing === 'left' ? 0 : 14, 8, 3, 5);
+    ctx.fillStyle = C.DARKEST;
+    rect(facing === 'left' ? 1 : 15, 9, 1, 3);
   }
   ctx.fillStyle = C.DARKEST;
   if (facing === 'down') {
@@ -904,17 +936,12 @@ function drawTrainerSprite(trainer, camX, camY) {
   const px = (trainer.x - camX) * TILE;
   const py = (trainer.y - camY) * TILE;
   if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
-  const colors = trainer.colors;
-  drawHoopsterSprite(px, py - 2, {
-    jersey: colors.body,
-    trim: '#f8f8f8',
-    hair: colors.hat,
-    pants: colors.pants,
-    number: trainer.id + 10,
-    ball: !trainer.beaten,
-    pose: trainer.beaten ? 'idle' : 'dribble',
-    headband: colors.hat,
-  });
+  drawHoopsterSprite(px, py - 2, getTrainerSpriteOptions(
+    trainer,
+    'down',
+    1,
+    !trainer.beaten
+  ));
 
   // Exclamation mark if not beaten
   if (!trainer.beaten) {
@@ -1014,24 +1041,43 @@ const BUILD_BONUS = {
 
 // Move unlocks by level
 const MOVE_UNLOCKS = {
-  1: { name: 'Layup', energy: 4, type: 'attack', power: 14, pts: 2, desc: 'Reliable close shot' },
-  2: { name: 'Jump Shot', energy: 7, type: 'attack', power: 20, pts: 2, desc: 'Balanced mid-range shot' },
-  3: { name: 'Three Pointer', energy: 10, type: 'attack', power: 17, pts: 3, desc: 'Risky long range - 3 pts!' },
-  4: { name: 'Block', energy: 5, type: 'attack', power: 10, pts: 0, desc: 'Halve next enemy strike', special: true },
-  5: { name: 'Steal', energy: 7, type: 'attack', power: 10, pts: 0, desc: 'Low damage, keeps pressure', special: true },
-  6: { name: 'Crossover', energy: 8, type: 'attack', power: 26, pts: 2, desc: 'High-skill drive' },
-  7: { name: 'Dunk', energy: 14, type: 'attack', power: 34, pts: 2, desc: 'Powerful but expensive!' },
+  1: { name: 'Layup', energy: 3, type: 'attack', power: 13, pts: 2, desc: 'Cheap safe close shot' },
+  2: { name: 'Jump Shot', energy: 6, type: 'attack', power: 19, pts: 2, desc: 'Balanced mid-range shot' },
+  3: { name: 'Three Pointer', energy: 9, type: 'attack', power: 17, pts: 3, desc: 'Risky long range - 3 pts!' },
+  4: { name: 'Block', energy: 4, type: 'attack', power: 9, pts: 0, desc: 'Halve next enemy strike', special: true },
+  5: { name: 'Steal', energy: 6, type: 'attack', power: 10, pts: 0, desc: 'Low damage, keeps pressure', special: true },
+  6: { name: 'Crossover', energy: 8, type: 'attack', power: 25, pts: 2, desc: 'High-skill drive' },
+  7: { name: 'Dunk', energy: 12, type: 'attack', power: 32, pts: 2, desc: 'Powerful finisher' },
   8: { name: 'Court Vision', energy: 4, type: 'buff', desc: 'Boost next shot accuracy' },
 };
 
 // Trainers
 const trainers = [
-  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#404040', body: '#404040', pants: '#202020' }, dialogue: 'Klaus vom Wohnhof: Neuer Ball, neues Gesicht. Nordhorn testet dich zuerst bei mir!', victoryLine: 'Klaus nickt: Der Wohnhof spricht jetzt von dir.', beaten: false, playerHp: 75, enemyEnergy: 16, level: 1, ptsToWin: 11, offense: 2, defense: 1, regen: 3, expReward: 22, aiStyle: 'Rookie' },
-  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#ff6b6b', body: '#ff6b6b', pants: '#402020' }, dialogue: 'Anna vom Park: Zwischen Vechte-Wind und Asphalt zählt nur ein sauberer Wurf.', victoryLine: 'Anna lächelt: Dein Wurf hat Park-Niveau.', beaten: false, playerHp: 92, enemyEnergy: 18, level: 2, ptsToWin: 15, offense: 4, defense: 2, regen: 3, expReward: 30, aiStyle: 'Shooter' },
-  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#2ecc71', body: '#2ecc71', pants: '#1a3a1a' }, dialogue: 'Markus am Schulhof: Schalibim! Wer nach Lingen will, muss erst durch meine Defense.', victoryLine: 'Markus lacht: Deine Handles sind kein Zaubertrick.', beaten: false, playerHp: 108, enemyEnergy: 20, level: 3, ptsToWin: 18, offense: 5, defense: 4, regen: 3, expReward: 40, aiStyle: 'Defender' },
-  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#e67e22', body: '#e67e22', pants: '#3a2a1a' }, dialogue: 'Sophie vom Spielplatz: Hier gewinnt, wer Ruhe behält, wenn alle Kinder schreien.', victoryLine: 'Sophie zeigt Respekt: Du hast Nerven aus Stahl.', beaten: false, playerHp: 122, enemyEnergy: 23, level: 4, ptsToWin: 21, offense: 7, defense: 5, regen: 4, expReward: 52, aiStyle: 'Playmaker' },
-  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#9b59b6', body: '#9b59b6', pants: '#2a1a3a' }, dialogue: 'Coach Mihler: Nordhorns Halle ist still. Lingen hört zu. Zeig, dass du bereit bist.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 145, enemyEnergy: 26, level: 5, ptsToWin: 21, offense: 9, defense: 7, regen: 4, expReward: 68, aiStyle: 'Coach' },
+  { id: 0, name: 'Klaus', x: 18, y: 32, colors: { hat: '#2f7a3d', body: '#7bcf5a', pants: '#1f3d2a' }, sprite: { reference: 'green-cap-8', accessory: 'cap', skin: '#d8a070', hair: '#2f7a3d', jersey: '#7bcf5a', trim: '#e8ffe0', pants: '#1f3d2a', number: '8' }, dialogue: 'Klaus vom Wohnhof: Grünes Cap, schneller erster Schritt. Nordhorn testet dich zuerst bei mir!', victoryLine: 'Klaus nickt: Der Wohnhof spricht jetzt von dir.', beaten: false, playerHp: 72, enemyEnergy: 15, level: 1, ptsToWin: 9, offense: 2, defense: 1, regen: 3, expReward: 26, aiStyle: 'Rookie' },
+  { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#1f2f1f', body: '#2f8f4a', pants: '#203030' }, sprite: { reference: 'hijab-green-vest', accessory: 'hijab', skin: '#c89068', hair: '#1f2f1f', jersey: '#2f8f4a', trim: '#d8f8c8', pants: '#203030', number: '23' }, dialogue: 'Anna vom Park: Ruhige Hände, grünes Jersey. Zwischen Vechte-Wind und Asphalt zählt Technik.', victoryLine: 'Anna lächelt: Dein Wurf hat Park-Niveau.', beaten: false, playerHp: 88, enemyEnergy: 18, level: 2, ptsToWin: 13, offense: 4, defense: 2, regen: 3, expReward: 34, aiStyle: 'Shooter' },
+  { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#203f8f', body: '#2f67c8', pants: '#18284f' }, sprite: { reference: 'blue-defender-33', accessory: 'headband', skin: '#d8a070', hair: '#203f8f', jersey: '#2f67c8', trim: '#f8f8ff', pants: '#18284f', number: '33' }, dialogue: 'Markus am Schulhof: Breite Defense, blaues Trikot. Wer nach Lingen will, muss an mir vorbei.', victoryLine: 'Markus lacht: Deine Handles sind kein Zaubertrick.', beaten: false, playerHp: 106, enemyEnergy: 21, level: 3, ptsToWin: 15, offense: 5, defense: 5, regen: 3, expReward: 46, aiStyle: 'Defender' },
+  { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#c8c8b8', body: '#7f4bc1', pants: '#244f2a' }, sprite: { reference: 'purple-green-grayhair', accessory: 'grayHair', skin: '#c89068', hair: '#c8c8b8', jersey: '#7f4bc1', trim: '#9fe070', pants: '#244f2a', number: '21' }, dialogue: 'Sophie vom Spielplatz: Graue Haare, lila Drive. Hier gewinnt, wer bei Lärm ruhig bleibt.', victoryLine: 'Sophie zeigt Respekt: Du hast Nerven aus Stahl.', beaten: false, playerHp: 120, enemyEnergy: 24, level: 4, ptsToWin: 17, offense: 7, defense: 5, regen: 4, expReward: 58, aiStyle: 'Playmaker' },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Clipboard raus, Ball fest. Nordhorns Halle ist still. Lingen hört zu.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 140, enemyEnergy: 28, level: 5, ptsToWin: 19, offense: 9, defense: 7, regen: 4, expReward: 78, aiStyle: 'Coach' },
 ];
+
+function getTrainerSpriteOptions(trainer, facing = 'down', scale = 1, hasBall = false) {
+  const colors = trainer.colors || {};
+  const sprite = trainer.sprite || {};
+  return {
+    scale,
+    facing,
+    skin: sprite.skin || '#d8a070',
+    jersey: sprite.jersey || colors.body || C.DARK,
+    trim: sprite.trim || '#f8f8f8',
+    hair: sprite.hair || colors.hat || '#4a3a1a',
+    pants: sprite.pants || colors.pants || '#2040a0',
+    number: sprite.number || String((trainer.id || 0) + 10),
+    ball: hasBall,
+    pose: hasBall ? 'dribble' : 'idle',
+    headband: sprite.accessory === 'headband' ? sprite.hair : (sprite.headband || null),
+    accessory: sprite.accessory || '',
+  };
+}
 
 // Battle state
 let battle = {
@@ -2394,17 +2440,27 @@ function drawOverworld() {
 
 
 function drawCleanOverworldHUD() {
-  // Compact status strip: essentials only, no coach/stat spam.
+  // Compact status strip: essentials + next target only, no coach/stat spam.
   ctx.fillStyle = C.DARKEST;
-  ctx.fillRect(6, 6, 132, 34);
+  ctx.fillRect(6, 6, 166, 46);
   ctx.fillStyle = C.LIGHT;
-  ctx.fillRect(8, 8, 128, 30);
+  ctx.fillRect(8, 8, 162, 42);
   ctx.fillStyle = C.DARKEST;
   ctx.font = '8px monospace';
   ctx.textAlign = 'left';
   const wins = trainers.filter(t => t.beaten).length;
+  const next = ObjectiveTracker.getNextTrainer();
   ctx.fillText('LV ' + player.level + '  WINS ' + wins + '/' + trainers.length, 14, 20);
   ctx.fillText('HP ' + player.hp + '/' + player.maxHp + '  EN ' + player.energy + '/' + player.maxEnergy, 14, 32);
+  if (next) {
+    const arrow = ObjectiveTracker.getArrowTo(next);
+    const dist = ObjectiveTracker.getDistanceTo(next);
+    ctx.font = '7px monospace';
+    ctx.fillText('NEXT ' + arrow + ' ' + shortenBattleLabel(next.name, 10) + ' ' + dist, 14, 44);
+  } else {
+    ctx.font = '7px monospace';
+    ctx.fillText('NEXT: CHAMPION', 14, 44);
+  }
 }
 
 // ============================================================
@@ -2795,18 +2851,12 @@ function drawBattlePlayer(x, y) {
 
 function drawBattleEnemy(x, y) {
   const trainer = battle.currentTrainer;
-  drawHoopsterSprite(x, y, {
-    scale: 3,
-    facing: 'left',
-    jersey: trainer.colors.body,
-    trim: '#f8f8f8',
-    hair: trainer.colors.hat,
-    pants: trainer.colors.pants,
-    number: trainer.id + 10,
-    ball: !battle.hasBall,
-    pose: 'dribble',
-    headband: trainer.colors.hat,
-  });
+  drawHoopsterSprite(x, y, getTrainerSpriteOptions(
+    trainer,
+    'left',
+    3,
+    !battle.hasBall
+  ));
   ctx.fillStyle = C.MID;
   ctx.fillRect(x + 42, y + 34, 18, 3);
   ctx.fillRect(x + 44, y + 44, 12, 3);

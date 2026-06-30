@@ -123,6 +123,8 @@
 - [x] New-Run Clean-State Reset — neuer Spielstart setzt Minimap-, Konami- und Easter-Egg-Zustand zurück, damit nach Continue/Credits keine optionalen Zustände in den frischen Gameboy-Screen leaken.
 - [x] Mobile-Touch Control Wiring — sichtbare Touch-Buttons sind jetzt wirklich mit der Keyboard-Input-Pipeline verbunden; MINI toggelt nur die kompakte Minimap und OVR öffnet die separate Übersicht ohne neue HUD-/Coach-Overlays.
 - [x] Confirm-Alias Input Hygiene — gleichzeitige A/a/B/b-Confirm-Edges werden vollständig geleert, damit keine Tastatur-/Touch-Hybrid-Eingabe in den nächsten Dialog- oder Battle-State blutet.
+- [x] Reference-Rival Sprite Pass — die gelieferten Gegnerbilder wurden als stilisierte Gameboy-Spriteprofile umgesetzt: grünes Cap #8 Klaus, Hijab/Green-Vest Anna, Blue-Defender #33 Markus, Purple/Green-Grayhair Sophie und Coach-Clipboard Mihler; Battle-Gegner rendern weiter gespiegelt nach links.
+- [x] Flow/Balance Pass — Clean-HUD zeigt jetzt kompaktes NEXT-Ziel mit Richtung/Distanz; Moves kosten etwas weniger EN und Trainer-Zielscore/HP/EXP sind flüssiger gestaffelt, damit die 5-Duelle-Route weniger zäh wird.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

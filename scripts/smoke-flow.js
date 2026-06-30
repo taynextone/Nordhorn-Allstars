@@ -45,6 +45,13 @@ function assertCleanRenderPaths() {
   }
   assert(overworld.includes('drawCleanOverworldHUD()'), 'Overworld must use the compact clean HUD');
   assert(code.includes('let minimapVisible = false;'), 'Minimap should default off for a clean overworld');
+  assert(code.includes("reference: 'green-cap-8'"), 'Klaus should use the user-provided green-cap #8 visual reference');
+  assert(code.includes("reference: 'hijab-green-vest'"), 'Anna should use the user-provided hijab/green-vest visual reference');
+  assert(code.includes("reference: 'blue-defender-33'"), 'Markus should use the user-provided blue #33 defender reference');
+  assert(code.includes("reference: 'purple-green-grayhair'"), 'Sophie should use the user-provided purple/green gray-hair reference');
+  assert(code.includes("reference: 'coach-clipboard'"), 'Coach Mihler should use the user-provided coach/clipboard reference');
+  assert(code.includes('function getTrainerSpriteOptions('), 'Trainer sprites should share reference-driven visual options');
+  assert(code.includes("facing,\n    skin: sprite.skin"), 'Trainer sprite helper should preserve explicit facing for battle mirroring');
   const removedLegacyModules = [
     'const RivalProgress =', 'const BattlePrep =', 'const DuelRiskMeter =',
     'const RouteCoach =', 'const PossessionCoach =', 'const MomentumMeter =',
@@ -83,6 +90,8 @@ function assertCleanRenderPaths() {
   assert(code.includes('const enemyScoreName = shortenBattleLabel(battle.currentTrainer.name, 12);'), 'Long trainer names should be shortened in the scoreboard');
   assert(code.includes('ctx.fillText(shortenBattleLabel(trainer.name, 12), x + 24, y + 68);'), 'Long trainer names should be shortened below battle sprites');
   assert(code.includes('ctx.fillText(shortenBattleLabel(battle.currentTrainer.name, 12), enemyBox.x + 8, VIEW_H - 60);'), 'Enemy HP/EN box should show the compact trainer label');
+  assert(code.includes("drawHoopsterSprite(x, y, getTrainerSpriteOptions(\n    trainer,\n    'left',\n    3"), 'Battle enemies must use mirrored left-facing reference sprites');
+  assert(code.includes("ctx.fillText('NEXT ' + arrow + ' ' + shortenBattleLabel(next.name, 10)"), 'Clean overworld HUD should show the next target and distance for flow');
   assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');
   assert(code.includes("← → select, ENTER/A/B confirm"), 'Gender select hint must match A/B confirm support');
   assert(code.includes("↑ ↓ select, ENTER/A/B confirm"), 'Build select hint must match A/B confirm support');
