@@ -101,6 +101,7 @@
 - [x] Level-Up Move Sync — Levelaufstiege schalten jetzt den Move des erreichten Levels frei (z.B. Level 3 = Three Pointer) statt einen Tier zu überspringen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Battle-Move Unlock Sync — Battle-Menü und Save-Sanitizer nutzen jetzt dieselbe echte Freischaltliste, damit Level-3-Spieler Three Pointer, aber keinen Level-4-Block zu früh sehen.
 - [x] Enemy-Rest Regen Sync — erschöpfte Rivalen bekommen nur noch den normalen Trainer-Regen-Tick statt zusätzlichem hartcodiertem +5-Boost; Smoke-Flow prüft den kompakten Message-Box-Hinweis ohne neue HUDs/Overlays.
+- [x] Enemy-Turn Damage Readability — erfolgreiche Gegnerwürfe zeigen den HP-Schaden jetzt als kompakte Subline in der bestehenden Battle-Message-Box; Smoke-Flow prüft das ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

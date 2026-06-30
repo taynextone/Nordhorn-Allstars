@@ -1651,7 +1651,10 @@ function executeEnemyMove() {
       const points = move.pts;
       battle.playerHp -= calc.damage;
       battle.enemyScore += points;
-      setBattleMessage(battle.currentTrainer.name + ': ' + move.name + '! ' + points + ' pts!');
+      setBattleMessage(
+        battle.currentTrainer.name + ': ' + move.name + '! ' + points + ' pts!',
+        '-' + calc.damage + ' HP'
+      );
       battle.ballOwner = 'player';
       battle.hasBall = true;
     } else {
