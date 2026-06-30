@@ -104,6 +104,7 @@
 - [x] Enemy-Turn Damage Readability — erfolgreiche Gegnerwürfe zeigen den HP-Schaden jetzt als kompakte Subline in der bestehenden Battle-Message-Box; Smoke-Flow prüft das ohne neue HUDs/Overlays.
 - [x] Battle-Scoreboard Readability — das Duell-Scoreboard zeigt Zielscore und gekürzte Rivalennamen in der bestehenden Core-Anzeige, ohne Coach-/Advisor-Overlays.
 - [x] Story-Atmosphäre Pass — Intro, Home-/Loss-/Champion-Texte, Rivalen-Dialoge, Siegzeilen, Credits und Spieler-Liste stärker auf Nordhorn-vs-Lingen und lokale Court-Stimmung getrimmt, ohne neue HUDs/Overlays.
+- [x] Overworld-Court Pixel-Polish — Court-Tiles haben jetzt kleine Linien-/Center-Paint-Pixel für bessere Lesbarkeit der Spielflächen; Smoke-Guard prüft die Map-Politur ohne Coach-/Advisor-Overlay-Rückkehr.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

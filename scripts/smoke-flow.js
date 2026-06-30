@@ -103,6 +103,10 @@ function assertCleanRenderPaths() {
   assert(!code.includes("battle.enemyEnergy = Math.min(battle.enemyMaxEnergy, battle.enemyEnergy + 5)"), 'Enemy rest should not double-stack hard-coded +5 energy with normal regen');
   assert(code.includes("setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN')"), 'Enemy rest message should match trainer regen inside the compact message box');
   assert(code.includes("'-' + calc.damage + ' HP'"), 'Enemy scoring moves should show player HP damage in the compact message subline');
+  const drawTile = getFunctionBody(code, 'drawTile');
+  assert(drawTile.includes('Tiny court-paint pixels'), 'Overworld court tiles should keep pixel-art court polish without new HUDs');
+  assert(drawTile.includes('ctx.fillRect(sx, sy + 7, TILE, 2);'), 'Court tiles should include horizontal court-paint lines');
+  assert(drawTile.includes('ctx.fillRect(sx + 6, sy + 6, 4, 4);'), 'Court tiles should include tiny center-paint pixels');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {

@@ -749,10 +749,21 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillRect(sx, sy, TILE, TILE);
       ctx.fillStyle = '#5a5a3a';
       ctx.fillRect(sx + 1, sy + 1, 14, 14);
-      // Court lines
+      // Tiny court-paint pixels: scenery only, no HUD/overlay chrome.
       ctx.fillStyle = C.DARK;
       if (x % 8 === 0 || x % 8 === 7) {
         ctx.fillRect(sx + 7, sy, 2, TILE);
+      }
+      if (y % 8 === 0 || y % 8 === 7) {
+        ctx.fillRect(sx, sy + 7, TILE, 2);
+      }
+      if (x % 8 === 3 && y % 8 === 3) {
+        ctx.fillRect(sx + 6, sy + 6, 4, 4);
+      }
+      if ((x + y) % 11 === 0) {
+        ctx.fillStyle = C.MID;
+        ctx.fillRect(sx + 3, sy + 3, 2, 2);
+        ctx.fillRect(sx + 11, sy + 11, 2, 2);
       }
       break;
     case T.DOOR:
