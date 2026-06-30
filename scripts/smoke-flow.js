@@ -57,6 +57,8 @@ function assertCleanRenderPaths() {
     assert(!code.includes(token), 'Legacy coach/advisor module should stay removed: ' + token);
   }
   assert(!code.includes('QuestRadar'), 'Legacy radar alias should stay removed; use ObjectiveTracker directly');
+  assert(!code.includes('const PerfHUD ='), 'Dormant FPS/stat HUD code should stay removed from the clean playfield');
+  assert(!code.includes('PerfHUD.tick'), 'Game loop must not keep hidden HUD modules alive');
   assert(!code.includes('renderBattleHUD() {'), 'Legacy battle-HUD module methods must stay removed');
   assert(!code.includes('renderHUD() {'), 'Legacy overworld-HUD module methods must stay removed');
   assert(battle.includes('drawBattleHUD()'), 'Battle must keep the core HP/EN boxes');
@@ -92,6 +94,7 @@ function assertCleanRenderPaths() {
   assert(battleHud.includes('battle.subMessage'), 'Battle result subMessage/score must be rendered in the core message box');
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
   assert(code.includes('function getCompactBattleTextLines('), 'Battle message wrapping should be testable and shared');
+  assert(!code.includes('PerfHUD'), 'Dormant FPS/stat HUD code should stay removed from runtime and module registry');
   assert(battleHud.includes('getCompactBattleTextLines(text, 13, maxLines)'), 'Battle message box must use the compact anti-overflow wrapper');
   assert(battleHud.includes('battle.feedbackTimer > 0'), 'Select-phase battle feedback must be readable in the core message box');
   assert(battleHud.includes('const clampBarWidth ='), 'Battle HP/EN bars must clamp to their compact boxes');

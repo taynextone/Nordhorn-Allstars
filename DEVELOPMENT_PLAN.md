@@ -48,7 +48,7 @@
 - [x] Balance-Tuning (Stats, Moves, Level) — Moves/Energie-Kosten, Trainer-HP/EN/EXP, smartere Gegner-KI und Battle-HUD-Anzeigen abgestimmt
 - [x] Easter Eggs (Konami-Code: +5 alle Stats, +20 HP)
 - [x] Credits-Screen (Scrolling-Title, Team, Trainer, Locations)
-- [x] Performance-Optimierung — Minimap-Tilelayer gecacht (4.200 Draws → 1 drawImage/Frame) und sichtbarer FPS-HUD ergänzt
+- [x] Performance-Optimierung — Minimap-Tilelayer gecacht (4.200 Draws → 1 drawImage/Frame); sichtbarer FPS-HUD wurde im Clean-UI-Pass wieder entfernt.
 - [x] Cross-Browser-Test — sichtbarer Compat-Check auf dem Titelbild, rAF/performance-Polyfills, Safe-Area/dvh-Fallbacks; Chromium file:// Smoke-Test OK, Firefox-Headless in dieser Sandbox blockiert.
 - [x] Deployment (GitHub Pages) — Pages-Actions-Workflow, .nojekyll, README-Link und sichtbarer Title-Screen-Deploy-Marker ergänzt.
 - [x] Quick-Continue Save-Slot — Titelbild zeigt NEW GAME/CONTINUE, Siege/Rast werden in LocalStorage gespeichert und alte Dialog-Callbacks werden sicher bereinigt.
@@ -119,6 +119,7 @@
 - [x] Battle-Message Overflow Guard — lange Aktionswörter/-Labels werden in der bestehenden Message-Box hart auf Zeilenbreite gesplittet und gekürzt, damit sie nie in HP/EN-Boxen laufen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Dialog-Overflow Guard — lange Story-/Rivalenwörter werden in der bestehenden Gameboy-Dialogbox hart umbrochen und mit Ellipse gekürzt, damit Victory-/NPC-Texte lesbar bleiben ohne neue HUDs/Overlays.
 - [x] Legacy-Radar-Alias Cleanup — letzter `QuestRadar`-Kompatibilitätsalias entfernt; VM-/Browser-Smokes prüfen, dass ObjectiveTracker direkt genutzt wird und keine Radar-/Coach-Renderpfade zurückkehren.
+- [x] Dormant-FPS-HUD Cleanup — ungenutztes PerfHUD-/FPS-Stat-HUD-Modul aus Runtime und Smoke-Guards entfernt, damit der Overworld-Screen sauber Karte + Actors + kompaktes Status-HUD bleibt.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

@@ -2203,30 +2203,6 @@ function applyCharacterCreation() {
 // OVERWORLD
 // ============================================================
 
-const PerfHUD = {
-  last: performance.now(),
-  frames: 0,
-  fps: 0,
-
-  tick(now) {
-    this.frames++;
-    if (now - this.last >= 500) {
-      this.fps = Math.round((this.frames * 1000) / (now - this.last));
-      this.frames = 0;
-      this.last = now;
-    }
-  },
-
-  render() {
-    ctx.fillStyle = C.DARKEST;
-    ctx.fillRect(4, VIEW_H - 18, 44, 12);
-    ctx.fillStyle = C.LIGHT;
-    ctx.font = '6px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('FPS ' + this.fps, 7, VIEW_H - 10);
-  }
-};
-
 const ObjectiveTracker = {
   getNextTrainer() {
     return trainers.find(t => !t.beaten) || null;
@@ -2961,8 +2937,6 @@ function updateBattle() {
 
 function gameLoop() {
   ErrorGuard.safe('gameLoop', () => {
-    const now = performance.now();
-    PerfHUD.tick(now);
     frameCount++;
     ErrorGuard.validateGameState();
 
@@ -3144,7 +3118,6 @@ const GameModules = {
     { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
     { id: 'quest', label: 'Objective Marker', check: () => !!(ObjectiveTracker && typeof ObjectiveTracker.getNextTrainer === 'function' && typeof ObjectiveTracker.drawWorldMarker === 'function') },
     { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
-    { id: 'perf', label: 'Frame Timing', check: () => !!(PerfHUD && typeof PerfHUD.tick === 'function') },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },
     { id: 'errors', label: 'Error Guard', check: () => !!(ErrorGuard && typeof ErrorGuard.safe === 'function') },
     { id: 'save', label: 'Save/Continue', check: () => !!(SaveSystem && typeof SaveSystem.save === 'function' && typeof SaveSystem.load === 'function') },
