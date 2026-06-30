@@ -118,6 +118,9 @@ function assertCleanRenderPaths() {
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
   assert(code.includes("trainerName + ' besiegt! Siege: '"), 'Victory dialog should show rival progress in the existing dialog box');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
+  assert(code.includes('function markTrainerBeaten(trainer)'), 'Trainer victory state should be synced through one small helper');
+  assert(code.includes('if (!player.beatenTrainers.includes(trainer.id))'), 'Victory progress must not duplicate beaten trainer IDs');
+  assert(code.includes('player.rivalBeaten = trainers.every(t => t.beaten);'), 'Final-win progress flag should be saved immediately after the champion battle');
   assert(code.includes('const newMove = MOVE_UNLOCKS[player.level];'), 'Level-up move unlocks should match the level just reached');
   assert(!code.includes('MOVE_UNLOCKS[player.level + 1]'), 'Level-up move unlocks must not skip one tier ahead');
   assert(code.includes('function movePlayerToHomeGate()'), 'Return-home flows should share one safe home-gate helper');
@@ -350,6 +353,8 @@ function runSmokeFlow() {
   assert(get('player.level') === 3, 'Level-up smoke should advance the player to level 3');
   assert(get('player.moves.includes("Three Pointer")') === true, 'Level 3 should unlock Three Pointer at the matching tier');
   assert(get('player.moves.includes("Block")') === false, 'Level 3 must not skip ahead and unlock the level-4 Block');
+  assert(get('player.beatenTrainers.filter(id => id === 0).length') === 1, 'Victory sync should not duplicate trainer IDs in progress');
+  assert(get('player.rivalBeaten') === false, 'Non-final victory should keep champion progress flag false');
   run('battle.playerMoves = getPlayerMoves();');
   assert(get('battle.playerMoves.some(m => m.name === "Three Pointer")') === true, 'Level 3 battle menu should include the newly earned Three Pointer');
   assert(get('battle.playerMoves.some(m => m.name === "Block")') === false, 'Level 3 battle menu must not expose level-4 Block early');
@@ -475,6 +480,8 @@ function runSmokeFlow() {
     }
     assert(get(`trainers[${i}].beaten`) === true, 'Trainer ' + i + ' should be marked beaten');
   }
+  assert(get('player.rivalBeaten') === true, 'Champion run should sync rivalBeaten before save/continue');
+  assert(get('new Set(player.beatenTrainers).size === player.beatenTrainers.length'), 'Champion progress should keep beatenTrainers unique');
 
   console.log('NORDHORN_SMOKE_FLOW_OK lossDialog=pass trainers=' + trainerCount + ' finalState=' + get('gameState'));
 }

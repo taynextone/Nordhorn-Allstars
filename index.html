@@ -1868,12 +1868,21 @@ function endTurn() {
   }
 }
 
-function winBattle() {
-  const trainer = battle.currentTrainer;
-  if (!trainer.beaten) {
-    trainer.beaten = true;
+function markTrainerBeaten(trainer) {
+  if (!trainer) return;
+  trainer.beaten = true;
+  if (!player.beatenTrainers.includes(trainer.id)) {
     player.beatenTrainers.push(trainer.id);
   }
+  // Keep the lightweight player progress flag synced before SaveSystem.collect().
+  // Final wins used to persist trainer-state correctly but could leave this flag stale
+  // until the next load; syncing here keeps Continue/progress data coherent without UI spam.
+  player.rivalBeaten = trainers.every(t => t.beaten);
+}
+
+function winBattle() {
+  const trainer = battle.currentTrainer;
+  markTrainerBeaten(trainer);
 
   // Carry the played battle back into the overworld before saving.
   // Earlier builds only persisted score/EXP, so post-fight HP/EN HUDs could

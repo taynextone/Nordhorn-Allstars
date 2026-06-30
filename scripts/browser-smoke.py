@@ -284,6 +284,8 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(dialog.subText.includes('Wohnhof'), 'victory dialog should include local story flavor without adding a HUD');
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'victory dialog should return to overworld and mark win');
+  assert(player.beatenTrainers.filter(id => id === 0).length === 1, 'first victory should save one unique trainer ID');
+  assert(player.rivalBeaten === false, 'first non-final victory should not set champion flag early');
   out.push('firstVictoryWins=' + trainers.filter(t => t.beaten).length);
 
   resetRunProgress();
@@ -306,6 +308,8 @@ async def run_cdp_flow(ws_url: str) -> str:
     }
   }
   assert(trainers.every(t => t.beaten), 'all trainers should be beaten in browser flow');
+  assert(player.rivalBeaten === true, 'final victory should sync champion progress before the save is reused');
+  assert(new Set(player.beatenTrainers).size === player.beatenTrainers.length, 'browser flow should keep beaten trainer IDs unique');
   return out.concat(['allTrainers=' + trainers.length, 'final=' + gameState]).join('|');
 })()
 """
