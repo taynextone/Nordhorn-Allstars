@@ -244,7 +244,7 @@ function runSmokeFlow() {
   assert(get('player.maxEnergy') === 20 && get('player.energy') === 0, 'Load should clamp corrupt energy before battle/overworld use');
   assert(get('player.level') === 1 && get('player.build') === 'shooter' && get('player.facing') === 'down', 'Load should sanitize corrupt level/build/facing fields');
   assert(get('Number.isFinite(player.stats.shooting) && player.stats.shooting === 5 && player.stats.defense === 30 && player.stats.dribbling === 1'), 'Load should sanitize corrupt stat values into finite balanced bounds');
-  assert(get('player.moves.includes("Layup") && player.moves.includes("Jump Shot") && !player.moves.includes("Glitch Dunk")'), 'Load should remove invalid saved moves while keeping core playable moves');
+  assert(get('player.moves.includes("Layup") && player.moves.includes("Jump Shot") && !player.moves.includes("Three Pointer") && !player.moves.includes("Glitch Dunk")'), 'Load should remove invalid or too-early saved moves while keeping core playable moves');
   assert(get('player.beatenTrainers.length') === 2 && get('trainers[1].beaten && trainers[2].beaten') === true, 'Load should sync only known valid trainer IDs from mixed save shapes');
   assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'Load should recover invalid save positions to the home gate immediately');
   assert(get('isWalkable(player.x, player.y)') === true, 'Sanitized save position must be walkable');
@@ -261,6 +261,9 @@ function runSmokeFlow() {
   assert(get('player.level') === 3, 'Level-up smoke should advance the player to level 3');
   assert(get('player.moves.includes("Three Pointer")') === true, 'Level 3 should unlock Three Pointer at the matching tier');
   assert(get('player.moves.includes("Block")') === false, 'Level 3 must not skip ahead and unlock the level-4 Block');
+  run('battle.playerMoves = getPlayerMoves();');
+  assert(get('battle.playerMoves.some(m => m.name === "Three Pointer")') === true, 'Level 3 battle menu should include the newly earned Three Pointer');
+  assert(get('battle.playerMoves.some(m => m.name === "Block")') === false, 'Level 3 battle menu must not expose level-4 Block early');
   timers.length = 0;
   run('resetRunProgress(); gameState = "OVERWORLD"; battle.active = false;');
 

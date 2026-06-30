@@ -99,6 +99,7 @@
 - [x] Victory-Dialog Progress Polish — Siegdialoge nennen den geschlagenen Rivalen und kompakten Fortschritt in der bestehenden Dialogbox; Smoke- und Browser-Flows prüfen das ohne neue HUDs/Overlays.
 - [x] Zero-Energy Battle UX — Spieler mit 0 EN atmen automatisch eine Runde durch statt im Move-Menü festzuhängen; Smoke- und Browser-Flows prüfen den kompakten Message-Box-Flow ohne neue HUDs/Overlays.
 - [x] Level-Up Move Sync — Levelaufstiege schalten jetzt den Move des erreichten Levels frei (z.B. Level 3 = Three Pointer) statt einen Tier zu überspringen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] Battle-Move Unlock Sync — Battle-Menü und Save-Sanitizer nutzen jetzt dieselbe echte Freischaltliste, damit Level-3-Spieler Three Pointer, aber keinen Level-4-Block zu früh sehen.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

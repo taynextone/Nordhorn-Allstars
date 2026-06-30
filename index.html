@@ -993,15 +993,26 @@ function sanitizePlayerStats(savedStats = {}) {
   ]));
 }
 
+const STARTER_MOVE_NAMES = ['Layup', 'Jump Shot'];
+
+function getUnlockedMoveNames(level) {
+  // Starter moves stay available from a fresh run, but later tier moves should
+  // not appear one level early. This keeps save loading and battle menus aligned
+  // with the visible level-up rewards.
+  const safeLevel = clampInteger(level, 1, 50, 1);
+  const levelUnlocked = Object.keys(MOVE_UNLOCKS)
+    .filter(key => parseInt(key) <= safeLevel)
+    .map(key => MOVE_UNLOCKS[key].name);
+  return [...new Set([...STARTER_MOVE_NAMES, ...levelUnlocked])];
+}
+
 function sanitizeMoveList(savedMoves, level) {
   const allMoveNames = new Set(Object.values(MOVE_UNLOCKS).map(move => move.name));
-  const unlockedNames = Object.keys(MOVE_UNLOCKS)
-    .filter(key => parseInt(key) <= level + 1)
-    .map(key => MOVE_UNLOCKS[key].name);
+  const unlockedNames = getUnlockedMoveNames(level);
   const savedValid = Array.isArray(savedMoves)
-    ? savedMoves.filter(name => allMoveNames.has(name))
+    ? savedMoves.filter(name => allMoveNames.has(name) && unlockedNames.includes(name))
     : [];
-  const merged = [...new Set(['Layup', 'Jump Shot', ...savedValid, ...unlockedNames])];
+  const merged = [...new Set([...STARTER_MOVE_NAMES, ...savedValid, ...unlockedNames])];
   return merged.filter(name => allMoveNames.has(name));
 }
 
@@ -1406,10 +1417,11 @@ function enforceCleanGameboyUI() {
 // ============================================================
 
 function getPlayerMoves() {
-  const moves = [];
-  const moveKeys = Object.keys(MOVE_UNLOCKS).filter(k => parseInt(k) <= player.level + 1);
-  moveKeys.forEach(k => moves.push(MOVE_UNLOCKS[k]));
-  return moves;
+  const availableNames = sanitizeMoveList(player.moves, player.level);
+  player.moves = availableNames;
+  return availableNames
+    .map(name => Object.values(MOVE_UNLOCKS).find(move => move.name === name))
+    .filter(Boolean);
 }
 
 function getEnemyMoves(enemyLevel) {

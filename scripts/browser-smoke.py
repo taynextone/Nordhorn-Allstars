@@ -166,6 +166,9 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(player.level === 3, 'level-up should advance to level 3');
   assert(player.moves.includes('Three Pointer'), 'level 3 should unlock Three Pointer at the matching tier');
   assert(!player.moves.includes('Block'), 'level 3 must not skip ahead to level-4 Block');
+  battle.playerMoves = getPlayerMoves();
+  assert(battle.playerMoves.some(m => m.name === 'Three Pointer'), 'level 3 battle menu should include the earned Three Pointer');
+  assert(!battle.playerMoves.some(m => m.name === 'Block'), 'level 3 battle menu must not expose level-4 Block early');
   timerQueue.length = 0;
   resetRunProgress();
   gameState = 'OVERWORLD';
