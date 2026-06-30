@@ -128,6 +128,7 @@
 - [x] Simulation-Balance Pass — VM-Battle-Probe misst Winrate/Turnlänge über 80 Seeds pro Rivalen; Trainer-HP, Zielscore, Offense/Defense und EXP wurden auf eine fairere Kurve von Wohnhof-Rookie bis Coach Mihler nachgezogen.
 - [x] Champion-Save Progress Sync — Siegmarkierung läuft über einen kleinen deduplizierenden Helper; der Champion-Flag wird vor dem Save synchronisiert und VM-/Browser-Smokes prüfen eindeutige Trainer-IDs ohne neue HUDs/Overlays.
 - [x] Battle-Result Lock — Ergebniszustände sperren nach dem ersten Win/Loss-Trigger weitere `endTurn()`-Callbacks, damit Victory-/Loss-Dialoge nicht doppelt geplant werden; Smoke-Flow prüft das ohne neue HUDs/Overlays.
+- [x] Home-Rest No-Op Polish — R am Home-Court überschreibt volle Saves nicht mehr unnötig, sondern gibt nur eine kurze bestehende Dialogbox-Rückmeldung; Smoke-Flow prüft Fit- und Heal-Rest ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

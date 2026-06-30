@@ -1424,6 +1424,14 @@ const HomeRest = {
 
   rest() {
     if (!this.isAvailable()) return false;
+    if (!this.needsRest()) {
+      // Keep the home-court interaction useful during playtests without touching
+      // the save slot or adding another HUD: a tiny dialog tells the player they
+      // are already ready to route toward the next rival.
+      startDialog('HOME COURT', 'Mama: Du bist schon fit. Raus auf den Court!');
+      gameState = 'DIALOG';
+      return true;
+    }
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
     SaveSystem.save('Rested at home');

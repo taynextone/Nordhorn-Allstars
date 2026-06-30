@@ -158,6 +158,26 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(gameState === 'OVERWORLD' && !dialog.active, 'intro dialog should close to overworld');
   out.push('intro=OVERWORLD');
 
+  SaveSystem.clear();
+  player.hp = player.maxHp;
+  player.energy = player.maxEnergy;
+  movePlayerToHomeGate();
+  HomeRest.rest();
+  assert(gameState === 'DIALOG' && dialog.subText.includes('schon fit'), 'full-health home rest should use only the existing dialog box');
+  assert(SaveSystem.hasSave() === false, 'full-health home rest should not create a redundant save slot');
+  closeDialog();
+  assert(gameState === 'OVERWORLD', 'full-health rest dialog should return to overworld');
+  player.hp = Math.max(1, player.maxHp - 10);
+  player.energy = Math.max(0, player.maxEnergy - 5);
+  movePlayerToHomeGate();
+  HomeRest.rest();
+  assert(SaveSystem.hasSave() === true, 'damaged home rest should still heal and save progress');
+  closeDialog();
+  SaveSystem.clear();
+  resetRunProgress();
+  gameState = 'OVERWORLD';
+  out.push('homeRest=no-op+heal');
+
   TouchControls.press('o', null);
   tick(1);
   TouchControls.release('o', null);

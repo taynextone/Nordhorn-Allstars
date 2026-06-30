@@ -281,6 +281,15 @@ function runSmokeFlow() {
   assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
   assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
   assert(get('ObjectiveTracker.getNextTrainer().name') === 'Klaus', 'Fresh overview routing should target the first unbeaten rival');
+  run('SaveSystem.clear(); player.hp = player.maxHp; player.energy = player.maxEnergy; movePlayerToHomeGate(); HomeRest.rest();');
+  assert(get('gameState') === 'DIALOG' && get('dialog.subText').includes('schon fit'), 'Full-health home rest should give compact feedback instead of silently overwriting save data');
+  assert(get('SaveSystem.hasSave()') === false, 'Full-health home rest should not create a redundant save slot');
+  closeDialog();
+  assert(get('gameState') === 'OVERWORLD', 'Full-health home rest dialog should return cleanly to overworld');
+  run('player.hp = Math.max(1, player.maxHp - 10); player.energy = Math.max(0, player.maxEnergy - 5); movePlayerToHomeGate(); HomeRest.rest();');
+  assert(get('SaveSystem.hasSave()') === true, 'Damaged home rest should still heal and save progress');
+  closeDialog();
+  run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
   run('TouchControls.press("o", null);');
   tick(1);
   run('TouchControls.release("o", null);');
