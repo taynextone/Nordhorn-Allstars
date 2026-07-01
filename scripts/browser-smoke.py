@@ -378,6 +378,9 @@ async def run_cdp_flow(ws_url: str) -> str:
     endTurn();
     flushTimers();
     if (i === trainers.length - 1) {
+      assert(gameState === 'DIALOG' && dialog.text === 'CHAMPION!', 'final victory should show champion dialog before credits');
+      assert(dialog.subText.startsWith('Coach Mihler besiegt · 5/5 · Final '), 'champion dialog should show final rival, progress and score in the existing dialog box');
+      assert(dialog.subText.includes('Nordhorn jubelt'), 'champion dialog should keep finale flavor without adding HUD chrome');
       closeDialog();
       assert(gameState === 'CREDITS', 'final victory should enter credits after champion dialog');
       press('Enter');

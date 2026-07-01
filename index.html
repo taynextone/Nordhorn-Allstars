@@ -1996,11 +1996,16 @@ function loseBattle() {
 
 function endBattle() {
   const defeatedTrainer = battle.currentTrainer;
+  const trainerName = defeatedTrainer ? defeatedTrainer.name : 'Rivale';
+  const finalScore = battle.playerScore + '-' + battle.enemyScore;
   clearBattleRuntimeState();
   gameState = 'OVERWORLD';
+  const beatenCount = trainers.filter(t => t.beaten).length;
   const allTrainersBeaten = trainers.every(t => t.beaten);
   if (allTrainersBeaten) {
-    startDialog('CHAMPION!', 'Nordhorn jubelt. Sogar Lingen schweigt für einen Moment.', () => {
+    // Final win uses the same existing dialog box as normal victories: compact
+    // progress + score, then credits via callback. No extra champion HUD/overlay.
+    startDialog('CHAMPION!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore + '. Nordhorn jubelt. Sogar Lingen schweigt.', () => {
       gameState = 'CREDITS';
     });
     return;
@@ -2008,9 +2013,6 @@ function endBattle() {
 
   // Keep post-battle feedback in the existing dialog box only: name the beaten
   // rival, final score and compact progress without adding battle/coach HUDs.
-  const beatenCount = trainers.filter(t => t.beaten).length;
-  const trainerName = defeatedTrainer ? defeatedTrainer.name : 'Rivale';
-  const finalScore = battle.playerScore + '-' + battle.enemyScore;
   startDialog('SIEG!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore + '. ' + (defeatedTrainer && defeatedTrainer.victoryLine ? defeatedTrainer.victoryLine : ''), () => {
     gameState = 'OVERWORLD';
   });

@@ -123,6 +123,7 @@ function assertCleanRenderPaths() {
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
   assert(code.includes("const finalScore = battle.playerScore + '-' + battle.enemyScore;"), 'Victory dialog should include the final battle score from existing state');
   assert(code.includes("trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Victory dialog should show rival progress and score in the existing dialog box');
+  assert(code.includes("startDialog('CHAMPION!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Champion dialog should also show final score/progress before credits without a new overlay');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
   assert(code.includes('function markTrainerBeaten(trainer)'), 'Trainer victory state should be synced through one small helper');
   assert(code.includes('function clearBattleRuntimeState()'), 'Post-battle and new-run flows should clear stale battle runtime state');
@@ -538,6 +539,9 @@ function runSmokeFlow() {
     flushTimers();
     flushTimers();
     if (i === trainerCount - 1) {
+      assert(get('dialog.text') === 'CHAMPION!', 'Final victory should show the champion dialog before credits');
+      assert(get('dialog.subText').startsWith('Coach Mihler besiegt · 5/5 · Final '), 'Champion dialog should include final rival, progress and score inside the existing dialog box');
+      assert(get('dialog.subText').includes('Nordhorn jubelt'), 'Champion dialog should keep the local finale flavor without adding HUD chrome');
       escape();
       assert(get('gameState') === 'CREDITS', 'Final victory Escape should honor Champion dialog callback and enter credits');
       confirm();
