@@ -131,6 +131,7 @@
 - [x] Home-Rest No-Op Polish — R am Home-Court überschreibt volle Saves nicht mehr unnötig, sondern gibt nur eine kurze bestehende Dialogbox-Rückmeldung; Smoke-Flow prüft Fit- und Heal-Rest ohne neue HUDs/Overlays.
 - [x] Continue Clean-State Sync — Continue lädt Fortschritt in die bestehende Dialogbox, leert stale Confirm-Inputs und setzt Minimap/Konami/Legacy-Overlay-Flags auf den sauberen Gameboy-Default zurück.
 - [x] New-Game Clean-State Sync — New Game und Continue teilen denselben Clean-View-Reset; frische Runs löschen stale Minimap/Konami/Legacy-Overlay-/Confirm-Zustände vor dem ersten Overworld-Frame.
+- [x] Home-Rest Input Ownership — R am Home-Court stoppt den Overworld-Frame sofort, damit gehaltene Bewegung nicht in Trainer-Encounter/Battle-Dialoge blutet; Smoke-Flow prüft den sauberen Dialog-State ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

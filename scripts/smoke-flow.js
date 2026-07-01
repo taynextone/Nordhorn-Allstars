@@ -294,6 +294,13 @@ function runSmokeFlow() {
   run('player.hp = Math.max(1, player.maxHp - 10); player.energy = Math.max(0, player.maxEnergy - 5); movePlayerToHomeGate(); HomeRest.rest();');
   assert(get('SaveSystem.hasSave()') === true, 'Damaged home rest should still heal and save progress');
   closeDialog();
+  run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD"; player.x = HomeRest.homeX; player.y = HomeRest.homeY; trainers[0].x = HomeRest.homeX + 1; trainers[0].y = HomeRest.homeY; trainers[0].beaten = false; keysPressed.r = true; keysPressed.ArrowRight = true; keys.ArrowRight = true;');
+  tick(6);
+  release('ArrowRight');
+  assert(get('gameState') === 'DIALOG' && get('dialog.text') === 'HOME COURT', 'Home-rest input should own the frame instead of bleeding into movement/trainer battle flow');
+  assert(get('battle.active') === false, 'Home-rest dialog must not be replaced by an adjacent trainer battle when a direction is held');
+  closeDialog();
+  run('trainers[0].x = 18; trainers[0].y = 12; keys.ArrowRight = false; keysPressed.ArrowRight = false;');
   run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
   run('TouchControls.press("o", null);');
   tick(1);

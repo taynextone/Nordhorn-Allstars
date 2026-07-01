@@ -2669,7 +2669,16 @@ function updateOverworld() {
   // Toggle minimap / full overview map
   if (wasPressed('m') || wasPressed('M')) { minimapVisible = !minimapVisible; }
   if (wasPressed('o') || wasPressed('O')) { gameState = 'OVERVIEW'; clearPressedInput(); return; }
-  if (wasPressed('r') || wasPressed('R')) { HomeRest.rest(); }
+  if (wasPressed('r') || wasPressed('R')) {
+    if (HomeRest.rest()) {
+      // Rest feedback opens the existing dialog box; stop this overworld frame so
+      // a held direction cannot move into a trainer and replace the home dialog
+      // with a battle intro. This keeps dialog/state flow deterministic without
+      // adding any new HUD or overlay chrome.
+      clearPressedInput();
+      return;
+    }
+  }
 
   if (keysPressed['ArrowLeft'] || keys['ArrowLeft']) { dx = -1; player.facing = 'left'; player.moving = true; }
   else if (keysPressed['ArrowRight'] || keys['ArrowRight']) { dx = 1; player.facing = 'right'; player.moving = true; }
