@@ -275,6 +275,12 @@ function runSmokeFlow() {
   assert(get('gameState') === 'DIALOG', 'Build confirm should open intro dialog');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Intro dialog should return to overworld');
+  run('keysPressed.Enter = true; keysPressed.a = true; startDialog("INPUT HYGIENE", "stale confirms cleared");');
+  assert(get('Object.values(keysPressed).every(value => !value)') === true, 'Dialog start should clear stale confirm input before the first dialog frame');
+  tick(1);
+  assert(get('gameState') === 'DIALOG' && get('dialog.active') === true, 'Stale confirm input must not instantly close a freshly opened dialog');
+  closeDialog();
+  assert(get('gameState') === 'OVERWORLD', 'Input-hygiene dialog should close back to overworld normally');
 
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');

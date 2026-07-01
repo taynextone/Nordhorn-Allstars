@@ -2000,6 +2000,9 @@ function startDialog(text, subText, onComplete = null) {
   dialog.timer = 0;
   dialog.typing = dialog.text.length > 0;
   dialog.onComplete = onComplete;
+  // Dialog boxes own their first input frame. Any stale confirm edge from the
+  // action/menu that opened the dialog must not instantly skip or close it.
+  clearPressedInput();
   // Non-battle dialogs must own the state so they can type, accept input,
   // and reliably return to the map after intro/load/victory/defeat flows.
   if (gameState !== 'BATTLE') gameState = 'DIALOG';
