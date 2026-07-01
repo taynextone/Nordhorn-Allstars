@@ -281,6 +281,9 @@ function runSmokeFlow() {
   assert(get('gameState') === 'DIALOG' && get('dialog.active') === true, 'Stale confirm input must not instantly close a freshly opened dialog');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Input-hygiene dialog should close back to overworld normally');
+  run('dialogCallbackCount = 0; startDialog("DOUBLE EDGE", "", () => { dialogCallbackCount++; gameState = "OVERWORLD"; }); dialog.displayed = dialog.text; dialog.charIndex = dialog.text.length; dialog.typing = false; keysPressed.Enter = true; keysPressed.Escape = true; updateDialog();');
+  assert(get('dialogCallbackCount') === 1, 'Simultaneous confirm+Escape should complete a dialog callback exactly once');
+  assert(get('dialog.active') === false && get('gameState') === 'OVERWORLD', 'Confirm-owned dialog frame should return cleanly without a second Escape close');
 
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');

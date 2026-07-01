@@ -213,6 +213,18 @@ async def run_cdp_flow(ws_url: str) -> str:
   out.push('continue=clean');
   out.push('newRun=clean');
 
+  let dialogCallbackCount = 0;
+  startDialog('DOUBLE EDGE', '', () => { dialogCallbackCount += 1; gameState = 'OVERWORLD'; });
+  dialog.displayed = dialog.text;
+  dialog.charIndex = dialog.text.length;
+  dialog.typing = false;
+  keysPressed.Enter = true;
+  keysPressed.Escape = true;
+  updateDialog();
+  assert(dialogCallbackCount === 1, 'simultaneous confirm+Escape should complete a dialog callback exactly once');
+  assert(!dialog.active && gameState === 'OVERWORLD', 'confirm-owned dialog frame should return cleanly without a second Escape close');
+  out.push('dialogDoubleEdge=clean');
+
   TouchControls.press('o', null);
   tick(1);
   TouchControls.release('o', null);
