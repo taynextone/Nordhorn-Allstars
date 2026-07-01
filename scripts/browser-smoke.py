@@ -195,6 +195,9 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(konamiIndex === 0 && easterEggActive === false, 'continue should clear transient Konami state');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'continue should keep legacy overlay flags hidden');
   assert(!keysPressed.Enter, 'continue should clear stale confirm input before dialog flow');
+  const repairedSave = JSON.parse(localStorage.getItem(SaveSystem.STORAGE_KEY));
+  assert(repairedSave.player.beatenTrainers.length === 1 && repairedSave.player.beatenTrainers[0] === 0, 'continue should persist repaired trainer progress');
+  assert(repairedSave.player.hp === player.hp && repairedSave.player.energy === player.energy, 'continue should persist sanitized vital stats');
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'continue dialog should close back to loaded overworld progress');
   SaveSystem.clear();

@@ -1141,10 +1141,10 @@ const SaveSystem = {
     catch (err) { return false; }
   },
 
-  collect() {
+  collect(savedAt = new Date().toISOString()) {
     return {
       version: 2,
-      savedAt: new Date().toISOString(),
+      savedAt,
       player: {
         x: player.x, y: player.y, facing: player.facing,
         gender: player.gender, build: player.build,
@@ -1213,6 +1213,12 @@ const SaveSystem = {
       player.beatenTrainers = trainers.filter(t => t.beaten).map(t => t.id);
       player.rivalBeaten = trainers.every(t => t.beaten);
       if (!isWalkable(player.x, player.y)) movePlayerToHomeGate();
+      // Persist the sanitized shape immediately after Continue. Older/corrupt
+      // slots may load successfully through the guards above, but without this
+      // repair pass they would stay broken on disk and re-trigger the same edge
+      // cases every session. This is data hygiene only; it does not add HUDs or
+      // change the clean dialog flow.
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.collect(data.savedAt || new Date().toISOString())));
       // Continue should resume gameplay, not transient view/debug state from the
       // current browser session. Keep the loaded run on the clean Gameboy view.
       resetCleanViewState();

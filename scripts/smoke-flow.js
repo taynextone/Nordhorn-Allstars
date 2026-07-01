@@ -375,6 +375,9 @@ function runSmokeFlow() {
   assert(get('player.beatenTrainers.length') === 2 && get('trainers[1].beaten && trainers[2].beaten') === true, 'Load should sync only known valid trainer IDs from mixed save shapes');
   assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'Load should recover invalid save positions to the home gate immediately');
   assert(get('isWalkable(player.x, player.y)') === true, 'Sanitized save position must be walkable');
+  assert(get('JSON.parse(localStorage.getItem(SaveSystem.STORAGE_KEY)).player.hp') === 1, 'Continue should persist repaired HP back into the save slot');
+  assert(get('JSON.parse(localStorage.getItem(SaveSystem.STORAGE_KEY)).player.build') === 'shooter', 'Continue should persist repaired build data back into the save slot');
+  assert(get('JSON.parse(localStorage.getItem(SaveSystem.STORAGE_KEY)).player.beatenTrainers.join(",")') === '1,2', 'Continue should persist deduped valid trainer progress back into the save slot');
   closeDialog();
   run('SaveSystem.clear(); resetRunProgress(); gameState = "OVERWORLD";');
 
