@@ -198,9 +198,20 @@ async def run_cdp_flow(ws_url: str) -> str:
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'continue dialog should close back to loaded overworld progress');
   SaveSystem.clear();
+  minimapVisible = true;
+  konamiIndex = 3;
+  easterEggActive = true;
+  ControlsHelp.visible = true;
+  ScoutCard.visible = true;
+  CoachTip.visible = true;
+  keysPressed.Enter = true;
   resetRunProgress();
+  assert(!minimapVisible && konamiIndex === 0 && easterEggActive === false, 'new run should reset optional view/easter state before overworld');
+  assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'new run should clear dormant legacy overlay flags');
+  assert(!keysPressed.Enter, 'new run should clear stale confirm input');
   gameState = 'OVERWORLD';
   out.push('continue=clean');
+  out.push('newRun=clean');
 
   TouchControls.press('o', null);
   tick(1);

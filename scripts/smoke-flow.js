@@ -44,6 +44,9 @@ function assertCleanRenderPaths() {
     assert(!battle.includes(token), 'drawBattle reintroduced overlay token: ' + token);
   }
   assert(overworld.includes('drawCleanOverworldHUD()'), 'Overworld must use the compact clean HUD');
+  assert(code.includes('function resetCleanViewState()'), 'New Game and Continue should share the same clean view-state reset helper');
+  assert(code.includes('resetCleanViewState();\n      gameState = \'OVERWORLD\';'), 'Continue should use the shared clean view reset before showing the load dialog');
+  assert(!code.includes('minimapVisible = false;\n      konamiIndex = 0;\n      easterEggActive = false;'), 'Continue should not duplicate stale clean-state reset logic');
   assert(code.includes('let minimapVisible = false;'), 'Minimap should default off for a clean overworld');
   assert(code.includes("reference: 'green-cap-8'"), 'Klaus should use the user-provided green-cap #8 visual reference');
   assert(code.includes("reference: 'hijab-green-vest'"), 'Anna should use the user-provided hijab/green-vest visual reference');
@@ -275,9 +278,11 @@ function runSmokeFlow() {
 
   assert(!get('ControlsHelp.visible') && !get('ScoutCard.visible') && !get('CoachTip.visible'), 'Legacy overlays must stay hidden');
   assert(get('minimapVisible') === false, 'Minimap should default off after the clean-UI pass');
-  run('minimapVisible = true; konamiIndex = 4; easterEggActive = true; resetRunProgress(); gameState = "OVERWORLD";');
+  run('minimapVisible = true; konamiIndex = 4; easterEggActive = true; ControlsHelp.visible = true; ScoutCard.visible = true; CoachTip.visible = true; keysPressed.Enter = true; resetRunProgress(); gameState = "OVERWORLD";');
   assert(get('minimapVisible') === false, 'New runs should reset optional minimap state to the clean default view');
   assert(get('konamiIndex') === 0 && get('easterEggActive') === false, 'New runs should not inherit old Konami/easter-egg state');
+  assert(get('!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible'), 'New runs should also clear dormant legacy overlay flags before the first overworld frame');
+  assert(get('!keysPressed.Enter'), 'New runs should clear stale confirm input before intro/dialog flow');
   assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
   assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
   assert(get('ObjectiveTracker.getNextTrainer().name') === 'Klaus', 'Fresh overview routing should target the first unbeaten rival');

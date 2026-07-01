@@ -1215,13 +1215,7 @@ const SaveSystem = {
       if (!isWalkable(player.x, player.y)) movePlayerToHomeGate();
       // Continue should resume gameplay, not transient view/debug state from the
       // current browser session. Keep the loaded run on the clean Gameboy view.
-      minimapVisible = false;
-      konamiIndex = 0;
-      easterEggActive = false;
-      [ControlsHelp, ScoutCard, CoachTip].forEach(panel => {
-        if (panel) panel.visible = false;
-      });
-      clearPressedInput();
+      resetCleanViewState();
       gameState = 'OVERWORLD';
       startDialog('Save geladen!', 'Nordhorn wartet. Die Lingen-Rivalen auch.');
       this.lastMessage = 'Save loaded';
@@ -1283,6 +1277,19 @@ const SaveSystem = {
   }
 };
 
+function resetCleanViewState() {
+  // Shared clean-screen reset for New Game and Continue. This prevents optional
+  // view state (mini-map, Konami bonus, or dormant legacy panels) from leaking
+  // from an old browser session into a fresh readable Gameboy playfield.
+  minimapVisible = false;
+  konamiIndex = 0;
+  easterEggActive = false;
+  [ControlsHelp, ScoutCard, CoachTip].forEach(panel => {
+    if (panel) panel.visible = false;
+  });
+  clearPressedInput();
+}
+
 function resetRunProgress() {
   movePlayerToHomeGate();
   player.level = 1;
@@ -1296,11 +1303,7 @@ function resetRunProgress() {
   player.beatenTrainers = [];
   player.rivalBeaten = false;
   trainers.forEach(t => { t.beaten = false; });
-  // Starting over should always return to the clean default Gameboy view.
-  // Do not carry optional map/debug/easter-egg state from a finished or loaded run.
-  minimapVisible = false;
-  konamiIndex = 0;
-  easterEggActive = false;
+  resetCleanViewState();
 }
 
 // ============================================================
