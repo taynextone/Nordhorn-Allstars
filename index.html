@@ -2007,10 +2007,11 @@ function endBattle() {
   }
 
   // Keep post-battle feedback in the existing dialog box only: name the beaten
-  // rival and show compact progress without adding any battle/coach HUD modules.
+  // rival, final score and compact progress without adding battle/coach HUDs.
   const beatenCount = trainers.filter(t => t.beaten).length;
   const trainerName = defeatedTrainer ? defeatedTrainer.name : 'Rivale';
-  startDialog('Victory!', trainerName + ' besiegt! Siege: ' + beatenCount + '/' + trainers.length + '. ' + (defeatedTrainer && defeatedTrainer.victoryLine ? defeatedTrainer.victoryLine : ''), () => {
+  const finalScore = battle.playerScore + '-' + battle.enemyScore;
+  startDialog('SIEG!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore + '. ' + (defeatedTrainer && defeatedTrainer.victoryLine ? defeatedTrainer.victoryLine : ''), () => {
     gameState = 'OVERWORLD';
   });
 }

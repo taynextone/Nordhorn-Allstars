@@ -358,8 +358,8 @@ async def run_cdp_flow(ws_url: str) -> str:
   battle.playerScore = battle.currentTrainer.ptsToWin;
   endTurn();
   flushTimers();
-  assert(gameState === 'DIALOG' && dialog.active && dialog.text === 'Victory!', 'victory should show dialog');
-  assert(dialog.subText.startsWith('Klaus besiegt! Siege: 1/5'), 'victory dialog should show compact rival progress in the existing dialog box');
+  assert(gameState === 'DIALOG' && dialog.active && dialog.text === 'SIEG!', 'victory should show compact localized dialog');
+  assert(dialog.subText.startsWith('Klaus besiegt · 1/5 · Final '), 'victory dialog should show compact rival progress and score in the existing dialog box');
   assert(dialog.subText.includes('Wohnhof'), 'victory dialog should include local story flavor without adding a HUD');
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'victory dialog should return to overworld and mark win');

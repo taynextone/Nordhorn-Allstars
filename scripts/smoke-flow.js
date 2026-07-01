@@ -121,7 +121,8 @@ function assertCleanRenderPaths() {
   assert(code.includes('getWrappedDialogLines(dialog.displayed, 46, 3)'), 'Main dialog text should clamp with an in-box ellipsis instead of silent slicing');
   assert(code.includes('getWrappedDialogLines(dialog.subText, 52, 2)'), 'Dialog subtext should clamp with an in-box ellipsis instead of silent slicing');
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
-  assert(code.includes("trainerName + ' besiegt! Siege: '"), 'Victory dialog should show rival progress in the existing dialog box');
+  assert(code.includes("const finalScore = battle.playerScore + '-' + battle.enemyScore;"), 'Victory dialog should include the final battle score from existing state');
+  assert(code.includes("trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Victory dialog should show rival progress and score in the existing dialog box');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
   assert(code.includes('function markTrainerBeaten(trainer)'), 'Trainer victory state should be synced through one small helper');
   assert(code.includes('function clearBattleRuntimeState()'), 'Post-battle and new-run flows should clear stale battle runtime state');
@@ -431,7 +432,8 @@ function runSmokeFlow() {
   flushTimers();
   flushTimers();
   assert(get('gameState') === 'DIALOG', 'Enemy HP KO should flow into the victory dialog');
-  assert(get('dialog.subText').startsWith('Klaus besiegt! Siege: 1/5'), 'Victory dialog should name the rival and compact progress without extra HUD');
+  assert(get('dialog.text') === 'SIEG!', 'Victory dialog title should stay compact and localized');
+  assert(get('dialog.subText').startsWith('Klaus besiegt · 1/5 · Final '), 'Victory dialog should name the rival, score and compact progress without extra HUD');
   assert(get('dialog.subText').includes('Wohnhof'), 'Victory dialog should include the new local story flavor in the existing dialog box');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Enemy HP KO victory dialog should return to overworld');
