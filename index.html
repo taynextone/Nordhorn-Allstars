@@ -1137,8 +1137,10 @@ const SaveSystem = {
   toastTimer: 0,
 
   hasSave() {
-    try { return !!localStorage.getItem(this.STORAGE_KEY); }
-    catch (err) { return false; }
+    // Title-screen Continue should only appear for a slot that can at least be
+    // summarized. Raw/corrupt localStorage used to show CONTINUE and then bounce
+    // back with no readable flow; keep the title clean until a real save exists.
+    return !!this.getInfo();
   },
 
   collect(savedAt = new Date().toISOString()) {
@@ -1249,6 +1251,7 @@ const SaveSystem = {
       const raw = localStorage.getItem(this.STORAGE_KEY);
       if (!raw) return null;
       const data = JSON.parse(raw);
+      if (!data || !data.player) return null;
       const p = data.player || {};
       const date = data.savedAt ? new Date(data.savedAt) : null;
       const knownTrainerIds = new Set(trainers.map(t => t.id));

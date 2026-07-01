@@ -174,14 +174,17 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(SaveSystem.hasSave() === true, 'damaged home rest should still heal and save progress');
   closeDialog();
   SaveSystem.clear();
-  resetRunProgress();
-  gameState = 'OVERWORLD';
+  localStorage.setItem(SaveSystem.STORAGE_KEY, 'not-json');
+  assert(SaveSystem.hasSave() === false, 'corrupt raw save should not expose a dead Continue option');
+  localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({ version: 2, trainers: [{ id: 0, beaten: true }] }));
+  assert(SaveSystem.getInfo() === null && SaveSystem.hasSave() === false, 'save without player payload should stay hidden from Continue');
   localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,
     savedAt: '2026-01-03T00:00:00.000Z',
     player: { level: 2, hp: 80, maxHp: 100, energy: 10, maxEnergy: 20, moves: ['Layup', 'Jump Shot'], beatenTrainers: [] },
     trainers: [{ id: 0, beaten: true }]
   }));
+  assert(SaveSystem.hasSave() === true, 'valid repaired save should expose Continue');
   minimapVisible = true;
   konamiIndex = 5;
   easterEggActive = true;

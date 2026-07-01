@@ -348,12 +348,18 @@ function runSmokeFlow() {
   confirm('b');
   assert(get('gameState') === 'OVERWORLD', 'A/B/Enter-style confirm should close the overview screen as hinted');
 
+  run('localStorage.setItem(SaveSystem.STORAGE_KEY, "not-json");');
+  assert(get('SaveSystem.hasSave()') === false, 'Corrupt raw save should not expose a dead Continue option');
+  run('localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({ version: 2, trainers: [{ id: 0, beaten: true }] }));');
+  assert(get('SaveSystem.getInfo()') === null && get('SaveSystem.hasSave()') === false, 'Save without player payload should stay hidden from Continue');
+
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,
     savedAt: '2026-01-01T00:00:00.000Z',
-    player: { level: 3, hp: 77, maxHp: 100, energy: 12, maxEnergy: 20, moves: ['Layup'], beatenTrainers: [] },
+    player: { level: 2, beatenTrainers: [] },
     trainers: [{ id: 0, beaten: true }, { id: 2, beaten: true }]
   }))`);
+  assert(get('SaveSystem.hasSave()') === true, 'Valid legacy save should expose Continue');
   assert(get('SaveSystem.getInfo().beaten') === 2, 'Continue info should count legacy trainer-state saves');
   run('minimapVisible = true; konamiIndex = 6; easterEggActive = true; ControlsHelp.visible = true; ScoutCard.visible = true; CoachTip.visible = true; keysPressed.Enter = true;');
   assert(get('SaveSystem.load()') === true, 'Legacy trainer-state save should load');
