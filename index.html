@@ -431,7 +431,8 @@ function drawCredits() {
     '--- LOCATIONS ---',
     '',
     'Nordhorn',
-    'Lingen',
+    'Lingen-Bahnhof',
+    'Lingen-Hafen',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -567,7 +568,13 @@ function generateMap() {
   setCourt(31, 47, 40, 54);
   setBuilding(6, 46, 13, 50, 9);
 
-  [[16,39],[17,39],[48,33],[49,33],[31,26],[32,26],[10,53],[11,53]].forEach(([x,y]) => worldMap[y][x] = T.BENCH);
+  // Lingen route extension: a small border-court and harbor approach make the
+  // rival-city arc playable content instead of a name on the map only.
+  setCourt(3, 53, 12, 58);
+  setRect(9, 50, 11, 58, T.PATH);
+  setBuilding(14, 53, 21, 57, 17);
+
+  [[16,39],[17,39],[48,33],[49,33],[31,26],[32,26],[10,53],[11,53],[6,56],[17,58]].forEach(([x,y]) => worldMap[y][x] = T.BENCH);
   [[18,12],[19,12],[28,14],[38,14],[45,34],[46,34],[7,34],[8,34],[16,6],[19,6],[52,40],[53,40]].forEach(([x,y]) => {
     if (worldMap[y] && worldMap[y][x] === T.GRASS) worldMap[y][x] = T.FLOWER;
   });
@@ -610,7 +617,8 @@ const MAP_LANDMARKS = [
   { id: 'tierpark', label: 'TIERPARK', x: 52, y: 23, kind: 'park' },
   { id: 'stadion', label: 'HALLE', x: 40, y: 43, kind: 'boss' },
   { id: 'industrie', label: 'INDUSTRIE', x: 50, y: 45, kind: 'hard' },
-  { id: 'lingen', label: '→ LINGEN', x: 8, y: 53, kind: 'route' },
+  { id: 'lingen', label: '→ LINGEN', x: 8, y: 55, kind: 'route' },
+  { id: 'hafen', label: 'HAFEN', x: 17, y: 55, kind: 'hard' },
 ];
 
 // ============================================================
@@ -1034,7 +1042,9 @@ const trainers = [
   { id: 1, name: 'Anna', x: 36, y: 42, colors: { hat: '#1f2f1f', body: '#2f8f4a', pants: '#203030' }, sprite: { reference: 'hijab-green-vest', accessory: 'hijab', skin: '#c89068', hair: '#1f2f1f', jersey: '#2f8f4a', trim: '#d8f8c8', pants: '#203030', number: '23' }, dialogue: 'Anna vom Park: Ruhige Hände, grünes Jersey. Zwischen Vechte-Wind und Asphalt zählt Technik.', victoryLine: 'Anna lächelt: Dein Wurf hat Park-Niveau.', beaten: false, playerHp: 98, enemyEnergy: 20, level: 2, ptsToWin: 15, offense: 5, defense: 3, regen: 3, expReward: 38, aiStyle: 'Shooter' },
   { id: 2, name: 'Markus', x: 45, y: 8, colors: { hat: '#203f8f', body: '#2f67c8', pants: '#18284f' }, sprite: { reference: 'blue-defender-33', accessory: 'headband', skin: '#d8a070', hair: '#203f8f', jersey: '#2f67c8', trim: '#f8f8ff', pants: '#18284f', number: '33' }, dialogue: 'Markus am Schulhof: Breite Defense, blaues Trikot. Wer nach Lingen will, muss an mir vorbei.', victoryLine: 'Markus lacht: Deine Handles sind kein Zaubertrick.', beaten: false, playerHp: 116, enemyEnergy: 23, level: 3, ptsToWin: 17, offense: 6, defense: 6, regen: 3, expReward: 50, aiStyle: 'Defender' },
   { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#c8c8b8', body: '#7f4bc1', pants: '#244f2a' }, sprite: { reference: 'purple-green-grayhair', accessory: 'grayHair', skin: '#c89068', hair: '#c8c8b8', jersey: '#7f4bc1', trim: '#9fe070', pants: '#244f2a', number: '21' }, dialogue: 'Sophie vom Spielplatz: Graue Haare, lila Drive. Hier gewinnt, wer bei Lärm ruhig bleibt.', victoryLine: 'Sophie zeigt Respekt: Du hast Nerven aus Stahl.', beaten: false, playerHp: 134, enemyEnergy: 26, level: 4, ptsToWin: 19, offense: 8, defense: 6, regen: 4, expReward: 64, aiStyle: 'Playmaker' },
-  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Clipboard raus, Ball fest. Nordhorns Halle ist still. Lingen hört zu.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 145, enemyEnergy: 28, level: 5, ptsToWin: 19, offense: 9, defense: 7, regen: 4, expReward: 88, aiStyle: 'Coach' },
+  { id: 5, name: 'Sven', x: 8, y: 55, colors: { hat: '#283838', body: '#5b6468', pants: '#253030' }, sprite: { reference: 'lingen-steel-screen', accessory: 'headband', skin: '#d8a070', hair: '#4a4a48', jersey: '#5b6468', trim: '#d0e0e0', pants: '#253030', number: '11' }, dialogue: 'Sven vom Lingen-Bahnhof: Stahlgraues Jersey, harte Screens. Wenn Nordhorn rüberkommt, muss es hier zuerst stoppen.', victoryLine: 'Sven schnaubt: Okay. Die Grenze gehört heute deinem ersten Schritt.', beaten: false, playerHp: 142, enemyEnergy: 27, level: 5, ptsToWin: 19, offense: 8, defense: 8, regen: 4, expReward: 76, aiStyle: 'Defender' },
+  { id: 6, name: 'Rashta', x: 17, y: 55, colors: { hat: '#1f3048', body: '#345b8c', pants: '#1b2438' }, sprite: { reference: 'lingen-harbor-storm', accessory: 'hijab', skin: '#c89068', hair: '#1f3048', jersey: '#345b8c', trim: '#b8d8ff', pants: '#1b2438', number: '13' }, dialogue: 'Rashta am Hafen: Wind von der Ems, Ball tief, Blick kalt. Lingen will sehen, ob Nordhorn auch auswärts wirft.', victoryLine: 'Rashta nickt knapp: Dein Wurf klingt sogar im Hafen nach Netz.', beaten: false, playerHp: 154, enemyEnergy: 30, level: 6, ptsToWin: 21, offense: 10, defense: 8, regen: 4, expReward: 92, aiStyle: 'Playmaker' },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Clipboard raus, Ball fest. Nordhorns Halle ist still. Lingen hört zu.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 162, enemyEnergy: 32, level: 7, ptsToWin: 21, offense: 11, defense: 9, regen: 4, expReward: 110, aiStyle: 'Coach' },
 ];
 
 function getTrainerSpriteOptions(trainer, facing = 'down', scale = 1, hasBall = false) {
