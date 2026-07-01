@@ -293,12 +293,12 @@ const ErrorGuard = {
   overlayTimer: 0,
   validStates: ['TITLE', 'CHARSELECT', 'OVERWORLD', 'OVERVIEW', 'BATTLE', 'DIALOG', 'LOST', 'CREDITS'],
 
-  record(source, error) {
+  record(source, error, options = {}) {
     const message = error && error.message ? error.message : String(error || 'Unknown error');
     this.errors.unshift({ source, message, frame: (typeof frameCount !== 'undefined' ? frameCount : 0) });
     this.errors = this.errors.slice(0, 4);
     this.overlayTimer = 300;
-    if (window.console && console.error) console.error('[ErrorGuard]', source, error);
+    if (options.console !== false && window.console && console.error) console.error('[ErrorGuard]', source, error);
   },
 
   safe(source, fn, fallback) {
@@ -318,7 +318,7 @@ const ErrorGuard = {
     }
 
     if (!Number.isFinite(player.x) || !Number.isFinite(player.y) || !isWalkable(player.x, player.y)) {
-      this.record('player-position', 'Recovered invalid position ' + player.x + ',' + player.y);
+      this.record('player-position', 'Recovered invalid position ' + player.x + ',' + player.y, { console: false });
       // Recover to the same walkable home-gate tile used by new-game, loss,
       // and HomeRest. The old y=6 fallback was inside the house, which made
       // ErrorGuard re-trigger every frame after a corrupt save/edge-case warp.
@@ -3225,7 +3225,9 @@ function gameLoop() {
     }
 
     SaveSystem.renderToast();
-    ErrorGuard.renderOverlay();
+    // ErrorGuard recoveries stay logged internally only. Do not draw a runtime
+    // overlay over Overworld/Battle/Dialog; the post-declutter playfield must
+    // remain classic Gameboy UI with only the core HUD/message boxes.
   }, () => {
     ctx.fillStyle = C.DARKEST;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);

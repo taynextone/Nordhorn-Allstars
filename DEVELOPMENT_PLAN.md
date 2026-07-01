@@ -137,6 +137,7 @@
 - [x] Continue-Save Repair Persistence — Continue schreibt sanitisierte alte/kaputte Saves sofort in sauberer V2-Form zurück, damit reparierte HP/EN/Build-/Trainerdaten beim nächsten Start stabil bleiben; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Continue-Mixed-Progress Merge — Continue vereinigt beatenTrainers und alte Trainer-Snapshots, statt gültige Siege durch stale `beaten:false`-Zeilen zu verlieren; Smoke-Flow prüft Persistenz ohne neue HUDs/Overlays.
 - [x] Battle-Runtime Cleanup — New Game, Victory-, Loss- und Champion-Flows räumen stale Battle-Trainer/Move-Listen/Result-Locks weg, damit Dialoge sauber in Overworld/Credits zurückführen ohne neue HUDs/Overlays.
+- [x] ErrorGuard Overlay Declutter — erwartete Recovery-Fälle bleiben intern diagnostizierbar, zeichnen aber kein zusätzliches Fehler-Overlay mehr über Overworld/Battle/Dialog; Smoke-Flow prüft die saubere UI-Grenze.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

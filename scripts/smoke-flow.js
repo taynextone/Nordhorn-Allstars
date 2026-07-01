@@ -107,6 +107,8 @@ function assertCleanRenderPaths() {
   assert(battleHud.includes('drawWrappedBattleText'), 'Battle messages should wrap inside the compact message box');
   assert(code.includes('function getCompactBattleTextLines('), 'Battle message wrapping should be testable and shared');
   assert(!code.includes('PerfHUD'), 'Dormant FPS/stat HUD code should stay removed from runtime and module registry');
+  assert(!code.includes('ErrorGuard.renderOverlay();'), 'Runtime recoveries must not draw an extra overlay over the clean Gameboy playfield');
+  assert(code.includes("this.record('player-position', 'Recovered invalid position ' + player.x + ',' + player.y, { console: false });"), 'Expected position recovery should stay silent during smoke/playtest flows');
   assert(battleHud.includes('getCompactBattleTextLines(text, 13, maxLines)'), 'Battle message box must use the compact anti-overflow wrapper');
   assert(battleHud.includes('battle.feedbackTimer > 0'), 'Select-phase battle feedback must be readable in the core message box');
   assert(battleHud.includes('const clampBarWidth ='), 'Battle HP/EN bars must clamp to their compact boxes');
@@ -521,6 +523,7 @@ function runSmokeFlow() {
   run('player.x = 3; player.y = 4; ErrorGuard.validateGameState();');
   assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'ErrorGuard should recover corrupt positions to the walkable home gate');
   assert(get('isWalkable(player.x, player.y)') === true, 'ErrorGuard recovery tile must be walkable');
+  assert(get('ErrorGuard.errors[0].source') === 'player-position', 'ErrorGuard should keep silent recovery diagnostics internally');
 
   const trainerCount = get('trainers.length');
   for (let i = 0; i < trainerCount; i++) {
