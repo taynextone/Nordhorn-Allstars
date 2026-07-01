@@ -1386,6 +1386,7 @@ function setupTouchControls() {
   const enabled = TouchControls.shouldShow();
   if (enabled) root.classList.add('active');
 
+  const supportsPointerEvents = 'PointerEvent' in window;
   root.querySelectorAll('[data-key]').forEach(button => {
     const key = button.getAttribute('data-key');
     const down = (event) => {
@@ -1396,15 +1397,22 @@ function setupTouchControls() {
       if (event && event.preventDefault) event.preventDefault();
       TouchControls.release(key, button);
     };
-    button.addEventListener('pointerdown', down);
-    button.addEventListener('pointerup', up);
-    button.addEventListener('pointercancel', up);
-    button.addEventListener('pointerleave', up);
-    // Older mobile browsers without PointerEvent still get working buttons.
-    button.addEventListener('touchstart', down, { passive: false });
-    button.addEventListener('touchend', up, { passive: false });
-    button.addEventListener('mousedown', down);
-    button.addEventListener('mouseup', up);
+    if (supportsPointerEvents) {
+      // Prefer one unified input stream. Registering pointer + touch + mouse on
+      // modern mobile browsers can synthesize a second confirm after release and
+      // skip the next dialog/battle menu. This keeps touch UX deterministic
+      // without adding any screen chrome.
+      button.addEventListener('pointerdown', down);
+      button.addEventListener('pointerup', up);
+      button.addEventListener('pointercancel', up);
+      button.addEventListener('pointerleave', up);
+    } else {
+      // Older mobile browsers without PointerEvent still get working buttons.
+      button.addEventListener('touchstart', down, { passive: false });
+      button.addEventListener('touchend', up, { passive: false });
+      button.addEventListener('mousedown', down);
+      button.addEventListener('mouseup', up);
+    }
   });
   window.addEventListener('blur', () => TouchControls.releaseAll());
   return enabled;

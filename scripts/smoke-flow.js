@@ -170,6 +170,9 @@ function assertCleanRenderPaths() {
   assert(code.includes('function setupTouchControls()'), 'Mobile touch controls should be wired, not just static HTML');
   assert(code.includes('setupTouchControls();'), 'Runtime init should activate touch controls when touch is available');
   assert(code.includes('TouchControls.press(key, button)'), 'Touch buttons should feed the same edge-triggered input path as keyboard controls');
+  assert(code.includes("const supportsPointerEvents = 'PointerEvent' in window;"), 'Touch controls should choose one event stream on modern browsers');
+  assert(code.includes('if (supportsPointerEvents) {'), 'Pointer-capable browsers should not also register fallback touch/mouse handlers');
+  assert(code.includes('can synthesize a second confirm after release'), 'Touch input guard should document the dialog-skip risk it prevents');
 
   const forbiddenLegacyToggles = ['ControlsHelp.toggle', 'ScoutCard.toggle', 'CoachTip.toggle'];
   for (const token of forbiddenLegacyToggles) {
