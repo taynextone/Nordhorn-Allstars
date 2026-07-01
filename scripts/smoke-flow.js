@@ -108,6 +108,9 @@ function assertCleanRenderPaths() {
   assert(code.includes('function getCompactBattleTextLines('), 'Battle message wrapping should be testable and shared');
   assert(!code.includes('PerfHUD'), 'Dormant FPS/stat HUD code should stay removed from runtime and module registry');
   assert(!code.includes('ErrorGuard.renderOverlay();'), 'Runtime recoveries must not draw an extra overlay over the clean Gameboy playfield');
+  assert(!code.includes('renderOverlay() {'), 'ErrorGuard should not keep dormant overlay drawing methods in the clean UI build');
+  assert(!code.includes('overlayTimer'), 'ErrorGuard recovery should stay log-only without overlay timers');
+  assert(code.includes("No error badges or overlays are"), 'ErrorGuard code should document that recovery stays off-screen');
   assert(code.includes("this.record('player-position', 'Recovered invalid position ' + player.x + ',' + player.y, { console: false });"), 'Expected position recovery should stay silent during smoke/playtest flows');
   assert(battleHud.includes('getCompactBattleTextLines(text, 13, maxLines)'), 'Battle message box must use the compact anti-overflow wrapper');
   assert(battleHud.includes('battle.feedbackTimer > 0'), 'Select-phase battle feedback must be readable in the core message box');

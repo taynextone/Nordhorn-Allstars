@@ -141,6 +141,7 @@
 - [x] Victory-Dialog Score Polish — Siegdialoge zeigen jetzt Rivalenfortschritt plus Finalscore in der bestehenden Dialogbox, ohne neue Battle-/Coach-HUDs oder Overlays.
 - [x] Champion-Dialog Score Sync — der finale Coach-Mihler-Sieg zeigt jetzt Rivalenname, 5/5-Fortschritt und Finalscore in derselben Champion-Dialogbox vor den Credits; VM-/Browser-Smokes sichern den Flow ohne neue Overlays.
 - [x] Continue-Corrupt-Slot Guard — kaputte/halbe LocalStorage-Slots blenden CONTINUE am Title sauber aus, statt in einen toten Ladeversuch zu laufen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] ErrorGuard Overlay-Code Cleanup — dormant ErrorGuard-Badge-/Overlay-Renderer und Overlay-Timer entfernt; Recovery bleibt intern/log-only, damit Overworld/Battle/Dialog auch bei Edge-Case-Reparaturen sauber bleiben.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

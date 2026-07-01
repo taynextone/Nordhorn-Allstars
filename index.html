@@ -290,14 +290,15 @@ const C = {
 
 const ErrorGuard = {
   errors: [],
-  overlayTimer: 0,
   validStates: ['TITLE', 'CHARSELECT', 'OVERWORLD', 'OVERVIEW', 'BATTLE', 'DIALOG', 'LOST', 'CREDITS'],
 
   record(source, error, options = {}) {
     const message = error && error.message ? error.message : String(error || 'Unknown error');
     this.errors.unshift({ source, message, frame: (typeof frameCount !== 'undefined' ? frameCount : 0) });
     this.errors = this.errors.slice(0, 4);
-    this.overlayTimer = 300;
+    // Runtime recovery stays internal/log-only. No error badges or overlays are
+    // drawn over Overworld/Battle/Dialog so the clean Gameboy screen remains
+    // readable even after recoverable edge cases.
     if (options.console !== false && window.console && console.error) console.error('[ErrorGuard]', source, error);
   },
 
@@ -344,30 +345,6 @@ const ErrorGuard = {
       gameState = 'OVERWORLD';
       startDialog('Der Kampf wurde sicher abgebrochen.', 'Zurück auf den Court!');
     }
-  },
-
-  renderBadge(x, y) {
-    const ok = this.errors.length === 0;
-    ctx.fillStyle = ok ? C.DARKEST : C.DARK;
-    ctx.fillRect(x - 58, y - 10, 116, 15);
-    ctx.fillStyle = C.LIGHT;
-    ctx.font = '6px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('ERROR GUARD: ' + (ok ? 'OK' : 'RECOVERED'), x, y);
-    ctx.textAlign = 'left';
-  },
-
-  renderOverlay() {
-    if (this.overlayTimer <= 0 || this.errors.length === 0) return;
-    this.overlayTimer--;
-    const latest = this.errors[0];
-    ctx.fillStyle = C.DARKEST;
-    ctx.fillRect(8, 8, 250, 36);
-    ctx.fillStyle = C.LIGHT;
-    ctx.font = '7px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('FEHLER ABGEFANGEN: ' + latest.source, 14, 22);
-    ctx.fillText(latest.message.substring(0, 34), 14, 34);
   }
 };
 
