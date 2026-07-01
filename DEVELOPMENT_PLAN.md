@@ -135,6 +135,7 @@
 - [x] Dialog-Start Input Hygiene — neue Dialoge löschen stale Confirm-Edges direkt beim Öffnen, damit Menü-/Touch-/Battle-Inputs keine Story- oder Victory-Box sofort überspringen; Smoke-Flow prüft das ohne neue HUDs/Overlays.
 - [x] Dialog-Double-Edge Guard — gleichzeitiges Confirm+Escape beendet Dialog-Callbacks nur einmal, damit Victory-/Champion-/Load-Flows nicht durch doppelte Eingabekanten churnen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Continue-Save Repair Persistence — Continue schreibt sanitisierte alte/kaputte Saves sofort in sauberer V2-Form zurück, damit reparierte HP/EN/Build-/Trainerdaten beim nächsten Start stabil bleiben; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] Continue-Mixed-Progress Merge — Continue vereinigt beatenTrainers und alte Trainer-Snapshots, statt gültige Siege durch stale `beaten:false`-Zeilen zu verlieren; Smoke-Flow prüft Persistenz ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

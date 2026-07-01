@@ -1204,7 +1204,11 @@ const SaveSystem = {
       if (Array.isArray(data.trainers)) {
         data.trainers.forEach(saved => {
           const trainer = saved ? trainers.find(t => t.id === normalizeTrainerId(saved.id)) : null;
-          if (trainer) trainer.beaten = !!saved.beaten;
+          // Merge old trainer snapshots with the player progress list. Some
+          // repaired/hand-edited saves can contain stale `beaten: false` trainer
+          // rows next to a valid player.beatenTrainers entry; Continue must keep
+          // the most complete progress instead of un-beating a rival.
+          if (trainer && saved.beaten) trainer.beaten = true;
         });
       }
       // Keep old/new save shapes in sync. Some saves contain trainer-state but

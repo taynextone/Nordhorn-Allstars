@@ -356,6 +356,18 @@ function runSmokeFlow() {
 
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,
+    savedAt: '2026-01-01T00:30:00.000Z',
+    player: { level: 3, hp: 80, maxHp: 100, energy: 12, maxEnergy: 20, moves: ['Layup'], beatenTrainers: [1] },
+    trainers: [{ id: 1, beaten: false }, { id: 3, beaten: true }]
+  }))`);
+  assert(get('SaveSystem.load()') === true, 'Mixed progress save should load');
+  assert(get('player.beatenTrainers.includes(1) && player.beatenTrainers.includes(3)'), 'Continue should union player progress and trainer snapshots');
+  assert(get('trainers[1].beaten && trainers[3].beaten') === true, 'Stale trainer false rows must not erase valid beaten progress');
+  assert(get('JSON.parse(localStorage.getItem(SaveSystem.STORAGE_KEY)).player.beatenTrainers.join(",")') === '1,3', 'Continue should persist merged progress back into the save slot');
+  closeDialog();
+
+  run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
+    version: 2,
     savedAt: '2026-01-02T00:00:00.000Z',
     player: {
       x: 3, y: 4, facing: 'sideways', gender: 'robot', build: 'hacker',
