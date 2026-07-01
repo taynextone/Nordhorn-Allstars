@@ -124,6 +124,8 @@ function assertCleanRenderPaths() {
   assert(code.includes('getWrappedDialogLines(dialog.displayed, 46, 3)'), 'Main dialog text should clamp with an in-box ellipsis instead of silent slicing');
   assert(code.includes('getWrappedDialogLines(dialog.subText, 52, 2)'), 'Dialog subtext should clamp with an in-box ellipsis instead of silent slicing');
   assert(code.includes('function setBattleMessage('), 'Battle message helper should clear stale submessages');
+  assert(code.includes("const toastVisibleStates = ['TITLE', 'OVERWORLD'];"), 'Save/load toast must be limited to title/overworld so it never covers battle/dialog/overview screens');
+  assert(code.includes('Save/load feedback must not cover dialog boxes, battle messages, credits,'), 'Save toast guard should document the clean-screen reason');
   assert(code.includes("const finalScore = battle.playerScore + '-' + battle.enemyScore;"), 'Victory dialog should include the final battle score from existing state');
   assert(code.includes("trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Victory dialog should show rival progress and score in the existing dialog box');
   assert(code.includes("startDialog('CHAMPION!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Champion dialog should also show final score/progress before credits without a new overlay');
@@ -385,6 +387,14 @@ function runSmokeFlow() {
   assert(get('trainers[1].beaten && trainers[3].beaten') === true, 'Stale trainer false rows must not erase valid beaten progress');
   assert(get('JSON.parse(localStorage.getItem(SaveSystem.STORAGE_KEY)).player.beatenTrainers.join(",")') === '1,3', 'Continue should persist merged progress back into the save slot');
   closeDialog();
+
+  run('SaveSystem.toastTimer = 3; gameState = "DIALOG"; SaveSystem.renderToast();');
+  assert(get('SaveSystem.toastTimer') === 2, 'Save toast should drain silently during dialogs instead of covering dialog text');
+  run('SaveSystem.toastTimer = 3; gameState = "BATTLE"; SaveSystem.renderToast();');
+  assert(get('SaveSystem.toastTimer') === 2, 'Save toast should drain silently during battles instead of covering the core battle UI');
+  run('SaveSystem.toastTimer = 3; gameState = "OVERWORLD"; SaveSystem.renderToast();');
+  assert(get('SaveSystem.toastTimer') === 2, 'Save toast may still appear on the clean overworld/title screens');
+  run('gameState = "OVERWORLD";');
 
   run(`localStorage.setItem(SaveSystem.STORAGE_KEY, JSON.stringify({
     version: 2,

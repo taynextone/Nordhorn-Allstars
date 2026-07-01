@@ -1253,6 +1253,14 @@ const SaveSystem = {
 
   renderToast() {
     if (this.toastTimer <= 0) return;
+    const toastVisibleStates = ['TITLE', 'OVERWORLD'];
+    if (!toastVisibleStates.includes(gameState)) {
+      // Save/load feedback must not cover dialog boxes, battle messages, credits,
+      // or the overview map. Let the timer drain silently in those states so the
+      // clean Gameboy screens stay readable without introducing another overlay.
+      this.toastTimer--;
+      return;
+    }
     this.toastTimer--;
     const alpha = Math.min(1, this.toastTimer / 30);
     ctx.globalAlpha = alpha;
