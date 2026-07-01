@@ -136,6 +136,7 @@
 - [x] Dialog-Double-Edge Guard — gleichzeitiges Confirm+Escape beendet Dialog-Callbacks nur einmal, damit Victory-/Champion-/Load-Flows nicht durch doppelte Eingabekanten churnen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Continue-Save Repair Persistence — Continue schreibt sanitisierte alte/kaputte Saves sofort in sauberer V2-Form zurück, damit reparierte HP/EN/Build-/Trainerdaten beim nächsten Start stabil bleiben; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Continue-Mixed-Progress Merge — Continue vereinigt beatenTrainers und alte Trainer-Snapshots, statt gültige Siege durch stale `beaten:false`-Zeilen zu verlieren; Smoke-Flow prüft Persistenz ohne neue HUDs/Overlays.
+- [x] Battle-Runtime Cleanup — New Game, Victory-, Loss- und Champion-Flows räumen stale Battle-Trainer/Move-Listen/Result-Locks weg, damit Dialoge sauber in Overworld/Credits zurückführen ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

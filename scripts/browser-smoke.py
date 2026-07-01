@@ -266,6 +266,15 @@ async def run_cdp_flow(ws_url: str) -> str:
   out.push('levelMove=Three Pointer');
 
   startBattle(trainers[0]);
+  battle.resultLocked = true;
+  resetRunProgress();
+  assert(!battle.active && battle.currentTrainer === null, 'new run should clear stale battle trainer state');
+  assert(battle.playerMoves.length === 0 && battle.enemyMoves.length === 0, 'new run should clear stale battle move lists');
+  assert(battle.resultLocked === false, 'new run should clear stale battle result locks');
+  gameState = 'OVERWORLD';
+  out.push('battleReset=clean');
+
+  startBattle(trainers[0]);
   tick(5);
   assert(gameState === 'BATTLE', 'startBattle should enter battle');
   assert(battle.phase === 'select', 'battle should start in move select');
@@ -354,6 +363,7 @@ async def run_cdp_flow(ws_url: str) -> str:
   assert(dialog.subText.includes('Wohnhof'), 'victory dialog should include local story flavor without adding a HUD');
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'victory dialog should return to overworld and mark win');
+  assert(!battle.active && battle.currentTrainer === null, 'victory should leave no stale active trainer state');
   assert(player.beatenTrainers.filter(id => id === 0).length === 1, 'first victory should save one unique trainer ID');
   assert(player.rivalBeaten === false, 'first non-final victory should not set champion flag early');
   out.push('firstVictoryWins=' + trainers.filter(t => t.beaten).length);
@@ -376,6 +386,7 @@ async def run_cdp_flow(ws_url: str) -> str:
       closeDialog();
       assert(gameState === 'OVERWORLD', 'trainer ' + i + ' victory should return to overworld');
     }
+    assert(!battle.active && battle.currentTrainer === null, 'trainer ' + i + ' should leave no stale active trainer state');
   }
   assert(trainers.every(t => t.beaten), 'all trainers should be beaten in browser flow');
   assert(player.rivalBeaten === true, 'final victory should sync champion progress before the save is reused');

@@ -122,6 +122,8 @@ function assertCleanRenderPaths() {
   assert(code.includes("trainerName + ' besiegt! Siege: '"), 'Victory dialog should show rival progress in the existing dialog box');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
   assert(code.includes('function markTrainerBeaten(trainer)'), 'Trainer victory state should be synced through one small helper');
+  assert(code.includes('function clearBattleRuntimeState()'), 'Post-battle and new-run flows should clear stale battle runtime state');
+  assert(code.includes('function resetRunProgress() {\n  clearBattleRuntimeState();'), 'New runs should reset stale battle state before the first overworld/dialog frame');
   assert(code.includes('if (!player.beatenTrainers.includes(trainer.id))'), 'Victory progress must not duplicate beaten trainer IDs');
   assert(code.includes('player.rivalBeaten = trainers.every(t => t.beaten);'), 'Final-win progress flag should be saved immediately after the champion battle');
   assert(code.includes('const newMove = MOVE_UNLOCKS[player.level];'), 'Level-up move unlocks should match the level just reached');
@@ -292,6 +294,11 @@ function runSmokeFlow() {
   assert(get('konamiIndex') === 0 && get('easterEggActive') === false, 'New runs should not inherit old Konami/easter-egg state');
   assert(get('!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible'), 'New runs should also clear dormant legacy overlay flags before the first overworld frame');
   assert(get('!keysPressed.Enter'), 'New runs should clear stale confirm input before intro/dialog flow');
+  run('startBattle(trainers[0]); battle.resultLocked = true; resetRunProgress();');
+  assert(get('battle.active') === false && get('battle.currentTrainer') === null, 'New runs should clear stale battle trainer state');
+  assert(get('battle.playerMoves.length') === 0 && get('battle.enemyMoves.length') === 0, 'New runs should clear stale battle move lists');
+  assert(get('battle.resultLocked') === false, 'New runs should clear stale battle result locks');
+  run('gameState = "OVERWORLD";');
   assert(get('MAP_LANDMARKS.length') >= 9, 'Overview map should expose the main Nordhorn landmarks');
   assert(get('MAP_LANDMARKS.some(m => m.label === "TIERPARK") && MAP_LANDMARKS.some(m => m.label === "→ LINGEN")') === true, 'Overview landmarks should include park and Lingen route');
   assert(get('ObjectiveTracker.getNextTrainer().name') === 'Klaus', 'Fresh overview routing should target the first unbeaten rival');
@@ -427,6 +434,7 @@ function runSmokeFlow() {
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Enemy HP KO victory dialog should return to overworld');
   assert(get('trainers[0].beaten') === true, 'Enemy HP KO should mark trainer beaten');
+  assert(get('battle.active') === false && get('battle.currentTrainer') === null, 'Victory dialog should leave no stale active trainer state');
   run('resetRunProgress(); gameState = "OVERWORLD";');
 
   run('startBattle(trainers[0])');
@@ -508,6 +516,7 @@ function runSmokeFlow() {
   assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'Loss respawn should use the safe home-gate helper');
   assert(get('isWalkable(player.x, player.y)') === true, 'Loss respawn tile must be walkable');
   assert(get('trainers[0].beaten') === false, 'Loss must not mark trainer beaten');
+  assert(get('battle.active') === false && get('battle.currentTrainer') === null, 'Loss dialog should leave no stale active trainer state');
 
   run('player.x = 3; player.y = 4; ErrorGuard.validateGameState();');
   assert(get('player.x') === get('HomeRest.homeX') && get('player.y') === get('HomeRest.homeY'), 'ErrorGuard should recover corrupt positions to the walkable home gate');
@@ -528,6 +537,7 @@ function runSmokeFlow() {
       assert(get('gameState') === 'CREDITS', 'Final victory Escape should honor Champion dialog callback and enter credits');
       confirm();
       assert(get('gameState') === 'TITLE', 'Credits confirm should return to title');
+      assert(get('battle.active') === false && get('battle.currentTrainer') === null, 'Champion credits path should leave no stale battle trainer state');
     } else {
       closeDialog();
       assert(get('gameState') === 'OVERWORLD', 'Victory dialog should return to overworld for trainer ' + i);

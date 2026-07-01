@@ -1301,6 +1301,7 @@ function resetCleanViewState() {
 }
 
 function resetRunProgress() {
+  clearBattleRuntimeState();
   movePlayerToHomeGate();
   player.level = 1;
   player.exp = 0;
@@ -1537,6 +1538,23 @@ function setBattleMessage(message, subMessage = '', feedbackTimer = 0) {
   battle.message = message;
   battle.subMessage = subMessage || '';
   battle.feedbackTimer = feedbackTimer;
+}
+
+function clearBattleRuntimeState() {
+  // Post-battle dialogs and fresh runs should not carry a stale trainer, queued
+  // move list, or result lock into the next state. Keep this data-only cleanup
+  // separate from rendering so the battle screen stays classic and uncluttered.
+  battle.active = false;
+  battle.currentTrainer = null;
+  battle.playerMoves = [];
+  battle.enemyMoves = [];
+  battle.playerTurn = true;
+  battle.phase = 'result';
+  battle.selectedMove = 0;
+  battle.animTimer = 0;
+  battle.resultLocked = false;
+  battle.playerBlockNext = false;
+  battle.enemyBlockNext = false;
 }
 
 function getCompactBattleTextLines(text, maxChars = 13, maxLines = 3) {
@@ -1963,7 +1981,7 @@ function winBattle() {
 function loseBattle() {
   battle.phase = 'result';
   setTimeout(() => {
-    battle.active = false;
+    clearBattleRuntimeState();
     // Reset to the same safe home gate used by new-game and ErrorGuard.
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
@@ -1978,7 +1996,7 @@ function loseBattle() {
 
 function endBattle() {
   const defeatedTrainer = battle.currentTrainer;
-  battle.active = false;
+  clearBattleRuntimeState();
   gameState = 'OVERWORLD';
   const allTrainersBeaten = trainers.every(t => t.beaten);
   if (allTrainersBeaten) {
