@@ -211,7 +211,15 @@ async def run_cdp_flow(ws_url: str) -> str:
   ScoutCard.visible = true;
   CoachTip.visible = true;
   keysPressed.Enter = true;
+  let staleBattleTimerFired = false;
+  startBattle(trainers[0]);
+  scheduleBattleCallback(() => { staleBattleTimerFired = true; battle.message = 'STALE TIMER'; }, 10);
   resetRunProgress();
+  gameState = 'OVERWORLD';
+  flushTimers();
+  assert(staleBattleTimerFired === false, 'new run should invalidate queued battle timers');
+  assert(battle.message !== 'STALE TIMER', 'stale battle timer should not mutate the reset state');
+  assert(!battle.active && battle.currentTrainer === null, 'new run should clear active battle state');
   assert(!minimapVisible && konamiIndex === 0 && easterEggActive === false, 'new run should reset optional view/easter state before overworld');
   assert(!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible, 'new run should clear dormant legacy overlay flags');
   assert(!keysPressed.Enter, 'new run should clear stale confirm input');

@@ -132,6 +132,8 @@ function assertCleanRenderPaths() {
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
   assert(code.includes('function markTrainerBeaten(trainer)'), 'Trainer victory state should be synced through one small helper');
   assert(code.includes('function clearBattleRuntimeState()'), 'Post-battle and new-run flows should clear stale battle runtime state');
+  assert(code.includes('function scheduleBattleCallback('), 'Delayed battle timers should be token-guarded against stale state callbacks');
+  assert(code.includes('battle.runtimeToken = (battle.runtimeToken || 0) + 1;'), 'Battle cleanup/start should invalidate queued runtime timers');
   assert(code.includes('function resetRunProgress() {\n  clearBattleRuntimeState();'), 'New runs should reset stale battle state before the first overworld/dialog frame');
   assert(code.includes('if (!player.beatenTrainers.includes(trainer.id))'), 'Victory progress must not duplicate beaten trainer IDs');
   assert(code.includes('player.rivalBeaten = trainers.every(t => t.beaten);'), 'Final-win progress flag should be saved immediately after the champion battle');
@@ -306,7 +308,10 @@ function runSmokeFlow() {
   assert(get('konamiIndex') === 0 && get('easterEggActive') === false, 'New runs should not inherit old Konami/easter-egg state');
   assert(get('!ControlsHelp.visible && !ScoutCard.visible && !CoachTip.visible'), 'New runs should also clear dormant legacy overlay flags before the first overworld frame');
   assert(get('!keysPressed.Enter'), 'New runs should clear stale confirm input before intro/dialog flow');
-  run('startBattle(trainers[0]); battle.resultLocked = true; resetRunProgress();');
+  run('startBattle(trainers[0]); battle.resultLocked = true; staleTimerFired = false; scheduleBattleCallback(() => { staleTimerFired = true; battle.message = "STALE TIMER"; }, 10); resetRunProgress(); gameState = "OVERWORLD";');
+  flushTimers();
+  assert(get('staleTimerFired') === false, 'New runs should invalidate queued battle timers before they can mutate the next flow');
+  assert(get('battle.message') !== 'STALE TIMER', 'Stale battle timers must not write into the clean post-reset state');
   assert(get('battle.active') === false && get('battle.currentTrainer') === null, 'New runs should clear stale battle trainer state');
   assert(get('battle.playerMoves.length') === 0 && get('battle.enemyMoves.length') === 0, 'New runs should clear stale battle move lists');
   assert(get('battle.resultLocked') === false, 'New runs should clear stale battle result locks');

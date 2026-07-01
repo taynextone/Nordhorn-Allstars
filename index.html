@@ -1080,6 +1080,7 @@ let battle = {
   hasBall: true,
   turnCount: 0,
   resultLocked: false,
+  runtimeToken: 0,
 };
 
 // Dialog state
@@ -1536,10 +1537,22 @@ function setBattleMessage(message, subMessage = '', feedbackTimer = 0) {
   battle.feedbackTimer = feedbackTimer;
 }
 
+function scheduleBattleCallback(callback, delay) {
+  // Battle turns use delayed callbacks for readable messages/animations. Tie each
+  // timer to the current battle token so an old timeout cannot fire after victory,
+  // loss, Continue, or New Game and corrupt the next clean dialog/state flow.
+  const token = battle.runtimeToken;
+  setTimeout(() => {
+    if (!battle.active || battle.runtimeToken !== token) return;
+    callback();
+  }, delay);
+}
+
 function clearBattleRuntimeState() {
   // Post-battle dialogs and fresh runs should not carry a stale trainer, queued
-  // move list, or result lock into the next state. Keep this data-only cleanup
-  // separate from rendering so the battle screen stays classic and uncluttered.
+  // move list, result lock, or delayed callback into the next state. Keep this
+  // data-only cleanup separate from rendering so the battle screen stays classic.
+  battle.runtimeToken = (battle.runtimeToken || 0) + 1;
   battle.active = false;
   battle.currentTrainer = null;
   battle.playerMoves = [];
@@ -1628,6 +1641,7 @@ function startBattle(trainer) {
   ScoutCard.visible = false;
   CoachTip.visible = false;
   battle.active = true;
+  battle.runtimeToken = (battle.runtimeToken || 0) + 1;
   battle.currentTrainer = trainer;
   battle.playerScore = 0;
   battle.enemyScore = 0;
@@ -1694,7 +1708,7 @@ function executePlayerMove() {
       battle.animTimer = 45;
       setBattleMessage('You catch breath...', '+' + PLAYER_ENERGY_REGEN + ' EN', 90);
       battle.turnCount++;
-      setTimeout(() => endTurn(), 900);
+      scheduleBattleCallback(() => endTurn(), 900);
       return;
     }
     // Keep low-energy turns playable: if the highlighted move is too expensive
@@ -1717,7 +1731,7 @@ function executePlayerMove() {
     battle.playerBlockNext = true;
     setBattleMessage('You prepare to block!', 'Next rival shot -50%');
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   } else if (move.special && move.name === 'Steal') {
     const success = Math.random() < (0.4 + player.stats.dribbling * 0.05);
     if (success) {
@@ -1732,12 +1746,12 @@ function executePlayerMove() {
       setBattleMessage('Steal failed!');
     }
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   } else if (move.type === 'buff') {
     battle.playerBuffed = true;
     setBattleMessage('Analyzing court... Next shot boosted!');
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   } else {
     // Attack move
     const calc = calculateDamage(move, player, { stats: { defense: battle.currentTrainer.defense || battle.currentTrainer.level * 2 } });
@@ -1764,7 +1778,7 @@ function executePlayerMove() {
       battle.hasBall = false;
     }
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   }
 }
 
@@ -1806,7 +1820,7 @@ function executeEnemyMove() {
     const regen = battle.currentTrainer.regen || 3;
     setBattleMessage(battle.currentTrainer.name + ' rests...', '+' + regen + ' EN');
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
     return;
   }
 
@@ -1819,7 +1833,7 @@ function executeEnemyMove() {
     battle.enemyBlockNext = true;
     setBattleMessage(battle.currentTrainer.name + ' prepares to block!', 'Next shot -50%');
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   } else if (move.special && move.name === 'Steal') {
     const success = Math.random() < (0.3 + battle.currentTrainer.level * 0.05);
     if (success) {
@@ -1834,12 +1848,12 @@ function executeEnemyMove() {
       setBattleMessage('Steal failed!');
     }
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   } else if (move.type === 'buff') {
     battle.enemyBuffed = true;
     setBattleMessage(battle.currentTrainer.name + ' analyzes the court...');
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   } else {
     const calc = calculateDamage(move, { stats: { shooting: battle.currentTrainer.offense || battle.currentTrainer.level * 2 } }, { stats: { defense: player.stats.defense } });
 
@@ -1866,7 +1880,7 @@ function executeEnemyMove() {
       battle.hasBall = true;
     }
     battle.turnCount++;
-    setTimeout(() => endTurn(), 1000);
+    scheduleBattleCallback(() => endTurn(), 1000);
   }
 }
 
@@ -1882,7 +1896,7 @@ function endTurn() {
     setBattleMessage('YOU WIN!', resultDetail);
     battle.phase = 'result';
     battle.resultLocked = true;
-    setTimeout(() => winBattle(), 2500);
+    scheduleBattleCallback(() => winBattle(), 2500);
     return;
   }
 
@@ -1890,7 +1904,7 @@ function endTurn() {
     setBattleMessage('You lost...', 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore);
     battle.phase = 'result';
     battle.resultLocked = true;
-    setTimeout(() => loseBattle(), 2500);
+    scheduleBattleCallback(() => loseBattle(), 2500);
     return;
   }
 
@@ -1898,7 +1912,7 @@ function endTurn() {
     setBattleMessage('You collapsed...', 'Score: ' + battle.playerScore + ' - ' + battle.enemyScore);
     battle.phase = 'result';
     battle.resultLocked = true;
-    setTimeout(() => loseBattle(), 2500);
+    scheduleBattleCallback(() => loseBattle(), 2500);
     return;
   }
 
@@ -1914,7 +1928,7 @@ function endTurn() {
     battle.playerTurn = false;
     battle.phase = 'anim';
     setBattleMessage(battle.currentTrainer.name + "'s turn...");
-    setTimeout(() => executeEnemyMove(), 800);
+    scheduleBattleCallback(() => executeEnemyMove(), 800);
   }
 }
 
@@ -1971,12 +1985,12 @@ function winBattle() {
 
   SaveSystem.save('Victory saved');
   battle.phase = 'result';
-  setTimeout(() => endBattle(), 2000);
+  scheduleBattleCallback(() => endBattle(), 2000);
 }
 
 function loseBattle() {
   battle.phase = 'result';
-  setTimeout(() => {
+  scheduleBattleCallback(() => {
     clearBattleRuntimeState();
     // Reset to the same safe home gate used by new-game and ErrorGuard.
     player.hp = player.maxHp;
