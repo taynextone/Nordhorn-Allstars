@@ -433,6 +433,7 @@ function drawCredits() {
     'Nordhorn',
     'Lingen-Bahnhof',
     'Lingen-Hafen',
+    'Arena Lingen',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -568,8 +569,8 @@ function generateMap() {
   setCourt(31, 47, 40, 54);
   setBuilding(6, 46, 13, 50, 9);
 
-  // Lingen route extension: a small border-court and harbor approach make the
-  // rival-city arc playable content instead of a name on the map only.
+  // Lingen route extension: border-court, harbor approach and arena stop make
+  // the rival-city arc playable content instead of a name on the map only.
   setCourt(3, 53, 12, 58);
   setRect(9, 50, 11, 58, T.PATH);
   setBuilding(14, 53, 21, 57, 17);
@@ -600,6 +601,12 @@ function generateMap() {
   setRect(54, 13, 57, 15, T.BRIDGE);
   setRect(52, 43, 57, 45, T.BRIDGE);
 
+  // Arena Lingen mini-boss court: a hard-edged away-game stop before the final
+  // Nordhorn coach. It is scenery/content, not another HUD or overlay layer.
+  setCourt(25, 53, 34, 58);
+  setRect(28, 50, 31, 53, T.PATH);
+  setBuilding(35, 53, 41, 58, 38);
+
   // Keep all trainer tiles reachable/visible on the new Nordhorn abstraction.
   trainers.forEach(t => {
     if (worldMap[t.y] && worldMap[t.y][t.x] !== T.WATER) worldMap[t.y][t.x] = T.PATH;
@@ -619,6 +626,7 @@ const MAP_LANDMARKS = [
   { id: 'industrie', label: 'INDUSTRIE', x: 50, y: 45, kind: 'hard' },
   { id: 'lingen', label: '→ LINGEN', x: 8, y: 55, kind: 'route' },
   { id: 'hafen', label: 'HAFEN', x: 17, y: 55, kind: 'hard' },
+  { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
 ];
 
 // ============================================================
@@ -1044,7 +1052,8 @@ const trainers = [
   { id: 3, name: 'Sophie', x: 16, y: 44, colors: { hat: '#c8c8b8', body: '#7f4bc1', pants: '#244f2a' }, sprite: { reference: 'purple-green-grayhair', accessory: 'grayHair', skin: '#c89068', hair: '#c8c8b8', jersey: '#7f4bc1', trim: '#9fe070', pants: '#244f2a', number: '21' }, dialogue: 'Sophie vom Spielplatz: Graue Haare, lila Drive. Hier gewinnt, wer bei Lärm ruhig bleibt.', victoryLine: 'Sophie zeigt Respekt: Du hast Nerven aus Stahl.', beaten: false, playerHp: 134, enemyEnergy: 26, level: 4, ptsToWin: 19, offense: 8, defense: 6, regen: 4, expReward: 64, aiStyle: 'Playmaker' },
   { id: 5, name: 'Sven', x: 8, y: 55, colors: { hat: '#283838', body: '#5b6468', pants: '#253030' }, sprite: { reference: 'lingen-steel-screen', accessory: 'headband', skin: '#d8a070', hair: '#4a4a48', jersey: '#5b6468', trim: '#d0e0e0', pants: '#253030', number: '11' }, dialogue: 'Sven vom Lingen-Bahnhof: Stahlgraues Jersey, harte Screens. Wenn Nordhorn rüberkommt, muss es hier zuerst stoppen.', victoryLine: 'Sven schnaubt: Okay. Die Grenze gehört heute deinem ersten Schritt.', beaten: false, playerHp: 142, enemyEnergy: 27, level: 5, ptsToWin: 19, offense: 8, defense: 8, regen: 4, expReward: 76, aiStyle: 'Defender' },
   { id: 6, name: 'Rashta', x: 17, y: 55, colors: { hat: '#1f3048', body: '#345b8c', pants: '#1b2438' }, sprite: { reference: 'lingen-harbor-storm', accessory: 'hijab', skin: '#c89068', hair: '#1f3048', jersey: '#345b8c', trim: '#b8d8ff', pants: '#1b2438', number: '13' }, dialogue: 'Rashta am Hafen: Wind von der Ems, Ball tief, Blick kalt. Lingen will sehen, ob Nordhorn auch auswärts wirft.', victoryLine: 'Rashta nickt knapp: Dein Wurf klingt sogar im Hafen nach Netz.', beaten: false, playerHp: 154, enemyEnergy: 30, level: 6, ptsToWin: 21, offense: 10, defense: 8, regen: 4, expReward: 92, aiStyle: 'Playmaker' },
-  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Clipboard raus, Ball fest. Nordhorns Halle ist still. Lingen hört zu.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 162, enemyEnergy: 32, level: 7, ptsToWin: 21, offense: 11, defense: 9, regen: 4, expReward: 110, aiStyle: 'Coach' },
+  { id: 7, name: 'Maxim', x: 29, y: 55, colors: { hat: '#6b4a18', body: '#d8a63a', pants: '#243048' }, sprite: { reference: 'lingen-arena-captain', accessory: 'headband', skin: '#d8a070', hair: '#6b4a18', jersey: '#d8a63a', trim: '#fff0a0', pants: '#243048', number: '10' }, dialogue: 'Maxim aus der Arena Lingen: Goldene Schultern, laute Tribüne. Besieg mich, dann weiß Mihler, dass Lingen gefallen ist.', victoryLine: 'Maxim senkt den Blick: Die Arena ruft heute Nordhorn.', beaten: false, playerHp: 160, enemyEnergy: 31, level: 7, ptsToWin: 21, offense: 11, defense: 9, regen: 4, expReward: 104, aiStyle: 'Allrounder' },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Clipboard raus, Ball fest. Nordhorns Halle ist still. Lingen hört zu.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 172, enemyEnergy: 34, level: 8, ptsToWin: 21, offense: 12, defense: 10, regen: 4, expReward: 120, aiStyle: 'Coach' },
 ];
 
 function getTrainerSpriteOptions(trainer, facing = 'down', scale = 1, hasBall = false) {

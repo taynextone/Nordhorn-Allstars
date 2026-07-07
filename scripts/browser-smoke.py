@@ -370,7 +370,7 @@ async def run_cdp_flow(ws_url: str) -> str:
   endTurn();
   flushTimers();
   assert(gameState === 'DIALOG' && dialog.active && dialog.text === 'SIEG!', 'victory should show compact localized dialog');
-  assert(dialog.subText.startsWith('Klaus besiegt · 1/7 · Final '), 'victory dialog should show compact rival progress and score in the existing dialog box');
+  assert(dialog.subText.startsWith('Klaus besiegt · 1/' + trainers.length + ' · Final '), 'victory dialog should show compact rival progress and score in the existing dialog box');
   assert(dialog.subText.includes('Wohnhof'), 'victory dialog should include local story flavor without adding a HUD');
   closeDialog();
   assert(gameState === 'OVERWORLD' && trainers[0].beaten, 'victory dialog should return to overworld and mark win');
@@ -390,7 +390,7 @@ async def run_cdp_flow(ws_url: str) -> str:
     flushTimers();
     if (i === trainers.length - 1) {
       assert(gameState === 'DIALOG' && dialog.text === 'CHAMPION!', 'final victory should show champion dialog before credits');
-      assert(dialog.subText.startsWith('Coach Mihler besiegt · 7/7 · Final '), 'champion dialog should show final rival, progress and score in the existing dialog box');
+      assert(dialog.subText.startsWith('Coach Mihler besiegt · ' + trainers.length + '/' + trainers.length + ' · Final '), 'champion dialog should show final rival, progress and score in the existing dialog box');
       assert(dialog.subText.includes('Nordhorn jubelt'), 'champion dialog should keep finale flavor without adding HUD chrome');
       closeDialog();
       assert(gameState === 'CREDITS', 'final victory should enter credits after champion dialog');

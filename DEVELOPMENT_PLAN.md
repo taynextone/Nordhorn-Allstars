@@ -146,6 +146,7 @@
 - [x] Touch-Input Duplicate Guard — moderne Pointer-Browser nutzen nur noch einen Touch-Eventstrom, damit mobile A/B/OVR/MINI-Taps keinen zweiten Confirm in Dialoge oder Battle-Menüs leaken.
 - [x] Battle-Timer State Guard — verzögerte Battle-Turn-/Win-/Loss-Callbacks sind jetzt token-gebunden, damit alte Timeouts nach New Game/Continue/Reset keine Dialog- oder Battle-States mehr überschreiben.
 - [x] Lingen-Route Content Pass — neuer Grenz-/Hafen-Court, zwei Lingen-Rivalen (Sven/Rashta), Credits-Orte und 7-Duelle-Finale erweitert, ohne neue HUD-/Coach-Overlays.
+- [x] Lingen-Arena Mini-Boss — Arena-Lingen-Court, Maxim als auswärtiger Mini-Boss, Credits-Ort und 8-Duelle-Finale ergänzt, ohne neue HUD-/Coach-Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

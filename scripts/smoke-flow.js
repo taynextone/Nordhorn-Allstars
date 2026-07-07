@@ -461,7 +461,7 @@ function runSmokeFlow() {
   flushTimers();
   assert(get('gameState') === 'DIALOG', 'Enemy HP KO should flow into the victory dialog');
   assert(get('dialog.text') === 'SIEG!', 'Victory dialog title should stay compact and localized');
-  assert(get('dialog.subText').startsWith('Klaus besiegt · 1/7 · Final '), 'Victory dialog should name the rival, score and compact progress without extra HUD');
+  assert(get('dialog.subText').startsWith('Klaus besiegt · 1/' + get('trainers.length') + ' · Final '), 'Victory dialog should name the rival, score and compact progress without extra HUD');
   assert(get('dialog.subText').includes('Wohnhof'), 'Victory dialog should include the new local story flavor in the existing dialog box');
   closeDialog();
   assert(get('gameState') === 'OVERWORLD', 'Enemy HP KO victory dialog should return to overworld');
@@ -567,7 +567,7 @@ function runSmokeFlow() {
     flushTimers();
     if (i === trainerCount - 1) {
       assert(get('dialog.text') === 'CHAMPION!', 'Final victory should show the champion dialog before credits');
-      assert(get('dialog.subText').startsWith('Coach Mihler besiegt · 7/7 · Final '), 'Champion dialog should include final rival, progress and score inside the existing dialog box');
+      assert(get('dialog.subText').startsWith('Coach Mihler besiegt · ' + get('trainers.length') + '/' + get('trainers.length') + ' · Final '), 'Champion dialog should include final rival, progress and score inside the existing dialog box');
       assert(get('dialog.subText').includes('Nordhorn jubelt'), 'Champion dialog should keep the local finale flavor without adding HUD chrome');
       escape();
       assert(get('gameState') === 'CREDITS', 'Final victory Escape should honor Champion dialog callback and enter credits');
