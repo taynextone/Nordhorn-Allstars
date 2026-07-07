@@ -364,7 +364,7 @@ const MAP_H = 60;
 
 // Tile types
 const T = {
-  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14
+  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14, SIGN: 15
 };
 
 // ============================================================
@@ -433,6 +433,7 @@ function drawCredits() {
     'Nordhorn',
     'Lingen-Bahnhof',
     'Lingen-Hafen',
+    'Fanbus-Route',
     'Arena Lingen',
     'Vechteufer',
     'Schulhof & Park',
@@ -607,6 +608,12 @@ function generateMap() {
   setRect(28, 50, 31, 53, T.PATH);
   setBuilding(35, 53, 41, 58, 38);
 
+  // Lingen story signposts: optional dialog flavor on existing route/court tiles.
+  // They are map objects, not HUD overlays, and sit beside the playable path.
+  StorySigns.forEach(sign => {
+    if (worldMap[sign.y] && worldMap[sign.y][sign.x] !== T.WATER) worldMap[sign.y][sign.x] = T.SIGN;
+  });
+
   // Keep all trainer tiles reachable/visible on the new Nordhorn abstraction.
   trainers.forEach(t => {
     if (worldMap[t.y] && worldMap[t.y][t.x] !== T.WATER) worldMap[t.y][t.x] = T.PATH;
@@ -627,6 +634,31 @@ const MAP_LANDMARKS = [
   { id: 'lingen', label: '→ LINGEN', x: 8, y: 55, kind: 'route' },
   { id: 'hafen', label: 'HAFEN', x: 17, y: 55, kind: 'hard' },
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
+  { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
+];
+
+const StorySigns = [
+  {
+    id: 'lingen-gate-sign',
+    x: 13,
+    y: 52,
+    title: 'Grenzschild Lingen',
+    body: 'Der Asphalt wird rauer. Nordhorn-Fans haben Pfeile zum Auswaertsspiel gemalt.'
+  },
+  {
+    id: 'fanbus-sign',
+    x: 23,
+    y: 52,
+    title: 'Fanbus Nordhorn',
+    body: 'Ein alter Fanbus wartet. Auf dem Fenster steht: Erst Sven, dann Rashta, dann Arena.'
+  },
+  {
+    id: 'arena-warning-sign',
+    x: 31,
+    y: 52,
+    title: 'Arena-Warnung',
+    body: 'Goldene Banner flattern: Maxim verteidigt Lingen, bevor Coach Mihler dich erwartet.'
+  }
 ];
 
 // ============================================================
@@ -763,6 +795,19 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillStyle = C.DARKEST;
       ctx.fillRect(sx + 1, sy + 6, 4, 10);
       ctx.fillRect(sx + 11, sy + 6, 4, 10);
+      break;
+    case T.SIGN:
+      ctx.fillStyle = C.LIGHT;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 7, sy + 7, 2, 9);
+      ctx.fillStyle = '#d8a63a';
+      ctx.fillRect(sx + 2, sy + 2, 12, 7);
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 3, sy + 3, 10, 1);
+      ctx.fillRect(sx + 3, sy + 6, 7, 1);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(sx + 11, sy + 5, 2, 2);
       break;
     case T.BRIDGE:
       ctx.fillStyle = '#5a4a2a';
@@ -2592,6 +2637,7 @@ const MINIMAP_COLORS = {
   [T.BRIDGE]: '#5a4a2a',
   [T.STADIUM]: '#4a4a4a',
   [T.WALL]: '#3a3a3a',
+  [T.SIGN]: '#ddaa22',
 };
 
 const MinimapCache = {
@@ -2727,6 +2773,24 @@ function isWalkable(x, y) {
   return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
 }
 
+function getAdjacentStorySign() {
+  if (!player || !Array.isArray(StorySigns)) return null;
+  const front = { x: player.x, y: player.y };
+  if (player.facing === 'left') front.x -= 1;
+  else if (player.facing === 'right') front.x += 1;
+  else if (player.facing === 'up') front.y -= 1;
+  else front.y += 1;
+  return StorySigns.find(sign => sign.x === front.x && sign.y === front.y) ||
+    StorySigns.find(sign => Math.abs(player.x - sign.x) + Math.abs(player.y - sign.y) === 1) || null;
+}
+
+function tryStorySignInteraction() {
+  const sign = getAdjacentStorySign();
+  if (!sign) return false;
+  startDialog(sign.title, sign.body);
+  return true;
+}
+
 let minimapVisible = false;
 
 function updateOverworld() {
@@ -2736,6 +2800,9 @@ function updateOverworld() {
   // Toggle minimap / full overview map
   if (wasPressed('m') || wasPressed('M')) { minimapVisible = !minimapVisible; }
   if (wasPressed('o') || wasPressed('O')) { gameState = 'OVERVIEW'; clearPressedInput(); return; }
+  if (wasConfirmPressed()) {
+    if (tryStorySignInteraction()) return;
+  }
   if (wasPressed('r') || wasPressed('R')) {
     if (HomeRest.rest()) {
       // Rest feedback opens the existing dialog box; stop this overworld frame so
