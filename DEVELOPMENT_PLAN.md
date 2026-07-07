@@ -148,6 +148,7 @@
 - [x] Lingen-Route Content Pass — neuer Grenz-/Hafen-Court, zwei Lingen-Rivalen (Sven/Rashta), Credits-Orte und 7-Duelle-Finale erweitert, ohne neue HUD-/Coach-Overlays.
 - [x] Lingen-Arena Mini-Boss — Arena-Lingen-Court, Maxim als auswärtiger Mini-Boss, Credits-Ort und 8-Duelle-Finale ergänzt, ohne neue HUD-/Coach-Overlays.
 - [x] Lingen-Fanbus Story Signs — drei goldene Route-/Arena-Schilder mit bestehenden Dialogboxen, Overview-Fanbus-Landmarke und Credits-Ort ergänzt, ohne neue HUD-/Coach-Overlays.
+- [x] Lingen-Gästekabinen Story-Pass — Fanbus-Schild reagiert jetzt auf Lingen-Auswärtssiege und eine neue Gästekabinen-Plakette erzählt Maxim-/Arena-Fortschritt über bestehende Dialogboxen, ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

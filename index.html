@@ -637,6 +637,11 @@ const MAP_LANDMARKS = [
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
 ];
 
+function hasTrainerWin(name) {
+  const trainer = trainers.find(t => t.name === name);
+  return !!(trainer && trainer.beaten);
+}
+
 const StorySigns = [
   {
     id: 'lingen-gate-sign',
@@ -650,7 +655,13 @@ const StorySigns = [
     x: 23,
     y: 52,
     title: 'Fanbus Nordhorn',
-    body: 'Ein alter Fanbus wartet. Auf dem Fenster steht: Erst Sven, dann Rashta, dann Arena.'
+    getBody: function() {
+      const wins = ['Sven', 'Rashta', 'Maxim'].filter(hasTrainerWin).length;
+      if (wins >= 3) return 'Der Fanbus hupt dreimal: Lingen ist gefallen. Naechster Halt: Mihlers Halle.';
+      if (wins === 2) return 'Auf dem Fenster steht jetzt: Zwei Auswaertssiege. Die Arena wartet auf den letzten Laerm.';
+      if (wins === 1) return 'Ein Fan trommelt gegen die Scheibe: Der erste Lingen-Court gehoert Nordhorn.';
+      return 'Ein alter Fanbus wartet. Auf dem Fenster steht: Erst Sven, dann Rashta, dann Arena.';
+    }
   },
   {
     id: 'arena-warning-sign',
@@ -658,6 +669,17 @@ const StorySigns = [
     y: 52,
     title: 'Arena-Warnung',
     body: 'Goldene Banner flattern: Maxim verteidigt Lingen, bevor Coach Mihler dich erwartet.'
+  },
+  {
+    id: 'lingen-locker-plaque',
+    x: 36,
+    y: 52,
+    title: 'Gaeste-Kabine',
+    getBody: function() {
+      if (hasTrainerWin('Maxim')) return 'In die Bank ist geritzt: Nordhorn blieb ruhig, als die Arena pfiff.';
+      if (hasTrainerWin('Rashta')) return 'Klebeband am Spind: Noch ein Captain, dann verstummt Lingen.';
+      return 'Die Gaeste-Kabine riecht nach Harz und Regen. Eine Kreidekarte zeigt den Weg zum Gold-Court.';
+    }
   }
 ];
 
@@ -2787,7 +2809,8 @@ function getAdjacentStorySign() {
 function tryStorySignInteraction() {
   const sign = getAdjacentStorySign();
   if (!sign) return false;
-  startDialog(sign.title, sign.body);
+  const body = typeof sign.getBody === 'function' ? sign.getBody() : sign.body;
+  startDialog(sign.title, body);
   return true;
 }
 
