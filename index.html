@@ -436,6 +436,7 @@ function drawCredits() {
     'Fanbus-Route',
     'Arena Lingen',
     'Lingen-Rivalenwand',
+    'Presse-Ecke Lingen',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -637,6 +638,7 @@ const MAP_LANDMARKS = [
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
+  { id: 'press-wall', label: 'PRESSE', x: 39, y: 52, kind: 'story' },
 ];
 
 function hasTrainerWin(name) {
@@ -693,6 +695,18 @@ const StorySigns = [
       if (hasTrainerWin('Maxim')) return 'In die Bank ist geritzt: Nordhorn blieb ruhig, als die Arena pfiff.';
       if (hasTrainerWin('Rashta')) return 'Klebeband am Spind: Noch ein Captain, dann verstummt Lingen.';
       return 'Die Gaeste-Kabine riecht nach Harz und Regen. Eine Kreidekarte zeigt den Weg zum Gold-Court.';
+    }
+  },
+  {
+    id: 'lingen-press-wall',
+    x: 39,
+    y: 52,
+    title: 'Presse-Ecke Lingen',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Die Schlagzeile klebt schief: Nordhorn gewinnt auswaerts und zuhause. Mihler laechelt klein.';
+      if (hasTrainerWin('Maxim')) return 'Reporter kritzeln: Arena Lingen gestoppt. Jetzt will jeder wissen, ob Mihler wackelt.';
+      if (hasTrainerWin('Rashta')) return 'Auf dem Block steht: Sven und Rashta weg. Gold-Captain Maxim bekommt Extra-Mikrofone.';
+      return 'Ein Mikrofon liegt bereit. Lingen wartet auf Zitate, sobald Nordhorn die Auswaerts-Courts betritt.';
     }
   }
 ];

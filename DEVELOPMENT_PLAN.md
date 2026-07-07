@@ -150,6 +150,7 @@
 - [x] Lingen-Fanbus Story Signs — drei goldene Route-/Arena-Schilder mit bestehenden Dialogboxen, Overview-Fanbus-Landmarke und Credits-Ort ergänzt, ohne neue HUD-/Coach-Overlays.
 - [x] Lingen-Gästekabinen Story-Pass — Fanbus-Schild reagiert jetzt auf Lingen-Auswärtssiege und eine neue Gästekabinen-Plakette erzählt Maxim-/Arena-Fortschritt über bestehende Dialogboxen, ohne neue HUDs/Overlays.
 - [x] Lingen-Rivalenwand Story-Pass — neue Rivalenwand an der Arena zeigt Sven/Rashta/Maxim-Fortschritt als dynamische Dialog-Story und eigener Overview-/Credits-Ort, ohne neue HUDs/Overlays.
+- [x] Lingen-Presse-Ecke Story-Pass — neue Pressewand an der Arena reagiert auf Rashta-/Maxim-/Mihler-Fortschritt, ist in Overview/Credits markiert und nutzt nur bestehende Dialogboxen.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
