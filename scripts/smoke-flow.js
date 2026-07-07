@@ -160,6 +160,9 @@ function assertCleanRenderPaths() {
   assert(code.includes("label: 'KLOSTER'"), 'Overview landmarks should include Kloster Frenswegen inspiration');
   assert(code.includes("label: 'TIERPARK'"), 'Overview landmarks should include Tierpark/Park area');
   assert(code.includes("label: '→ LINGEN'"), 'Overview landmarks should include the route toward Lingen');
+  assert(code.includes("id: 'mihler-tactics-board'"), 'Mihler tactics board story sign should stay in the Lingen finale route');
+  assert(code.includes("label: 'TAKTIK'"), 'Overview should mark the Mihler tactics board as a story landmark');
+  assert(code.includes('Mihler-Taktiktafel'), 'Credits should include the Mihler tactics board location');
   assert(code.includes('function drawOverviewMap()'), 'Full overview map screen should exist');
   const overview = getFunctionBody(code, 'drawOverviewMap');
   assert(overview.includes('MAP_LANDMARKS.forEach'), 'Landmark labels should live on the separate overview map only');

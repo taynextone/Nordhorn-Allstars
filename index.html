@@ -437,6 +437,7 @@ function drawCredits() {
     'Arena Lingen',
     'Lingen-Rivalenwand',
     'Presse-Ecke Lingen',
+    'Mihler-Taktiktafel',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -639,6 +640,7 @@ const MAP_LANDMARKS = [
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
   { id: 'press-wall', label: 'PRESSE', x: 39, y: 52, kind: 'story' },
+  { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
 ];
 
 function hasTrainerWin(name) {
@@ -707,6 +709,18 @@ const StorySigns = [
       if (hasTrainerWin('Maxim')) return 'Reporter kritzeln: Arena Lingen gestoppt. Jetzt will jeder wissen, ob Mihler wackelt.';
       if (hasTrainerWin('Rashta')) return 'Auf dem Block steht: Sven und Rashta weg. Gold-Captain Maxim bekommt Extra-Mikrofone.';
       return 'Ein Mikrofon liegt bereit. Lingen wartet auf Zitate, sobald Nordhorn die Auswaerts-Courts betritt.';
+    }
+  },
+  {
+    id: 'mihler-tactics-board',
+    x: 42,
+    y: 50,
+    title: 'Mihlers Taktiktafel',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Kreide staubt vom Brett: Nordhorn hat Mihlers letzten Spielzug gelesen.';
+      if (hasTrainerWin('Maxim')) return 'Auf der Tafel steht nur noch: Ruhe. Erster Pass. Mihler wartet zuhause.';
+      if (hasTrainerWin('Rashta')) return 'Mihler hat Pfeile gemalt: Hafenwind besiegt, Gold-Arena noch offen.';
+      return 'Kreidepfeile zeigen von Lingen zur Halle. Mihler plant schon den letzten Trap.';
     }
   }
 ];
