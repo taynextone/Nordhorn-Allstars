@@ -3,7 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Nordhorn All Stars</title>
+<meta name="description" content="Nordhorn Allstars ist ein Gameboy-style Basketball-RPG im Browser mit Nordhorn-/Lingen-Storyroute, 8 Rivalen, Save/Continue und Mobile-Touch-Controls.">
+<meta name="theme-color" content="#0f380f">
+<meta property="og:title" content="Nordhorn Allstars">
+<meta property="og:description" content="Spielbare Basketball-RPG-Demo im Gameboy-Look: trainieren, Rivalen besiegen und die Lingen-Route meistern.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://taynextone.github.io/Nordhorn-Allstars/">
+<title>Nordhorn Allstars — Gameboy Basketball RPG</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%230f380f'/%3E%3Crect x='2' y='2' width='12' height='12' fill='%239bbc0f'/%3E%3Crect x='5' y='4' width='6' height='8' fill='%230f380f'/%3E%3Crect x='6' y='5' width='4' height='2' fill='%239bbc0f'/%3E%3C/svg%3E">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -420,12 +426,15 @@ function drawCredits() {
     'Vechte wind, asphalt courts',
     'and every late-night baller',
     '',
-    '--- TRAINERS ---',
+    '--- RIVALEN ---',
     '',
     'Klaus - Wohnhof-Rookie',
     'Anna - Park-Shooter',
     'Markus - Schulhof-Wall',
     'Sophie - Spielplatz-Nerven',
+    'Sven - Lingen-Bahnhof',
+    'Rashta - Lingen-Hafen',
+    'Maxim - Arena Lingen',
     'Coach Mihler - Hallenmeister',
     '',
     '--- LOCATIONS ---',
@@ -437,6 +446,9 @@ function drawCredits() {
     'Auswaerts-Choreo',
     'Rueckfahrt-Korso',
     'Arena Lingen',
+    'Arena-Fankurve',
+    'Stadionsprecher',
+    'Schiedsrichter',
     'Lingen-Rivalenwand',
     'Presse-Ecke Lingen',
     'Arena-Spielbericht',
@@ -645,6 +657,9 @@ const MAP_LANDMARKS = [
   { id: 'return-korso', label: 'KORSO', x: 24, y: 50, kind: 'story' },
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
+  { id: 'arena-fankurve', label: 'FANKURVE', x: 26, y: 52, kind: 'story' },
+  { id: 'arena-stadionsprecher', label: 'SPRECHER', x: 28, y: 52, kind: 'story' },
+  { id: 'arena-schiedsrichter', label: 'SCHIRI', x: 30, y: 52, kind: 'story' },
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
   { id: 'press-wall', label: 'PRESSE', x: 39, y: 52, kind: 'story' },
   { id: 'arena-report', label: 'BERICHT', x: 34, y: 52, kind: 'story' },
@@ -652,6 +667,10 @@ const MAP_LANDMARKS = [
   { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
   { id: 'final-light', label: 'LICHT', x: 46, y: 50, kind: 'story' },
 ];
+
+ // Add the missing Lingen guest-locker landmark so Overview/Credits stay synced
+ // with the Gästekabinen plaque (plan line 151) and the 'gaeste' story marker.
+ MAP_LANDMARKS.push({ id: 'gaeste', label: 'GAESTE', x: 36, y: 52, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -796,6 +815,78 @@ const StorySigns = [
       if (hasTrainerWin('Rashta')) return 'Im Glas spiegelt sich Lingen. Die Halle wirkt naeher als vorher.';
       return 'Eine einsame Lampe ueber dem Weg. Sie markiert den Rueckweg nach Nordhorn.';
     }
+  },
+  {
+    id: 'arena-fankurve',
+    x: 24,
+    y: 54,
+    title: 'Arena-Fankurve',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Die Kurve singt: Acht Siege, eine Stadt.';
+      if (hasTrainerWin('Maxim')) return 'Kurve bricht aus: Arena erobert. Mihler next.';
+      if (hasTrainerWin('Rashta')) return 'Zwei Trommeln: Hafen erledigt. Arena hoert uns.';
+      if (hasTrainerWin('Sven')) return 'Ein Fan: Bahnhof erledigt. Naechster Halt Hafen.';
+      return 'Fankurve leer. Pfeile: Sven, Rashta, Maxim.';
+    }
+  },
+  {
+    id: 'arena-stadionsprecher',
+    x: 24,
+    y: 56,
+    title: 'Stadionsprecher',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Sprecher bricht ab: Acht Null.';
+      if (hasTrainerWin('Maxim')) return 'Arena schluckt. Mihler, letztes Wort?';
+      if (hasTrainerWin('Rashta')) return 'Hafen gekontert. Gold-Captain next.';
+      if (hasTrainerWin('Sven')) return 'Bahnhof Geschichte. Hafen kommt.';
+      return 'Mikrofon-Test: Lingen-Arena wartet.';
+    }
+  },
+  {
+    id: 'arena-schiedsrichter',
+    x: 29,
+    y: 59,
+    title: 'Schiedsrichter',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Saubere Serie. Acht Spiele, kein Foul.';
+      if (hasTrainerWin('Maxim')) return 'Letzter Pfiff in Nordhorn. Mihler.';
+      if (hasTrainerWin('Rashta')) return 'Hafen abgehakt. Arena-Captain wartet.';
+      if (hasTrainerWin('Sven')) return 'Bahnhof gepfiffen. Weiter Richtung Hafen.';
+      return 'Schiri prueft Ball: Fair Play. Erst Courts, dann Halle.';
+    }
+  }
+];
+    id: 'arena-fankurve',
+    x: 26,
+    y: 52,
+    title: 'Arena-Fankurve',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Die Kurve ist leise. Lingen hoert jetzt Nordhorns Atem vom Band ab.';
+      if (hasTrainerWin('Maxim')) return 'Noch hallt der letzte Jubel. Die Fankurve uebelt den Schlussakkord fuer Mihler ein.';
+      return 'Lautsprecher knacken: Willkommen in der Arena. Die Fankurve trommelt den Takt fuer Lingen.';
+    }
+  },
+  {
+    id: 'arena-stadionsprecher',
+    x: 28,
+    y: 52,
+    title: 'Stadionsprecher',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Mikrofon aus. Der Sprecher hat keine Worte mehr fuer Lingen.';
+      if (hasTrainerWin('Maxim')) return 'Die Stimme bricht: Arena-Captain down. Naechster Act: Coach Mihler.';
+      return 'Eine Stimme probt: Bahnhof, Hafen, Arena — wer kommt, muss erst durch Lingen.';
+    }
+  },
+  {
+    id: 'arena-schiedsrichter',
+    x: 30,
+    y: 52,
+    title: 'Schiedsrichter',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Der Schiedsrichter pfeift fair. Acht Siege, kein Foul — Nordhorn nimmt den Pokal.';
+      if (hasTrainerWin('Maxim')) return 'Er prueft die Uhr: Die Arena ist gepfiffen. Finale bleibt offen.';
+      return 'Pfeife und Hand. Er sagt: Auswaerts ist hart, aber der Ball kennt keine Grenze.';
+    }
   }
 ];
 
@@ -935,6 +1026,8 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillRect(sx + 11, sy + 6, 4, 10);
       break;
     case T.SIGN:
+      // Slightly richer sign post: grass base, wooden post, golden plaque with two
+      // readable lines. Keeps the pixel-art readable without adding a new overlay.
       ctx.fillStyle = C.LIGHT;
       ctx.fillRect(sx, sy, TILE, TILE);
       ctx.fillStyle = C.DARKEST;
@@ -950,6 +1043,9 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillRect(sx + 8, sy + 4, 1, 1);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(sx + 11, sy + 5, 2, 2);
+      // Tiny corner bolts so the plaque feels attached to the post.
+      ctx.fillRect(sx + 2, sy + 2, 1, 1);
+      ctx.fillRect(sx + 13, sy + 2, 1, 1);
       break;
     case T.BRIDGE:
       ctx.fillStyle = '#5a4a2a';
@@ -1654,14 +1750,14 @@ const HomeRest = {
       // Keep the home-court interaction useful during playtests without touching
       // the save slot or adding another HUD: a tiny dialog tells the player they
       // are already ready to route toward the next rival.
-      startDialog('HOME COURT', 'Mama: Du bist schon fit. Raus auf den Court!');
+      startDialog('HOME COURT', 'Mama: Du bist schon fit. Raus auf den Court — Klaus wartet beim Wohnhof!');
       gameState = 'DIALOG';
       return true;
     }
     player.hp = player.maxHp;
     player.energy = player.maxEnergy;
     SaveSystem.save('Rested at home');
-    startDialog('HOME COURT', 'Mama: Trink was. Nordhorn braucht dich fit.');
+    startDialog('HOME COURT', 'Mama: Trink was. Nordhorn braucht dich fit. Bleib hart — Lingen lacht sonst.');
     gameState = 'DIALOG';
     return true;
   },
@@ -2577,7 +2673,7 @@ function updateCharSelect() {
     }
     if (wasConfirmPressed()) {
       applyCharacterCreation();
-      startDialog('Willkommen in Nordhorn!', 'Mama: Die Courts rufen. Hol dir Respekt, bevor Lingen lacht.');
+      startDialog('Willkommen in Nordhorn!', 'Mama: Die Courts rufen. Klaus ist beim Wohnhof. Besieg ihn, dann Anna im Park, Markus am Schulhof und Sophie auf dem Spielplatz.');
     }
   }
 }

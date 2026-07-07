@@ -148,17 +148,21 @@
 - [x] Lingen-Route Content Pass — neuer Grenz-/Hafen-Court, zwei Lingen-Rivalen (Sven/Rashta), Credits-Orte und 7-Duelle-Finale erweitert, ohne neue HUD-/Coach-Overlays.
 - [x] Lingen-Arena Mini-Boss — Arena-Lingen-Court, Maxim als auswärtiger Mini-Boss, Credits-Ort und 8-Duelle-Finale ergänzt, ohne neue HUD-/Coach-Overlays.
 - [x] Lingen-Fanbus Story Signs — drei goldene Route-/Arena-Schilder mit bestehenden Dialogboxen, Overview-Fanbus-Landmarke und Credits-Ort ergänzt, ohne neue HUD-/Coach-Overlays.
-- [x] Lingen-Gästekabinen Story-Pass — Fanbus-Schild reagiert jetzt auf Lingen-Auswärtssiege und eine neue Gästekabinen-Plakette erzählt Maxim-/Arena-Fortschritt über bestehende Dialogboxen, ohne neue HUDs/Overlays.
+- [x] Lingen-Gästekabinen Story-Pass — Fanbus-Schild reagiert jetzt auf Lingen-Auswärtssiege und eine neue Gästekabinen-Plakette erzählt Maxim-/Arena-Fortschritt über bestehende Dialogboxen, ohne neue HUDs/Overlays. (GAESTE-Overview/Credits-Marker nachgereicht, damit die Plakette auf der Karte sichtbar ist.)
 - [x] Lingen-Rivalenwand Story-Pass — neue Rivalenwand an der Arena zeigt Sven/Rashta/Maxim-Fortschritt als dynamische Dialog-Story und eigener Overview-/Credits-Ort, ohne neue HUDs/Overlays.
 - [x] Lingen-Presse-Ecke Story-Pass — neue Pressewand an der Arena reagiert auf Rashta-/Maxim-/Mihler-Fortschritt, ist in Overview/Credits markiert und nutzt nur bestehende Dialogboxen.
 - [x] Mihler-Taktiktafel Story-Pass — neue Taktiktafel am Finale-Court zeigt dynamische Lingen-/Maxim-/Champion-Dialoge, ist in Overview/Credits markiert und bleibt ein Map-Objekt ohne neue HUDs/Overlays.
 - [x] Auswärts-Choreo Story-Pass — neues Lingen-Banner mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Markierung und feinerem Sign-Pixelart ergänzt, ohne neue HUDs/Overlays.
 - [x] Lingen-Rückfahrt Story-Pass — Rückfahrt-Korso und Nordhorn-Schlusslicht als dynamische Route-Schilder mit Overview-/Credits-Markern ergänzt, ohne neue HUDs/Overlays.
-- [x] Spieler-Liste Roster-Sync — Dex-/Spieler-Liste auf die echten 8 Rivalen (Klaus, Anna, Markus, Sophie, Sven, Rashta, Maxim, Mihler) synchronisiert und alte Platzhalter entfernt; Module-/Smoke-Checks folgen der echten Traineranzahl.
-- [x] Arena-Spielbericht Story-Pass — neues Matchbericht-Schild vor der Lingen-Arena mit Sven/Rashta/Maxim/Mihler-Fortschrittsdialogen, Overview-/Credits-Markierung und ohne neue HUDs/Overlays.
-- [x] Grenzbruecken-Graffiti Story-Pass — neues Bruecken-Graffiti zwischen Nordhorn/Lingen mit dynamischen Auswaertsfortschritts-Dialogen, Overview-/Credits-Markierung und ohne neue HUDs/Overlays.
+- [x] Nordhorn-Home-Story-Pass — Start-Intro benennt jetzt konkret die ersten vier Rivalen (Klaus → Anna → Markus → Sophie) und gibt Lingen-Motivation; Home-Rest-Dialoge ebenfalls mit Klaus-/Lingen-Hinweisen; keine neuen HUDs/Overlays.
+- [x] Lingen-Arena-Spectator-Story — drei Schilder (Arena-Fankurve, Stadionsprecher, Schiedsrichter) führen den Auswärtsspiel-Ablauf in der Lingen-Arena ein, ohne neue HUDs/Overlays.
 
-## Technische Schulden
+## Weiterführende Ideen (Content/Grafik/Story)
+- [ ] Nordhorn-Nachwuchs-Story — ein junger Spieler in der Heimatstadt kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt, ohne neue HUDs/Overlays.
+- [ ] Boss-Build-Story-Pass — Mihlers Champion-Siegdialog und Credits betonen stärker, warum der Nordhorn-Spielstil Lingen schlägt, ohne neue HUDs/Overlays.
+- [ ] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neue HUDs/Overlays.
+
+## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt
