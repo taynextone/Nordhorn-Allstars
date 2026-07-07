@@ -440,6 +440,7 @@ function drawCredits() {
     'Lingen-Rivalenwand',
     'Presse-Ecke Lingen',
     'Arena-Spielbericht',
+    'Grenzbruecken-Graffiti',
     'Mihler-Taktiktafel',
     'Nordhorn-Schlusslicht',
     'Vechteufer',
@@ -647,6 +648,7 @@ const MAP_LANDMARKS = [
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
   { id: 'press-wall', label: 'PRESSE', x: 39, y: 52, kind: 'story' },
   { id: 'arena-report', label: 'BERICHT', x: 34, y: 52, kind: 'story' },
+  { id: 'bridge-graffiti', label: 'BRUECKE', x: 52, y: 42, kind: 'story' },
   { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
   { id: 'final-light', label: 'LICHT', x: 46, y: 50, kind: 'story' },
 ];
@@ -756,6 +758,19 @@ const StorySigns = [
       if (hasTrainerWin('Rashta')) return 'Die Zeitung schreibt: Hafenwind gedreht, Arena noch heiss. Maxim markiert jeden Rebound.';
       if (hasTrainerWin('Sven')) return 'Erster Absatz: Sven gestoppt. Naechster Abschnitt wartet am Hafen bei Rashta.';
       return 'Ein leeres Spielbericht-Blatt: Bahnhof, Hafen, Arena. Lingen will Nordhorns Auswaertsform messen.';
+    }
+  },
+  {
+    id: 'bridge-graffiti',
+    x: 52,
+    y: 42,
+    title: 'Grenzbruecken-Graffiti',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Unter der Bruecke steht frisch: Acht Siege. Nordhorn und Lingen kennen jetzt denselben Champion.';
+      if (hasTrainerWin('Maxim')) return 'Goldene Farbe tropft ins Wasser: Arena geholt. Der Pfeil zeigt nur noch zu Mihlers Halle.';
+      if (hasTrainerWin('Rashta')) return 'Blaue Wellen sind uebersprueht: Hafenwind gekontert. Maxim wartet hinter dem Brueckenlicht.';
+      if (hasTrainerWin('Sven')) return 'Neben Svens grauer Markierung steht: Grenze offen. Der naechste Pfeil zeigt zum Hafen.';
+      return 'Graffiti an der Grenzbruecke: Nordhorn links, Lingen rechts, dazwischen ein Ball wie ein Kompass.';
     }
   },
   {

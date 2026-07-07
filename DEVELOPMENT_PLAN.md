@@ -156,6 +156,7 @@
 - [x] Lingen-Rückfahrt Story-Pass — Rückfahrt-Korso und Nordhorn-Schlusslicht als dynamische Route-Schilder mit Overview-/Credits-Markern ergänzt, ohne neue HUDs/Overlays.
 - [x] Spieler-Liste Roster-Sync — Dex-/Spieler-Liste auf die echten 8 Rivalen (Klaus, Anna, Markus, Sophie, Sven, Rashta, Maxim, Mihler) synchronisiert und alte Platzhalter entfernt; Module-/Smoke-Checks folgen der echten Traineranzahl.
 - [x] Arena-Spielbericht Story-Pass — neues Matchbericht-Schild vor der Lingen-Arena mit Sven/Rashta/Maxim/Mihler-Fortschrittsdialogen, Overview-/Credits-Markierung und ohne neue HUDs/Overlays.
+- [x] Grenzbruecken-Graffiti Story-Pass — neues Bruecken-Graffiti zwischen Nordhorn/Lingen mit dynamischen Auswaertsfortschritts-Dialogen, Overview-/Credits-Markierung und ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
