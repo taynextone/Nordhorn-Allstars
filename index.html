@@ -435,10 +435,12 @@ function drawCredits() {
     'Lingen-Hafen',
     'Fanbus-Route',
     'Auswaerts-Choreo',
+    'Rueckfahrt-Korso',
     'Arena Lingen',
     'Lingen-Rivalenwand',
     'Presse-Ecke Lingen',
     'Mihler-Taktiktafel',
+    'Nordhorn-Schlusslicht',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -638,11 +640,13 @@ const MAP_LANDMARKS = [
   { id: 'lingen', label: '→ LINGEN', x: 8, y: 55, kind: 'route' },
   { id: 'hafen', label: 'HAFEN', x: 17, y: 55, kind: 'hard' },
   { id: 'choreo', label: 'CHOREO', x: 20, y: 52, kind: 'story' },
+  { id: 'return-korso', label: 'KORSO', x: 24, y: 50, kind: 'story' },
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
   { id: 'press-wall', label: 'PRESSE', x: 39, y: 52, kind: 'story' },
   { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
+  { id: 'final-light', label: 'LICHT', x: 46, y: 50, kind: 'story' },
 ];
 
 function hasTrainerWin(name) {
@@ -682,6 +686,19 @@ const StorySigns = [
       if (hasTrainerWin('Rashta')) return 'Neben Rashtas Namen steht: Hafenwind gedreht. Maxim bekommt die grosse Trommel.';
       if (hasTrainerWin('Sven')) return 'Svens Feld ist angekreuzt. Der Fanblock uebt schon den Rashta-Rhythmus.';
       return 'Ein ausgerolltes Banner zeigt drei leere Kaestchen: Bahnhof, Hafen, Arena.';
+    }
+  },
+  {
+    id: 'lingen-return-korso',
+    x: 24,
+    y: 50,
+    title: 'Rueckfahrt-Korso',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Die Rueckfahrt ist Legende: Lingen im Rueckspiegel, Nordhorns Halle im Licht.';
+      if (hasTrainerWin('Maxim')) return 'Der Korso steht bereit. Auf dem Schild: Erst Mihler, dann hupen wir durch die Nacht.';
+      if (hasTrainerWin('Rashta')) return 'Zwei Trommeln liegen auf der Bank. Eine ist fuer Maxim, eine fuer die Heimfahrt.';
+      if (hasTrainerWin('Sven')) return 'Ein Motor laeuft warm. Der Fahrer sagt: Hafen holen, dann Arena.';
+      return 'Kleine Fahnen klemmen an den Spiegeln. Noch ist der Korso nur ein Versprechen.';
     }
   },
   {
@@ -736,6 +753,18 @@ const StorySigns = [
       if (hasTrainerWin('Maxim')) return 'Auf der Tafel steht nur noch: Ruhe. Erster Pass. Mihler wartet zuhause.';
       if (hasTrainerWin('Rashta')) return 'Mihler hat Pfeile gemalt: Hafenwind besiegt, Gold-Arena noch offen.';
       return 'Kreidepfeile zeigen von Lingen zur Halle. Mihler plant schon den letzten Trap.';
+    }
+  },
+  {
+    id: 'nordhorn-final-light',
+    x: 46,
+    y: 50,
+    title: 'Nordhorn-Schlusslicht',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Das Licht bleibt an: Acht Siege, eine Stadt, kein Zweifel mehr.';
+      if (hasTrainerWin('Maxim')) return 'Die Lampe flackert Richtung Halle. Mihler wartet unter dem letzten Korb.';
+      if (hasTrainerWin('Rashta')) return 'Im Glas spiegelt sich Lingen. Die Halle wirkt naeher als vorher.';
+      return 'Eine einsame Lampe ueber dem Weg. Sie markiert den Rueckweg nach Nordhorn.';
     }
   }
 ];

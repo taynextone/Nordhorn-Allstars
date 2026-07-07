@@ -153,6 +153,7 @@
 - [x] Lingen-Presse-Ecke Story-Pass — neue Pressewand an der Arena reagiert auf Rashta-/Maxim-/Mihler-Fortschritt, ist in Overview/Credits markiert und nutzt nur bestehende Dialogboxen.
 - [x] Mihler-Taktiktafel Story-Pass — neue Taktiktafel am Finale-Court zeigt dynamische Lingen-/Maxim-/Champion-Dialoge, ist in Overview/Credits markiert und bleibt ein Map-Objekt ohne neue HUDs/Overlays.
 - [x] Auswärts-Choreo Story-Pass — neues Lingen-Banner mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Markierung und feinerem Sign-Pixelart ergänzt, ohne neue HUDs/Overlays.
+- [x] Lingen-Rückfahrt Story-Pass — Rückfahrt-Korso und Nordhorn-Schlusslicht als dynamische Route-Schilder mit Overview-/Credits-Markern ergänzt, ohne neue HUDs/Overlays.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

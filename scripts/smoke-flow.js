@@ -161,8 +161,14 @@ function assertCleanRenderPaths() {
   assert(code.includes("label: 'TIERPARK'"), 'Overview landmarks should include Tierpark/Park area');
   assert(code.includes("label: '→ LINGEN'"), 'Overview landmarks should include the route toward Lingen');
   assert(code.includes("id: 'mihler-tactics-board'"), 'Mihler tactics board story sign should stay in the Lingen finale route');
+  assert(code.includes("id: 'lingen-return-korso'"), 'Lingen return-korso story sign should stay as post-arena route flavor');
+  assert(code.includes("id: 'nordhorn-final-light'"), 'Nordhorn final-light story sign should stay as final-route flavor');
   assert(code.includes("label: 'TAKTIK'"), 'Overview should mark the Mihler tactics board as a story landmark');
+  assert(code.includes("label: 'KORSO'"), 'Overview should mark the return-korso story landmark');
+  assert(code.includes("label: 'LICHT'"), 'Overview should mark the final-light story landmark');
   assert(code.includes('Mihler-Taktiktafel'), 'Credits should include the Mihler tactics board location');
+  assert(code.includes('Rueckfahrt-Korso'), 'Credits should include the return-korso location');
+  assert(code.includes('Nordhorn-Schlusslicht'), 'Credits should include the final-light location');
   assert(code.includes('function drawOverviewMap()'), 'Full overview map screen should exist');
   const overview = getFunctionBody(code, 'drawOverviewMap');
   assert(overview.includes('MAP_LANDMARKS.forEach'), 'Landmark labels should live on the separate overview map only');
