@@ -435,6 +435,7 @@ function drawCredits() {
     'Lingen-Hafen',
     'Fanbus-Route',
     'Arena Lingen',
+    'Lingen-Rivalenwand',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -635,6 +636,7 @@ const MAP_LANDMARKS = [
   { id: 'hafen', label: 'HAFEN', x: 17, y: 55, kind: 'hard' },
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
+  { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
 ];
 
 function hasTrainerWin(name) {
@@ -669,6 +671,18 @@ const StorySigns = [
     y: 52,
     title: 'Arena-Warnung',
     body: 'Goldene Banner flattern: Maxim verteidigt Lingen, bevor Coach Mihler dich erwartet.'
+  },
+  {
+    id: 'lingen-rival-wall',
+    x: 27,
+    y: 52,
+    title: 'Lingen-Rivalenwand',
+    getBody: function() {
+      if (hasTrainerWin('Maxim')) return 'Alle drei Fotos sind abgehakt: Sven, Rashta, Maxim. Nordhorns Sticker klebt oben.';
+      if (hasTrainerWin('Rashta')) return 'Sven und Rashta sind durchgestrichen. Unter Maxim steht: Arena-Captain, kein Schritt zurueck.';
+      if (hasTrainerWin('Sven')) return 'Svens Foto ist markiert. Rashta wartet am Hafen mit tiefem Dribbling und Emswind.';
+      return 'Drei Lingen-Fotos haengen hier: Sven am Bahnhof, Rashta am Hafen, Maxim in Gold.';
+    }
   },
   {
     id: 'lingen-locker-plaque',
