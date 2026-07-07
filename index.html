@@ -657,9 +657,9 @@ const MAP_LANDMARKS = [
   { id: 'return-korso', label: 'KORSO', x: 24, y: 50, kind: 'story' },
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
-  { id: 'arena-fankurve', label: 'FANKURVE', x: 26, y: 52, kind: 'story' },
-  { id: 'arena-stadionsprecher', label: 'SPRECHER', x: 28, y: 52, kind: 'story' },
-  { id: 'arena-schiedsrichter', label: 'SCHIRI', x: 30, y: 52, kind: 'story' },
+  { id: 'arena-fankurve', label: 'FANKURVE', x: 24, y: 54, kind: 'story' },
+  { id: 'arena-stadionsprecher', label: 'SPRECHER', x: 24, y: 56, kind: 'story' },
+  { id: 'arena-schiedsrichter', label: 'SCHIRI', x: 29, y: 59, kind: 'story' },
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
   { id: 'press-wall', label: 'PRESSE', x: 39, y: 52, kind: 'story' },
   { id: 'arena-report', label: 'BERICHT', x: 34, y: 52, kind: 'story' },
@@ -853,39 +853,6 @@ const StorySigns = [
       if (hasTrainerWin('Rashta')) return 'Hafen abgehakt. Arena-Captain wartet.';
       if (hasTrainerWin('Sven')) return 'Bahnhof gepfiffen. Weiter Richtung Hafen.';
       return 'Schiri prueft Ball: Fair Play. Erst Courts, dann Halle.';
-    }
-  }
-];
-    id: 'arena-fankurve',
-    x: 26,
-    y: 52,
-    title: 'Arena-Fankurve',
-    getBody: function() {
-      if (hasTrainerWin('Coach Mihler')) return 'Die Kurve ist leise. Lingen hoert jetzt Nordhorns Atem vom Band ab.';
-      if (hasTrainerWin('Maxim')) return 'Noch hallt der letzte Jubel. Die Fankurve uebelt den Schlussakkord fuer Mihler ein.';
-      return 'Lautsprecher knacken: Willkommen in der Arena. Die Fankurve trommelt den Takt fuer Lingen.';
-    }
-  },
-  {
-    id: 'arena-stadionsprecher',
-    x: 28,
-    y: 52,
-    title: 'Stadionsprecher',
-    getBody: function() {
-      if (hasTrainerWin('Coach Mihler')) return 'Mikrofon aus. Der Sprecher hat keine Worte mehr fuer Lingen.';
-      if (hasTrainerWin('Maxim')) return 'Die Stimme bricht: Arena-Captain down. Naechster Act: Coach Mihler.';
-      return 'Eine Stimme probt: Bahnhof, Hafen, Arena — wer kommt, muss erst durch Lingen.';
-    }
-  },
-  {
-    id: 'arena-schiedsrichter',
-    x: 30,
-    y: 52,
-    title: 'Schiedsrichter',
-    getBody: function() {
-      if (hasTrainerWin('Coach Mihler')) return 'Der Schiedsrichter pfeift fair. Acht Siege, kein Foul — Nordhorn nimmt den Pokal.';
-      if (hasTrainerWin('Maxim')) return 'Er prueft die Uhr: Die Arena ist gepfiffen. Finale bleibt offen.';
-      return 'Pfeife und Hand. Er sagt: Auswaerts ist hart, aber der Ball kennt keine Grenze.';
     }
   }
 ];
