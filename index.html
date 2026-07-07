@@ -434,6 +434,7 @@ function drawCredits() {
     'Lingen-Bahnhof',
     'Lingen-Hafen',
     'Fanbus-Route',
+    'Auswaerts-Choreo',
     'Arena Lingen',
     'Lingen-Rivalenwand',
     'Presse-Ecke Lingen',
@@ -636,6 +637,7 @@ const MAP_LANDMARKS = [
   { id: 'industrie', label: 'INDUSTRIE', x: 50, y: 45, kind: 'hard' },
   { id: 'lingen', label: '→ LINGEN', x: 8, y: 55, kind: 'route' },
   { id: 'hafen', label: 'HAFEN', x: 17, y: 55, kind: 'hard' },
+  { id: 'choreo', label: 'CHOREO', x: 20, y: 52, kind: 'story' },
   { id: 'arena-lingen', label: 'ARENA L', x: 29, y: 55, kind: 'boss' },
   { id: 'fanbus', label: 'FANBUS', x: 23, y: 52, kind: 'story' },
   { id: 'rival-wall', label: 'RIVALWALL', x: 27, y: 52, kind: 'story' },
@@ -667,6 +669,19 @@ const StorySigns = [
       if (wins === 2) return 'Auf dem Fenster steht jetzt: Zwei Auswaertssiege. Die Arena wartet auf den letzten Laerm.';
       if (wins === 1) return 'Ein Fan trommelt gegen die Scheibe: Der erste Lingen-Court gehoert Nordhorn.';
       return 'Ein alter Fanbus wartet. Auf dem Fenster steht: Erst Sven, dann Rashta, dann Arena.';
+    }
+  },
+  {
+    id: 'lingen-choreo-banner',
+    x: 20,
+    y: 52,
+    title: 'Auswaerts-Choreo',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Das Banner ist voll: Sven, Rashta, Maxim, Mihler. Nordhorn singt bis zur Vechte.';
+      if (hasTrainerWin('Maxim')) return 'Goldene Schnipsel kleben am Stoff: Die Arena ist still, nur Mihlers Halle fehlt.';
+      if (hasTrainerWin('Rashta')) return 'Neben Rashtas Namen steht: Hafenwind gedreht. Maxim bekommt die grosse Trommel.';
+      if (hasTrainerWin('Sven')) return 'Svens Feld ist angekreuzt. Der Fanblock uebt schon den Rashta-Rhythmus.';
+      return 'Ein ausgerolltes Banner zeigt drei leere Kaestchen: Bahnhof, Hafen, Arena.';
     }
   },
   {
@@ -868,8 +883,12 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillStyle = '#d8a63a';
       ctx.fillRect(sx + 2, sy + 2, 12, 7);
       ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 2, sy + 1, 12, 1);
+      ctx.fillRect(sx + 2, sy + 9, 12, 1);
       ctx.fillRect(sx + 3, sy + 3, 10, 1);
       ctx.fillRect(sx + 3, sy + 6, 7, 1);
+      ctx.fillRect(sx + 4, sy + 4, 1, 1);
+      ctx.fillRect(sx + 8, sy + 4, 1, 1);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(sx + 11, sy + 5, 2, 2);
       break;
