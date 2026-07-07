@@ -3459,19 +3459,14 @@ function gameLoop() {
 
 const DexData = {
   allTrainers: [
-    { id: 'tim', name: 'Tim', build: 'SHOOTER', level: 3, location: 'Nordhorn — Wohnhof-Court', badge: 'ANFÄNGER', badgeColor: '#9bbc0f', reward: 'Layup-Verständnis', flavor: 'Kennt jeden Riss im Wohnhof-Asphalt und jeden Namen im Viertel.' },
-    { id: 'lisa', name: 'Lisa', build: 'ALLROUNDER', level: 4, location: 'Nordhorn — Schulhof-Court', badge: 'SCHÜLER', badgeColor: '#8bac0f', reward: 'Ausgewogene Skills', flavor: 'Organisiert Schulhofspiele, als wären es Playoffs.' },
-    { id: 'mohammed', name: 'Mohammed', build: 'ALLROUNDER', level: 5, location: 'Nordhorn — Park-Court', badge: 'NATUR', badgeColor: '#306230', reward: 'Stadtkenntnis', flavor: 'Spielt ruhig, liest Räume schnell und kennt jede Abkürzung am Park.' },
-    { id: 'coach', name: 'Coach Müller', build: 'VERTEIDIGER', level: 6, location: 'Nordhorn — Stadion-Court', badge: 'PROFI', badgeColor: '#0f380f', reward: 'Professionelle Verteidigung', flavor: 'Alte Schule: keine Ausreden, saubere Defense, Blick Richtung Lingen.' },
-    { id: 'erik', name: 'Erik', build: 'SHOOTER', level: 7, location: 'Nordhorn — Spielplatz-Court', badge: 'KAMPF', badgeColor: '#c4944a', reward: 'Kampfgeist', flavor: 'Laut, nervig, clutch. Spielt besser, wenn alle zugucken.' },
-    { id: 'buecherei', name: 'Bibliothekar Klaus', build: 'VERTEIDIGER', level: 8, location: 'Nordhorn — Bücherei-Court', badge: 'WEISHEIT', badgeColor: '#6b5335', reward: 'Gedächtnis & Defense', flavor: 'Ein Bücherwurm mit Block-Finsternis. Kennt jede Spielregel.' },
-    { id: 'hausberg', name: 'Bergsteiger Armin', build: 'VERTEIDIGER', level: 9, location: 'Nordhorn — Hausberg-Court', badge: 'STÄRKE', badgeColor: '#aa3333', reward: 'Krafttraining', flavor: '40 Jahre Bergziege. Arm wie ein Bullenbericht.' },
-    { id: 'meister', name: 'Meister Wu', build: 'ALLROUNDER', level: 10, location: 'Nordhorn — Meister-Court', badge: 'MEISTER', badgeColor: '#aaaa33', reward: 'Meister-Move', flavor: 'Champions-League-Erfahrung. Höchste Anforderungen.' },
-    { id: 'koenig', name: 'KÖNIG', build: 'ALLROUNDER', level: 20, location: 'Nordhorn — Königs-Court', badge: 'KÖNIG', badgeColor: '#ff44ff', reward: 'Champion-Titel', flavor: 'Wartet, bis Nordhorn und Lingen deinen Namen kennen.', isFinalBoss: true },
-    { id: 'klaus', name: 'Klaus', build: 'SHOOTER', level: 9, location: 'Lingen — Bahnhof-Court', badge: 'RIVALE', badgeColor: '#cc4444', reward: 'Duell-Erfahrung', flavor: 'Erster Gruß aus Lingen: laut, direkt und direkt am Bahnhof.' },
-    { id: 'sven', name: 'Sven', build: 'VERTEIDIGER', level: 11, location: 'Lingen — Industrie-Court', badge: 'STAHL', badgeColor: '#888899', reward: 'Stahlhart', flavor: 'Schichtarbeiter-Beine, harte Screens, keine Show.' },
-    { id: 'rashta', name: 'Rashta', build: 'ALLROUNDER', level: 13, location: 'Lingen — Hafen-Court', badge: 'STURM', badgeColor: '#4466aa', reward: 'Sturm-Basketball', flavor: 'Spielt gegen Wind, Regen und schlechte Laune.' },
-    { id: 'maxim', name: 'Maxim', build: 'ALLROUNDER', level: 16, location: 'Lingen — Arena Lingen', badge: 'CHAMPION', badgeColor: '#ddaa22', reward: 'Champion von Lingen', flavor: 'Lingens Stolz. Will Nordhorns Courts zum Schweigen bringen.' }
+    { id: 0, name: 'Klaus', build: 'ROOKIE', level: 1, location: 'Nordhorn — Wohnhof-Court', badge: 'WOHNHOF', badgeColor: '#9bbc0f', reward: 'Erster Schritt', flavor: 'Gruenes Cap, Nummer 8, kurzer Antritt. Der Wohnhof merkt sich, wer hier sauber startet.' },
+    { id: 1, name: 'Anna', build: 'SHOOTER', level: 2, location: 'Nordhorn — Park-Court', badge: 'PARK', badgeColor: '#8bac0f', reward: 'Ruhiger Wurf', flavor: 'Ruhige Haende im gruenen Jersey. Zwischen Vechte-Wind und Asphalt zaehlt Technik.' },
+    { id: 2, name: 'Markus', build: 'DEFENDER', level: 3, location: 'Nordhorn — Schulhof-Court', badge: 'SCHULHOF', badgeColor: '#306230', reward: 'Breite Defense', flavor: 'Blaues Trikot, Nummer 33. Wer nach Lingen will, muss erst an seiner Defense vorbei.' },
+    { id: 3, name: 'Sophie', build: 'PLAYMAKER', level: 4, location: 'Nordhorn — Spielplatz-Court', badge: 'NERVEN', badgeColor: '#7f4bc1', reward: 'Clutch-Ruhe', flavor: 'Lila Drive, graue Haare, viel Laerm. Sie prueft, ob dein Kopf ruhig bleibt.' },
+    { id: 5, name: 'Sven', build: 'DEFENDER', level: 5, location: 'Lingen — Bahnhof-Court', badge: 'GRENZE', badgeColor: '#888899', reward: 'Auswaerts-Haerte', flavor: 'Stahlgraues Jersey und harte Screens. Der erste Lingen-Gegner macht die Grenze eng.' },
+    { id: 6, name: 'Rashta', build: 'PLAYMAKER', level: 6, location: 'Lingen — Hafen-Court', badge: 'HAFEN', badgeColor: '#4466aa', reward: 'Wind-Handles', flavor: 'Ball tief, Blick kalt, Emswind im Ruecken. Rashta testet echte Auswaertsruhe.' },
+    { id: 7, name: 'Maxim', build: 'ALLROUNDER', level: 7, location: 'Lingen — Arena Lingen', badge: 'ARENA', badgeColor: '#ddaa22', reward: 'Arena-Ruf', flavor: 'Goldenes Jersey, laute Tribuene. Wenn Maxim faellt, weiss Mihler, dass Lingen gefallen ist.' },
+    { id: 4, name: 'Coach Mihler', build: 'COACH', level: 8, location: 'Nordhorn — Finale-Halle', badge: 'CHAMPION', badgeColor: '#0f380f', reward: 'Nordhorn-Titel', flavor: 'Clipboard raus, letzter Trap. Er wartet, bis Nordhorn und Lingen deinen Namen kennen.', isFinalBoss: true }
   ],
 
   getAllTrainers() {
@@ -3526,7 +3521,7 @@ const GameModules = {
     { id: 'battle', label: 'Clean Battle', check: () => typeof startBattle === 'function' && typeof updateBattle === 'function' && typeof drawBattleHUD === 'function' && !!battle },
     { id: 'credits', label: 'Credits', check: () => typeof drawCredits === 'function' },
     { id: 'minimap', label: 'Minimap', check: () => !!(MinimapCache && typeof drawMinimap === 'function') },
-    { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length >= 13) },
+    { id: 'dex', label: 'Spieler-Liste', check: () => !!(DexData && Array.isArray(DexData.allTrainers) && DexData.allTrainers.length === trainers.length) },
     { id: 'quest', label: 'Objective Marker', check: () => !!(ObjectiveTracker && typeof ObjectiveTracker.getNextTrainer === 'function' && typeof ObjectiveTracker.drawWorldMarker === 'function') },
     { id: 'homeRest', label: 'Home Rest', check: () => !!(HomeRest && HomeRest.homeY === 9 && typeof HomeRest.rest === 'function' && isWalkable(HomeRest.homeX, HomeRest.homeY)) },
     { id: 'compat', label: 'Browser Compat', check: () => !!(BrowserCompat && BrowserCompat.checks.length > 0) },

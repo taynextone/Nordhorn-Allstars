@@ -54,6 +54,10 @@ function assertCleanRenderPaths() {
   assert(code.includes("reference: 'purple-green-grayhair'"), 'Sophie should use the user-provided purple/green gray-hair reference');
   assert(code.includes("reference: 'coach-clipboard'"), 'Coach Mihler should use the user-provided coach/clipboard reference');
   assert(code.includes('function getTrainerSpriteOptions('), 'Trainer sprites should share reference-driven visual options');
+  assert(code.includes("{ id: 7, name: 'Maxim'"), 'Dex/player list should include the real Lingen arena captain');
+  assert(code.includes("{ id: 4, name: 'Coach Mihler'"), 'Dex/player list should include the real final coach');
+  assert(!code.includes("name: 'Tim'"), 'Dex/player list should not keep stale placeholder trainers');
+  assert(code.includes('DexData.allTrainers.length === trainers.length'), 'Dex module check should track the real trainer roster count');
   assert(code.includes("facing,\n    skin: sprite.skin"), 'Trainer sprite helper should preserve explicit facing for battle mirroring');
   const removedLegacyModules = [
     'const RivalProgress =', 'const BattlePrep =', 'const DuelRiskMeter =',

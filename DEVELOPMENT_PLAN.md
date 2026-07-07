@@ -154,6 +154,7 @@
 - [x] Mihler-Taktiktafel Story-Pass — neue Taktiktafel am Finale-Court zeigt dynamische Lingen-/Maxim-/Champion-Dialoge, ist in Overview/Credits markiert und bleibt ein Map-Objekt ohne neue HUDs/Overlays.
 - [x] Auswärts-Choreo Story-Pass — neues Lingen-Banner mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Markierung und feinerem Sign-Pixelart ergänzt, ohne neue HUDs/Overlays.
 - [x] Lingen-Rückfahrt Story-Pass — Rückfahrt-Korso und Nordhorn-Schlusslicht als dynamische Route-Schilder mit Overview-/Credits-Markern ergänzt, ohne neue HUDs/Overlays.
+- [x] Spieler-Liste Roster-Sync — Dex-/Spieler-Liste auf die echten 8 Rivalen (Klaus, Anna, Markus, Sophie, Sven, Rashta, Maxim, Mihler) synchronisiert und alte Platzhalter entfernt; Module-/Smoke-Checks folgen der echten Traineranzahl.
 
 ## Technische Schulden
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
