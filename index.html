@@ -638,6 +638,13 @@ function generateMap() {
   trainers.forEach(t => {
     if (worldMap[t.y] && worldMap[t.y][t.x] !== T.WATER) worldMap[t.y][t.x] = T.PATH;
   });
+  // Home Court Kid stands on the path below the home gate; ensure the tile
+  // stays walkable so he never blocks movement or gets embedded in a building.
+  if (worldMap[HomeCourtKid.y] && worldMap[HomeCourtKid.y][HomeCourtKid.x] === T.BUILD) {
+    worldMap[HomeCourtKid.y][HomeCourtKid.x] = T.PATH;
+  } else if (worldMap[HomeCourtKid.y] && worldMap[HomeCourtKid.y][HomeCourtKid.x] !== T.WATER) {
+    worldMap[HomeCourtKid.y][HomeCourtKid.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
@@ -1288,6 +1295,7 @@ const MOVE_UNLOCKS = {
   2: { name: 'Jump Shot', energy: 6, type: 'attack', power: 19, pts: 2, desc: 'Balanced mid-range shot' },
   3: { name: 'Three Pointer', energy: 9, type: 'attack', power: 17, pts: 3, desc: 'Risky long range - 3 pts!' },
   4: { name: 'Block', energy: 4, type: 'attack', power: 9, pts: 0, desc: 'Halve next enemy strike', special: true },
+  // 5=Steal, 6=Crossover, 7=Dunk, 8=Court Vision
   5: { name: 'Steal', energy: 6, type: 'attack', power: 10, pts: 0, desc: 'Low damage, keeps pressure', special: true },
   6: { name: 'Crossover', energy: 8, type: 'attack', power: 25, pts: 2, desc: 'High-skill drive' },
   7: { name: 'Dunk', energy: 12, type: 'attack', power: 32, pts: 2, desc: 'Powerful finisher' },
@@ -2776,6 +2784,9 @@ function drawOverworld() {
   // Draw one small objective marker above the current trainer target.
   ObjectiveTracker.drawWorldMarker(camX, camY);
 
+  // Draw optional home-court NPC (kid apprentice) on top of tiles but below minimap/HUD.
+  drawHomeCourtKid(camX, camY);
+
   // Draw minimap
   if (minimapVisible) drawMinimap();
 
@@ -2790,6 +2801,98 @@ function drawOverworld() {
   drawCleanOverworldHUD();
 }
 
+
+// ============================================================
+// HOME COURT KID — Nordhorn youth NPC with progress-aware Lingen-route banter.
+// Uses existing drawHoopsterSprite; talks via startDialog on confirm/facing tile.
+// Placed on the home-court path below the starting house (x=6, y=7) so the
+// player sees a friendly face immediately after intro, without blocking spawn.
+// ============================================================
+const HomeCourtKid = {
+  x: 6,
+  y: 7,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+    const wins = trainers.filter(t => t.beaten).length;
+
+    if (beaten('Coach Mihler')) {
+      return ['Nachwuchs Spieler', 'Acht Siege! Selbst die kleinsten Courts in Nordhorn erzählen es weiter. Du bist jetzt die Legende, vor der Lingen Respekt hat.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Nachwuchs Spieler', 'Die Arena Lingen ist leise geworden. Nur noch Mihlers Halle steht. Ich hör schon den Stadionsprecher stottern.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Nachwuchs Spieler', 'Zwei Lingen-Courts gehören Nordhorn. Ich hab am Hafen die Trommeln gehört. Nächster Halt: Gold-Arena.'];
+    }
+    if (beaten('Sven')) {
+      return ['Nachwuchs Spieler', 'Der Bahnhof-Court ist unser! Mein großer Bruder sagt, Rashta am Hafen wird härter. Aber Nordhorn bleibt hart.'];
+    }
+    if (wins >= 4) {
+      return ['Nachwuchs Spieler', 'Alle Heim-Courts durch! Die Lingen-Route wartet am Zentrum und an der Grenzbrücke. Wir drücken dir die Daumen.'];
+    }
+    if (wins >= 2) {
+      return ['Nachwuchs Spieler', 'Du machst Nordhorn stolz. Anna sagt, dein Wurf hat schon Park-Niveau. Ich üb auch den Dreier.'];
+    }
+    return ['Nachwuchs Spieler', 'Hey! Coach Mihler hat gesagt, du sollst die Heim-Courts erst mal sauber abarbeiten. Klaus beim Wohnhof ist der erste Test.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#2a5a2a',
+      trim: '#9fd09f',
+      hair: '#4a3a1a',
+      pants: '#2040a0',
+      number: '0',
+      ball: true,
+      pose: 'idle',
+      headband: null,
+      accessory: ''
+    });
+    // Tiny speech-bubble cue when player is adjacent
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawHomeCourtKid(camX, camY) {
+  if (typeof HomeCourtKid !== 'undefined') HomeCourtKid.render(camX, camY);
+}
 
 function drawCleanOverworldHUD() {
   // Compact status strip: essentials + next target only, no coach/stat spam.
@@ -3008,6 +3111,7 @@ function updateOverworld() {
   if (wasPressed('o') || wasPressed('O')) { gameState = 'OVERVIEW'; clearPressedInput(); return; }
   if (wasConfirmPressed()) {
     if (tryStorySignInteraction()) return;
+    if (HomeCourtKid.tryInteract()) return;
   }
   if (wasPressed('r') || wasPressed('R')) {
     if (HomeRest.rest()) {

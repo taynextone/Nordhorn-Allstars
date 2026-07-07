@@ -158,7 +158,7 @@
 - [x] Lingen-Arena-Spectator-Story — drei Schilder (Arena-Fankurve, Stadionsprecher, Schiedsrichter) führen den Auswärtsspiel-Ablauf in der Lingen-Arena ein, ohne neue HUDs/Overlays.
 
 ## Weiterführende Ideen (Content/Grafik/Story)
-- [ ] Nordhorn-Nachwuchs-Story — ein junger Spieler in der Heimatstadt kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt, ohne neue HUDs/Overlays.
+- [x] Nordhorn-Nachwuchs-Story — ein junger Spieler am Home-Court (x=6,y=7) kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt; interagiert mit A/B/ENTER via bestehende Dialogbox, ohne neue HUDs/Overlays.
 - [ ] Boss-Build-Story-Pass — Mihlers Champion-Siegdialog und Credits betonen stärker, warum der Nordhorn-Spielstil Lingen schlägt, ohne neue HUDs/Overlays.
 - [ ] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neue HUDs/Overlays.
 
