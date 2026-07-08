@@ -473,6 +473,7 @@ function drawCredits() {
     'Schulhof-Schueler',
     'Zentrum-Reporter',
     'Vechteufer',
+    'Vechte-Bruecke Zentrum',
     'Schulhof & Park',
     'Stadionhalle',
     '',
@@ -740,6 +741,8 @@ const MAP_LANDMARKS = [
  MAP_LANDMARKS.push({ id: 'gaeste', label: 'GAESTE', x: 36, y: 52, kind: 'story' });
  // School Yard Student landmark for the new school-route NPC.
  MAP_LANDMARKS.push({ id: 'school-student', label: 'SCHULHOF', x: 44, y: 16, kind: 'story' });
+ // Central Vechte bridge pillar connects the Zentrum hub to the Lingen route.
+ MAP_LANDMARKS.push({ id: 'zentrum-bridge', label: 'BRUECKE', x: 24, y: 28, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -936,6 +939,21 @@ const StorySigns = [
       if (hasTrainerWin('Sven')) return 'Bahnhof gepfiffen. Weiter Richtung Hafen.';
       return 'Schiri prueft Ball: Fair Play. Erst Courts, dann Halle.';
     }
+  },
+  {
+    id: 'zentrum-bridge-pillar',
+    x: 24,
+    y: 28,
+    title: 'Vechte-Bruecke Zentrum',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Die Bruecke steht offen. Acht Siege, und selbst der Fluss scheint den Ball Nordhorn zuzutragen.';
+      if (hasTrainerWin('Maxim')) return 'Am Brueckengelaender haengt ein Plakat: Nordhorn hat Arena Lingen. Der Zug nach Halle ist fast leer.';
+      if (hasTrainerWin('Rashta')) return 'Zwei Lingen-Courts geschafft. Unter der Bruecke steht: Halbzeit in Lingen, der Rest spielt in Nordhorn.';
+      if (hasTrainerWin('Sven')) return 'Einer weg in Lingen. Auf dem Pfeiler: Erst Grenze, dann Hafen. Der Vechte folgen.';
+      if (hasTrainerWin('Sophie')) return 'Spielplatz gewonnen. Der erste Pfeiler zeigt nun: Richtung Bahnhof, Richtung Lingen.';
+      if (hasTrainerWin('Markus')) return 'Markus Defense durchbrochen. Die Bruecke ins Zentrum scheint breiter als gestern.';
+      return 'Vechte-Bruecke: von hier fuehrt der Weg nach Nordhorn und der erste Blick Richtung Lingen.';
+    }
   }
 ];
 
@@ -966,15 +984,27 @@ function drawTile(x, y, tileType, camX, camY) {
       if ((x + y) % 5 === 2) ctx.fillRect(sx + 11, sy + 12, 3, 3);
       break;
     case T.WATER:
+      // Vechte/Kanal water: darker base with layered wave crests that move with
+      // frameCount, so the river feels alive without adding any HUD or overlay.
       ctx.fillStyle = C.DARK;
       ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#0f280f';
+      ctx.fillRect(sx + 1, sy + 1, 14, 14);
+      const wave = (x * 3 + frameCount * 0.5) % TILE;
       ctx.fillStyle = C.MID;
-      // Water wave pattern
-      const wave = (x * 3 + Date.now() / 500) % TILE;
-      ctx.fillRect(sx + Math.floor(wave) % 8, sy + 4, 4, 2);
-      ctx.fillRect(sx + (Math.floor(wave) + 5) % 12, sy + 10, 4, 2);
+      // Crest 1 — mid-dark roll
+      ctx.fillRect(sx + (Math.floor(wave) % 16), sy + 5, 5, 2);
+      ctx.fillRect(sx + ((Math.floor(wave) + 8) % 16), sy + 11, 5, 2);
+      // Crest 2 — lighter sparkle, offset phase
       ctx.fillStyle = C.LIGHT;
-      ctx.fillRect(sx + 2 + Math.floor(wave * 0.7) % 6, sy + 7, 3, 1);
+      const wave2 = (x * 2 + frameCount * 0.35 + 6) % 16;
+      ctx.fillRect(sx + (Math.floor(wave2) % 16), sy + 3, 3, 1);
+      ctx.fillRect(sx + ((Math.floor(wave2) + 9) % 16), sy + 9, 3, 1);
+      // Subtle vertical ripple, water around posts
+      if ((x + y) % 7 === 0) {
+        ctx.fillStyle = C.MID;
+        ctx.fillRect(sx + 6, sy + 2, 2, 2);
+      }
       break;
     case T.TREE:
       ctx.fillStyle = C.LIGHT;
