@@ -400,8 +400,22 @@ function drawCredits() {
   ctx.font = '10px monospace';
   ctx.fillText('BASKETBALL RPG', cx, 80);
 
+  // Animated ball keeps the title alive without adding another menu layer.
+  const titleBall = {
+    x: cx + Math.sin(frameCount * 0.03) * 100,
+    y: 118 + Math.abs(Math.cos(frameCount * 0.06)) * 18
+  };
+  drawBasketball(titleBall.x, titleBall.y, 5, frameCount * 0.04);
+
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
+
+  // Add a small animated title-status note below the bouncing ball.
+  const statusBlink = Math.floor(Date.now() / 900) % 2;
+  if (statusBlink) {
+    ctx.fillStyle = C.DARK;
+    ctx.fillText('PASSEN · PAUSEN · WURF UM WURF', cx, 98);
+  }
 
   const lines = [
     '',
@@ -1159,6 +1173,12 @@ function drawHoopsterSprite(x, y, opts = {}) {
   rect(4, 16, 2, 1);
   rect(10, 16, 2, 1);
 
+  // Shorts over the jersey-bottom for clearer basketball shape.
+  ctx.fillStyle = pants;
+  rect(3, 12, 10, 3);
+  ctx.fillStyle = C.DARKEST;
+  rect(3, 12, 10, 1);
+
   // Jersey with outline, collar and tiny player number
   ctx.fillStyle = C.DARKEST;
   rect(3, 8, 10, 7);
@@ -1249,6 +1269,34 @@ function drawHoopsterSprite(x, y, opts = {}) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
   rect(5, 3, 2, 1);
   rect(5, 9, 1, 3);
+
+  // Subtle overworld idle breathing (only when scale is 1).
+  if (scale === 1 && (Math.floor(performance.now() / 400) % 2 === 0)) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    rect(10, 3, 1, 1);
+  }
+}
+
+function drawBasketball(x, y, radius, rotation) {
+  const px = Math.floor(x - radius);
+  const py = Math.floor(y - radius);
+  const size = radius * 2;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  ctx.fillStyle = '#d4600a';
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#5a2a0a';
+  ctx.fillRect(-radius + 1, -1, size - 2, 2);
+  ctx.fillRect(-1, -radius + 1, 2, size - 2);
+  ctx.strokeStyle = '#5a2a0a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius - 1, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function drawPlayer(camX, camY, facing, frame) {

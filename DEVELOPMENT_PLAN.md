@@ -168,6 +168,7 @@
 - [x] Battle-Timer State Guard — verzögerte Battle-Callbacks prüfen jetzt auch gameState, damit alte Timeouts nach Reset/Continue keinen Battle-State überschreiben.
 - [x] Battle-Buff Reset — playerBuffed/enemyBuffed werden beim Start jedes Kampfs zurückgesetzt, damit keine alten Buffs in den nächsten Rivalen übertragen.
 - [x] ObjectiveTracker Pulse Polish — Zielmarker pulsiert langsamer und hat einen kleinen Schatten, damit er auf allen Tiles lesbar bleibt.
+- [x] Title-Screen-Animation + Sprite-Shorts Grafik-Pass — kleiner hüpfender Basketball auf dem Titelbild, Hoopster-Sprites bekommen Shorts für klarere Basketball-Silhouette, blinkender Motto-Text statt neuer HUDs.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
