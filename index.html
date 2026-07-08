@@ -953,17 +953,26 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillRect(sx, sy, TILE, TILE);
       ctx.fillStyle = '#5a5a3a';
       ctx.fillRect(sx + 1, sy + 1, 14, 14);
-      // Tiny court-paint pixels: scenery only, no HUD/overlay chrome.
       ctx.fillStyle = C.DARK;
-      if (x % 8 === 0 || x % 8 === 7) {
-        ctx.fillRect(sx + 7, sy, 2, TILE);
+      // Sidelines + boundary paint (Gameboy-style court structure)
+      ctx.fillRect(sx + 1, sy + 1, 14, 1);
+      ctx.fillRect(sx + 1, sy + 14, 14, 1);
+      ctx.fillRect(sx + 1, sy + 1, 1, 14);
+      ctx.fillRect(sx + 14, sy + 1, 1, 14);
+      // Center line (vertical court divider)
+      ctx.fillRect(sx + 7, sy + 2, 2, 12);
+      // Small center circle / key pixels
+      ctx.fillRect(sx + 5, sy + 5, 1, 1);
+      ctx.fillRect(sx + 10, sy + 5, 1, 1);
+      ctx.fillRect(sx + 5, sy + 10, 1, 1);
+      ctx.fillRect(sx + 10, sy + 10, 1, 1);
+      ctx.fillRect(sx + 6, sy + 6, 4, 4);
+      // Sideline hash marks for readability
+      if ((x % 5) === 1) {
+        ctx.fillRect(sx + 3, sy + 4, 2, 1);
+        ctx.fillRect(sx + 3, sy + 11, 2, 1);
       }
-      if (y % 8 === 0 || y % 8 === 7) {
-        ctx.fillRect(sx, sy + 7, TILE, 2);
-      }
-      if (x % 8 === 3 && y % 8 === 3) {
-        ctx.fillRect(sx + 6, sy + 6, 4, 4);
-      }
+      // Subtle texture dots (keep existing feel)
       if ((x + y) % 11 === 0) {
         ctx.fillStyle = C.MID;
         ctx.fillRect(sx + 3, sy + 3, 2, 2);

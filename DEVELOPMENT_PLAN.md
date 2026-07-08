@@ -160,7 +160,7 @@
 ## Weiterführende Ideen (Content/Grafik/Story)
 - [x] Nordhorn-Nachwuchs-Story — ein junger Spieler am Home-Court (x=6,y=7) kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt; interagiert mit A/B/ENTER via bestehende Dialogbox, ohne neue HUDs/Overlays.
 - [x] Boss-Build-Story-Pass — Mihlers Champion-Siegdialog und Credits betonen jetzt stärker, warum der Nordhorn-Spielstil Lingen schlägt: "Passen, Pausen, Wurf um Wurf" und "Der Home-Court-Stil hat auswärts gehalten" in Dialog und Credits, ohne neue HUDs/Overlays.
-- [ ] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neue HUDs/Overlays.
+- [x] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neue HUDs/Overlays. (Court-Boundaries + Centerline + Sideline-Hashes in drawTile)
 - [x] Battle-Timer State Guard — verzögerte Battle-Callbacks prüfen jetzt auch gameState, damit alte Timeouts nach Reset/Continue keinen Battle-State überschreiben.
 - [x] Battle-Buff Reset — playerBuffed/enemyBuffed werden beim Start jedes Kampfs zurückgesetzt, damit keine alten Buffs in den nächsten Rivalen übertragen.
 - [x] ObjectiveTracker Pulse Polish — Zielmarker pulsiert langsamer und hat einen kleinen Schatten, damit er auf allen Tiles lesbar bleibt.
