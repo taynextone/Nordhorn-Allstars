@@ -476,6 +476,7 @@ function drawCredits() {
     'Vechte-Bruecke Zentrum',
     'Tierpark-Besucher',
     'Park-Court Natur',
+    'Home-Court Veteran',
     'Schulhof & Park',
     'Stadionhalle',
     '',
@@ -718,12 +719,20 @@ function generateMap() {
   } else if (worldMap[ZentrumReporter.y] && worldMap[ZentrumReporter.y][ZentrumReporter.x] !== T.WATER) {
     worldMap[ZentrumReporter.y][ZentrumReporter.x] = T.PATH;
   }
+  // Home Court Old Timer stands just south of the home gate at x=7, y=10; keep
+  // the tile walkable so new players can talk to him without getting stuck.
+  if (worldMap[HomeCourtOldTimer.y] && worldMap[HomeCourtOldTimer.y][HomeCourtOldTimer.x] === T.BUILD) {
+    worldMap[HomeCourtOldTimer.y][HomeCourtOldTimer.x] = T.PATH;
+  } else if (worldMap[HomeCourtOldTimer.y] && worldMap[HomeCourtOldTimer.y][HomeCourtOldTimer.x] !== T.WATER) {
+    worldMap[HomeCourtOldTimer.y][HomeCourtOldTimer.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
 
 const MAP_LANDMARKS = [
   { id: 'home', label: 'HOME', x: 5, y: 3, kind: 'start' },
+  { id: 'home-oldtimer', label: 'VETERAN', x: 7, y: 10, kind: 'story' },
   { id: 'kloster', label: 'KLOSTER', x: 15, y: 1, kind: 'quiet' },
   { id: 'blume', label: 'BLUMEN', x: 17, y: 30, kind: 'court' },
   { id: 'zentrum', label: 'ZENTRUM', x: 35, y: 17, kind: 'hub' },
@@ -2937,7 +2946,7 @@ function updateCharSelect() {
     }
     if (wasConfirmPressed()) {
       applyCharacterCreation();
-      startDialog('Willkommen in Nordhorn!', 'Mama: Die Courts rufen. Klaus ist beim Wohnhof. Besieg ihn, dann Anna im Park, Markus am Schulhof und Sophie auf dem Spielplatz.');
+      startDialog('Willkommen in Nordhorn!', 'Mama: Die Courts rufen. Klaus ist beim Wohnhof. Besieg ihn, dann Anna im Park, Markus am Schulhof und Sophie auf dem Spielplatz. Der alte Trainer am Home-Court erzählt mehr.');
     }
   }
 }
@@ -3086,6 +3095,9 @@ function drawOverworld() {
   // Draw Lingen arena fan NPC at the arena entrance, below minimap/HUD.
   drawLingenArenaFan(camX, camY);
 
+  // Draw the old home-court trainer who watches the Lingen route.
+  drawHomeCourtOldTimer(camX, camY);
+
   // Draw school-yard student NPC near the school/gym hub, below minimap/HUD.
   drawSchoolYardStudent(camX, camY);
 
@@ -3094,6 +3106,9 @@ function drawOverworld() {
 
   // Draw Tierpark visitor NPC near the park pond, below minimap/HUD.
   drawTierparkVisitor(camX, camY);
+
+  // Draw atmospheric world details (birds/balloons) on top of tiles, below actors/HUD.
+  drawWorldAtmosphere(camX, camY);
 
   // Draw minimap
   if (minimapVisible) drawMinimap();
@@ -3652,6 +3667,153 @@ function drawTierparkVisitor(camX, camY) {
   if (typeof TierparkVisitor !== 'undefined') TierparkVisitor.render(camX, camY);
 }
 
+// ============================================================
+// WORLD ATMOSPHERE — subtle animated sky/world details (birds, balloons)
+// drawn between tiles and actors/HUD. frameCount-driven, no overlays, no HUD.
+// ============================================================
+const WorldAtmosphere = {
+  // Slow-moving pixel clusters that drift across the sky.
+  // Each particle: {x, y, speed, offset, type} in tile coordinates or screen coords.
+  particles: [
+    { x: 5, y: 4, speed: 0.03, offset: 0, type: 'bird' },
+    { x: 25, y: 8, speed: 0.025, offset: 120, type: 'bird' },
+    { x: 45, y: 3, speed: 0.035, offset: 240, type: 'bird' },
+    { x: 60, y: 12, speed: 0.02, offset: 80, type: 'bird' },
+    { x: 15, y: 18, speed: 0.015, offset: 300, type: 'balloon' },
+    { x: 50, y: 22, speed: 0.018, offset: 180, type: 'balloon' },
+  ],
+
+  render(camX, camY) {
+    this.particles.forEach(p => {
+      // World-space drift, wrap around map width.
+      const drift = ((frameCount * p.speed + p.offset) % MAP_W);
+      const wx = p.x + drift;
+      const wy = p.y + Math.sin((frameCount + p.offset) * 0.02) * 0.8;
+      const px = Math.floor((wx - camX) * TILE);
+      const py = Math.floor((wy - camY) * TILE);
+      if (px < -8 || px > VIEW_W + 8 || py < -8 || py > VIEW_H + 8) return;
+
+      if (p.type === 'bird') {
+        // Tiny V-shaped bird in light/dark palette.
+        ctx.fillStyle = C.LIGHT;
+        ctx.fillRect(px, py, 2, 1);
+        ctx.fillRect(px + 3, py, 2, 1);
+        ctx.fillRect(px + 1, py + 1, 3, 1);
+      } else if (p.type === 'balloon') {
+        // Small floating balloon pixel-art.
+        ctx.fillStyle = '#9bbc0f';
+        ctx.fillRect(px + 1, py, 3, 4);
+        ctx.fillRect(px, py + 1, 5, 3);
+        ctx.fillStyle = C.DARK;
+        ctx.fillRect(px + 2, py + 4, 1, 3);
+        // Slight bob shadow
+        ctx.fillStyle = 'rgba(15, 56, 15, 0.25)';
+        ctx.fillRect(px + 1, py + 7, 3, 1);
+      }
+    });
+  }
+};
+
+function drawWorldAtmosphere(camX, camY) {
+  if (typeof WorldAtmosphere !== 'undefined') WorldAtmosphere.render(camX, camY);
+}
+
+// ============================================================
+// HOME COURT OLD TIMER — progress-aware veteran NPC near the home court.
+// He remembers old Nordhorn vs Lingen stories and reacts to the current rival run.
+// Uses existing drawHoopsterSprite; talks via startDialog. Placed at x=7, y=8 on a
+// walkable tile just below the home gate, so new players see him early.
+// ============================================================
+const HomeCourtOldTimer = {
+  x: 7,
+  y: 10,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Alter Trainer', 'Acht Siege. Ich habe in Nordhorn gegen Lingen verloren, bevor du geboren wurdest. Heute habe ich es gesehen: Passen, Pausen, Wurf um Wurf. Der Home-Court-Stil hat auswärts gehalten.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Alter Trainer', 'Die Gold-Arena ist still. In meiner Zeit war Lingen dort unbesiegbar. Du hast den Lärm einfach abgenäht. Nur noch Mihler.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Alter Trainer', 'Zwei Auswärts-Courts. Der Hafenwind war früher unser Ende. Du hast ihn zum Passen genutzt. Maxim wird lauter, aber du bleibst leise.'];
+    }
+    if (beaten('Sven')) {
+      return ['Alter Trainer', 'Der Bahnhof-Court gehört Nordhorn. Sven hat harte Screens gesetzt, aber du bist drum herum gelaufen. Nächster Halt: der Hafen.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Alter Trainer', 'Spielplatz durch. Sophie prüft die Nerven. Jetzt zeigt die Grenzbrücke nach Lingen. Erst den Bahnhof, dann den Hafen, dann die Arena.'];
+    }
+    if (beaten('Markus')) {
+      return ['Alter Trainer', 'Markus Defense geknackt. Sophie am Spielplatz wird die nächste Prüfung. Und dann … Lingen. Ich rieche schon den Hafenwind.'];
+    }
+    if (beaten('Anna')) {
+      return ['Alter Trainer', 'Anna im Park besiegt. In meiner Zeit war der Park-Court das Herz von Nordhorn. Markus wartet am Schulhof mit seiner Wand.'];
+    }
+    if (beaten('Klaus')) {
+      return ['Alter Trainer', 'Klaus war dein erster Test. Der Wohnhof hat schon viele angefangen, aber wenige bis Lingen gebracht. Anna als Nächste.'];
+    }
+    return ['Alter Trainer', 'Willkommen auf dem Home-Court. Ich habe hier vor Jahrzehnten gegen Lingen verloren. Vielleicht bringst du den Sieg zurück. Starte bei Klaus.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#5a4a3a',
+      trim: '#d8c8a0',
+      hair: '#c8c8c8',
+      pants: '#303040',
+      number: 'V',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: ''
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawHomeCourtOldTimer(camX, camY) {
+  if (typeof HomeCourtOldTimer !== 'undefined') HomeCourtOldTimer.render(camX, camY);
+}
+
 function drawCleanOverworldHUD() {
   // Compact status strip: essentials + next target only, no coach/stat spam.
   ctx.fillStyle = C.DARKEST;
@@ -3871,6 +4033,7 @@ function updateOverworld() {
   if (wasPressed('o') || wasPressed('O')) { gameState = 'OVERVIEW'; clearPressedInput(); return; }
   if (wasConfirmPressed()) {
     if (tryStorySignInteraction()) return;
+    if (HomeCourtOldTimer.tryInteract()) return;
     if (HomeCourtKid.tryInteract()) return;
     if (ZentrumReporter.tryInteract()) return;
     if (TierparkVisitor.tryInteract()) return;

@@ -174,6 +174,8 @@
 - [x] Vechte-Wasser-Animation + Brücken-Story-Pass — Wasser-Wellen-Animation mit frameCount-synchronen Lagen, neues progress-aware Vechte-Brücken-Schild am Zentrum-Übergang (x=24, y=28) mit Nordhorn-vs-Lingen Dialogbogen, Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
 - [x] Tierpark-Visitor + ParkCourt Story-Pass — neuer progress-aware Tierpark-Besucher am Parkteich (x=50, y=23) mit dynamischen Klaus/Anna/Markus/Sophie/Lingen-Dialogen; neuer T.PARKCOURT Tile mit Natur-Details (Blätter, Pfotenabdrücke) für den Tierpark-Court; Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
 - [x] World-Tile Pixel-Polish — Grass-, Path-, Tree-Tiles mit feineren Pixel-Details, Wind-Shimmer und strukturierten Pflasterfugen; Vechte-Wasser bleibt frameCount-animiert; keine neuen HUDs/Overlays.
+- [x] Home-Court Veteran Story-Pass — neuer progress-aware alter Trainer am Home-Court (x=7, y=10) mit Nordhorn-vs-Lingen Dialogbogen, eigener Overview-/Credits-Landmarke und Intro-Hinweis; keine neuen HUDs/Overlays.
+- [x] World Atmosphere Grafik-Pass — zarte frameCount-synchrone Himmelsdetails (Vögel, Ballons) zwischen Kacheln und Actors/HUD, ohne neue Overlays.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
