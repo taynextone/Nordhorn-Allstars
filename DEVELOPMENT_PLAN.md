@@ -173,6 +173,7 @@
 - [x] Zentrum-Reporter Story-Pass — neuer progress-aware Reporter am Marktplatz (x=35, y=18) mit dynamischen Dialogen zur Nordhorn-vs-Lingen Story, Overview-/Credits-Landmark ergänzt, begehbares Tile, ohne neue HUDs/Overlays.
 - [x] Vechte-Wasser-Animation + Brücken-Story-Pass — Wasser-Wellen-Animation mit frameCount-synchronen Lagen, neues progress-aware Vechte-Brücken-Schild am Zentrum-Übergang (x=24, y=28) mit Nordhorn-vs-Lingen Dialogbogen, Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
 - [x] Tierpark-Visitor + ParkCourt Story-Pass — neuer progress-aware Tierpark-Besucher am Parkteich (x=50, y=23) mit dynamischen Klaus/Anna/Markus/Sophie/Lingen-Dialogen; neuer T.PARKCOURT Tile mit Natur-Details (Blätter, Pfotenabdrücke) für den Tierpark-Court; Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
+- [x] World-Tile Pixel-Polish — Grass-, Path-, Tree-Tiles mit feineren Pixel-Details, Wind-Shimmer und strukturierten Pflasterfugen; Vechte-Wasser bleibt frameCount-animiert; keine neuen HUDs/Overlays.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

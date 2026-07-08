@@ -985,20 +985,37 @@ function drawTile(x, y, tileType, camX, camY) {
 
   switch(tileType) {
     case T.GRASS:
+      // Soft grass base with scattered meadow tufts that stay inside the tile.
       ctx.fillStyle = C.LIGHT;
       ctx.fillRect(sx, sy, TILE, TILE);
-      // Grass detail
+      // Tufts at deterministic positions
       ctx.fillStyle = C.MID;
-      if ((x + y) % 3 === 0) ctx.fillRect(sx + 3, sy + 6, 2, 3);
-      if ((x + y) % 4 === 1) ctx.fillRect(sx + 10, sy + 10, 2, 3);
-      if ((x + y) % 5 === 2) ctx.fillRect(sx + 7, sy + 3, 2, 3);
+      if ((x + y) % 3 === 0) { ctx.fillRect(sx + 3, sy + 6, 2, 3); ctx.fillRect(sx + 5, sy + 11, 2, 2); }
+      if ((x + y) % 4 === 1) { ctx.fillRect(sx + 10, sy + 10, 2, 3); ctx.fillRect(sx + 4, sy + 3, 2, 2); }
+      if ((x + y) % 5 === 2) { ctx.fillRect(sx + 7, sy + 3, 2, 3); ctx.fillRect(sx + 11, sy + 6, 2, 2); }
+      // Occasional tiny darker grass blade
+      if ((x * 2 + y) % 7 === 0) {
+        ctx.fillStyle = C.DARK;
+        ctx.fillRect(sx + 8, sy + 8, 1, 2);
+      }
       break;
     case T.PATH:
+      // Crisp pavement tile with a central brick seam and corner specks.
       ctx.fillStyle = C.MID;
       ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.LIGHT;
+      // center seam
+      ctx.fillRect(sx + 7, sy + 2, 2, 12);
+      ctx.fillRect(sx + 2, sy + 7, 12, 2);
+      // four corner specks
+      ctx.fillRect(sx + 2, sy + 2, 3, 3);
+      ctx.fillRect(sx + 11, sy + 2, 3, 3);
+      ctx.fillRect(sx + 2, sy + 11, 3, 3);
+      ctx.fillRect(sx + 11, sy + 11, 3, 3);
+      // fine cracks
       ctx.fillStyle = C.DARK;
-      if ((x + y) % 4 === 0) ctx.fillRect(sx + 4, sy + 4, 4, 4);
-      if ((x + y) % 5 === 2) ctx.fillRect(sx + 11, sy + 12, 3, 3);
+      if ((x + y) % 4 === 0) ctx.fillRect(sx + 5, sy + 5, 1, 3);
+      if ((x + y) % 5 === 2) ctx.fillRect(sx + 10, sy + 9, 2, 1);
       break;
     case T.WATER:
       // Vechte/Kanal water: darker base with layered wave crests that move with
@@ -1024,18 +1041,35 @@ function drawTile(x, y, tileType, camX, camY) {
       }
       break;
     case T.TREE:
+      // Gameboy-style deciduous tree with layered canopy and wind shimmer.
       ctx.fillStyle = C.LIGHT;
       ctx.fillRect(sx, sy, TILE, TILE);
-      // Tree trunk
+      // Trunk with slight curve and roots
       ctx.fillStyle = C.DARKEST;
-      ctx.fillRect(sx + 6, sy + 10, 4, 6);
-      // Tree canopy
+      ctx.fillRect(sx + 7, sy + 9, 3, 7);
+      ctx.fillRect(sx + 6, sy + 14, 2, 2);
+      ctx.fillRect(sx + 10, sy + 14, 2, 2);
+      // Canopy layers: back, mid, front
       ctx.fillStyle = C.MID;
-      ctx.fillRect(sx + 2, sy + 2, 12, 9);
+      ctx.fillRect(sx + 1, sy + 4, 14, 7);
+      ctx.fillRect(sx + 3, sy + 2, 10, 4);
+      ctx.fillRect(sx + 5, sy + 1, 6, 2);
       ctx.fillStyle = C.DARK;
-      ctx.fillRect(sx + 3, sy + 3, 10, 7);
+      ctx.fillRect(sx + 2, sy + 5, 12, 5);
+      ctx.fillRect(sx + 4, sy + 3, 8, 3);
+      // Highlight clumps
       ctx.fillStyle = C.MID;
-      ctx.fillRect(sx + 4, sy + 4, 4, 4);
+      ctx.fillRect(sx + 4, sy + 4, 3, 3);
+      ctx.fillRect(sx + 9, sy + 4, 3, 3);
+      // Wind shimmer: leaves on the right edge bob slightly with frameCount
+      if ((x + y + Math.floor(frameCount / 20)) % 3 === 0) {
+        ctx.fillStyle = C.LIGHT;
+        ctx.fillRect(sx + 12, sy + 5, 2, 2);
+      }
+      if ((x * 2 + y + Math.floor(frameCount / 25)) % 4 === 0) {
+        ctx.fillStyle = C.DARKEST;
+        ctx.fillRect(sx + 2, sy + 6, 2, 2);
+      }
       break;
     case T.BUILD:
       ctx.fillStyle = C.DARK;
