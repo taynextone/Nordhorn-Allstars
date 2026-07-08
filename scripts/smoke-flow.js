@@ -132,7 +132,9 @@ function assertCleanRenderPaths() {
   assert(code.includes('Save/load feedback must not cover dialog boxes, battle messages, credits,'), 'Save toast guard should document the clean-screen reason');
   assert(code.includes("const finalScore = battle.playerScore + '-' + battle.enemyScore;"), 'Victory dialog should include the final battle score from existing state');
   assert(code.includes("trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Victory dialog should show rival progress and score in the existing dialog box');
-  assert(code.includes("startDialog('CHAMPION!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore"), 'Champion dialog should also show final score/progress before credits without a new overlay');
+  assert(code.includes("'CHAMPION!'"), 'Champion dialog title should still open the final victory dialog');
+  assert(code.includes('Home-Court-Stil'), 'Champion dialog should explain why the Nordhorn home-court style beat Lingen');
+  assert(code.includes('Passen, Pausen, Wurf um Wurf'), 'Champion dialog should use the concrete Nordhorn play-style phrase');
   assert(!code.includes('Coach: Great game! Keep training!'), 'Generic coach victory line should stay replaced by compact rival progress');
   assert(code.includes('function markTrainerBeaten(trainer)'), 'Trainer victory state should be synced through one small helper');
   assert(code.includes('function clearBattleRuntimeState()'), 'Post-battle and new-run flows should clear stale battle runtime state');

@@ -460,6 +460,10 @@ function drawCredits() {
     'Stadionhalle',
     '',
     '',
+    'Nordhorn hat Lingen nicht überrannt.',
+    'Passen, Pausen, Wurf um Wurf.',
+    'Der Home-Court-Stil hat auswärts gehalten.',
+    '',
     'Nordhorn bleibt Champion.',
     '',
     '',
@@ -1311,7 +1315,7 @@ const trainers = [
   { id: 5, name: 'Sven', x: 8, y: 55, colors: { hat: '#283838', body: '#5b6468', pants: '#253030' }, sprite: { reference: 'lingen-steel-screen', accessory: 'headband', skin: '#d8a070', hair: '#4a4a48', jersey: '#5b6468', trim: '#d0e0e0', pants: '#253030', number: '11' }, dialogue: 'Sven vom Lingen-Bahnhof: Stahlgraues Jersey, harte Screens. Wenn Nordhorn rüberkommt, muss es hier zuerst stoppen.', victoryLine: 'Sven schnaubt: Okay. Die Grenze gehört heute deinem ersten Schritt.', beaten: false, playerHp: 142, enemyEnergy: 27, level: 5, ptsToWin: 19, offense: 8, defense: 8, regen: 4, expReward: 76, aiStyle: 'Defender' },
   { id: 6, name: 'Rashta', x: 17, y: 55, colors: { hat: '#1f3048', body: '#345b8c', pants: '#1b2438' }, sprite: { reference: 'lingen-harbor-storm', accessory: 'hijab', skin: '#c89068', hair: '#1f3048', jersey: '#345b8c', trim: '#b8d8ff', pants: '#1b2438', number: '13' }, dialogue: 'Rashta am Hafen: Wind von der Ems, Ball tief, Blick kalt. Lingen will sehen, ob Nordhorn auch auswärts wirft.', victoryLine: 'Rashta nickt knapp: Dein Wurf klingt sogar im Hafen nach Netz.', beaten: false, playerHp: 154, enemyEnergy: 30, level: 6, ptsToWin: 21, offense: 10, defense: 8, regen: 4, expReward: 92, aiStyle: 'Playmaker' },
   { id: 7, name: 'Maxim', x: 29, y: 55, colors: { hat: '#6b4a18', body: '#d8a63a', pants: '#243048' }, sprite: { reference: 'lingen-arena-captain', accessory: 'headband', skin: '#d8a070', hair: '#6b4a18', jersey: '#d8a63a', trim: '#fff0a0', pants: '#243048', number: '10' }, dialogue: 'Maxim aus der Arena Lingen: Goldene Schultern, laute Tribüne. Besieg mich, dann weiß Mihler, dass Lingen gefallen ist.', victoryLine: 'Maxim senkt den Blick: Die Arena ruft heute Nordhorn.', beaten: false, playerHp: 160, enemyEnergy: 31, level: 7, ptsToWin: 21, offense: 11, defense: 9, regen: 4, expReward: 104, aiStyle: 'Allrounder' },
-  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Clipboard raus, Ball fest. Nordhorns Halle ist still. Lingen hört zu.', victoryLine: 'Coach Mihler: Du trägst Nordhorn jetzt weiter.', beaten: false, playerHp: 172, enemyEnergy: 34, level: 8, ptsToWin: 21, offense: 12, defense: 10, regen: 4, expReward: 120, aiStyle: 'Coach' },
+  { id: 4, name: 'Coach Mihler', x: 40, y: 50, colors: { hat: '#d8d8c8', body: '#3b3b58', pants: '#202030' }, sprite: { reference: 'coach-clipboard', accessory: 'coach', skin: '#d8a070', hair: '#6b5a48', jersey: '#3b3b58', trim: '#f8f0c8', pants: '#202030', number: 'C' }, dialogue: 'Coach Mihler: Lingen hat Lautstärke. Nordhorn hat Geduld. Passen, Pausen, Wurf um Wurf. Beweis, dass der Home-Court-Stil auch in der Halle hält.', victoryLine: 'Coach Mihler legt das Clipboard weg: Lingen hat getobt. Nordhorn hat gewartet. So schlägt der Home-Court-Stil auch auswärts.', beaten: false, playerHp: 172, enemyEnergy: 34, level: 8, ptsToWin: 21, offense: 12, defense: 10, regen: 4, expReward: 120, aiStyle: 'Coach' },
 ];
 
 function getTrainerSpriteOptions(trainer, facing = 'down', scale = 1, hasBall = false) {
@@ -2297,9 +2301,11 @@ function endBattle() {
   const beatenCount = trainers.filter(t => t.beaten).length;
   const allTrainersBeaten = trainers.every(t => t.beaten);
   if (allTrainersBeaten) {
-    // Final win uses the same existing dialog box as normal victories: compact
-    // progress + score, then credits via callback. No extra champion HUD/overlay.
-    startDialog('CHAMPION!', trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore + '. Nordhorn jubelt. Sogar Lingen schweigt.', () => {
+    // Final win uses the same existing dialog box as normal victories. The text
+    // emphasizes the Nordhorn-vs-Lingen arc: calm home-court build, patient
+    // fundamentals, then the final road trip. No extra champion HUD/overlay.
+    const championSub = trainerName + ' besiegt · ' + beatenCount + '/' + trainers.length + ' · Final ' + finalScore + '. Nordhorn jubelt. Passen, Pausen, Wurf um Wurf. Der Home-Court-Stil hat auswärts gehalten.';
+    startDialog('CHAMPION!', championSub, () => {
       gameState = 'CREDITS';
     });
     return;
@@ -2846,7 +2852,7 @@ const HomeCourtKid = {
     const wins = trainers.filter(t => t.beaten).length;
 
     if (beaten('Coach Mihler')) {
-      return ['Nachwuchs Spieler', 'Acht Siege! Selbst die kleinsten Courts in Nordhorn erzählen es weiter. Du bist jetzt die Legende, vor der Lingen Respekt hat.'];
+      return ['Nachwuchs Spieler', 'Acht Siege! Du hast nicht Lingen ausgeschrien, sondern Nordhorn ausgespielt. Passen, Pausen, Wurf um Wurf. So hält der Home-Court-Stil auch auswärts.'];
     }
     if (beaten('Maxim')) {
       return ['Nachwuchs Spieler', 'Die Arena Lingen ist leise geworden. Nur noch Mihlers Halle steht. Ich hör schon den Stadionsprecher stottern.'];
