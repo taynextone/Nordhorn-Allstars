@@ -370,7 +370,7 @@ const MAP_H = 60;
 
 // Tile types
 const T = {
-  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, GOLDCOURT: 9, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14, SIGN: 15
+  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, GOLDCOURT: 9, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14, SIGN: 15, PARKCOURT: 16
 };
 
 // ============================================================
@@ -474,6 +474,8 @@ function drawCredits() {
     'Zentrum-Reporter',
     'Vechteufer',
     'Vechte-Bruecke Zentrum',
+    'Tierpark-Besucher',
+    'Park-Court Natur',
     'Schulhof & Park',
     'Stadionhalle',
     '',
@@ -549,6 +551,13 @@ function generateMap() {
     setLineV(midX, y1, y2, T.PATH);
     setLineH(x1, x2, midY, T.PATH);
   };
+  const setParkCourt = (x1, y1, x2, y2) => {
+    setRect(x1, y1, x2, y2, T.PARKCOURT);
+    const midX = Math.floor((x1 + x2) / 2);
+    const midY = Math.floor((y1 + y2) / 2);
+    setLineV(midX, y1, y2, T.PATH);
+    setLineH(x1, x2, midY, T.PATH);
+  };
   const setGoldCourt = (x1, y1, x2, y2) => {
     setRect(x1, y1, x2, y2, T.GOLDCOURT);
     const midX = Math.floor((x1 + x2) / 2);
@@ -600,7 +609,7 @@ function generateMap() {
   setCourt(50, 14, 57, 20);
 
   // Tierpark / Park court in the east, framed by water and trees.
-  setCourt(47, 25, 56, 32);
+  setParkCourt(47, 25, 56, 32);
   setRect(44, 18, 46, 31, T.TREE);
   setRect(53, 17, 58, 22, T.TREE);
   setBuilding(51, 34, 57, 38, 54);
@@ -688,6 +697,13 @@ function generateMap() {
   } else if (worldMap[LingenArenaFan.y] && worldMap[LingenArenaFan.y][LingenArenaFan.x] !== T.WATER) {
     worldMap[LingenArenaFan.y][LingenArenaFan.x] = T.PATH;
   }
+  // Tierpark Visitor stands at the park pond edge at x=50, y=23; keep the tile
+  // walkable so he is reachable and not embedded in the pond or trees.
+  if (worldMap[TierparkVisitor.y] && worldMap[TierparkVisitor.y][TierparkVisitor.x] === T.BUILD) {
+    worldMap[TierparkVisitor.y][TierparkVisitor.x] = T.PATH;
+  } else if (worldMap[TierparkVisitor.y] && worldMap[TierparkVisitor.y][TierparkVisitor.x] !== T.WATER) {
+    worldMap[TierparkVisitor.y][TierparkVisitor.x] = T.PATH;
+  }
   // School Yard Student stands near the school/gym hub at x=44, y=16; keep the
   // tile walkable so he is reachable and not embedded in the school building.
   if (worldMap[SchoolYardStudent.y] && worldMap[SchoolYardStudent.y][SchoolYardStudent.x] === T.BUILD) {
@@ -714,6 +730,7 @@ const MAP_LANDMARKS = [
   { id: 'reporter', label: 'REPORTER', x: 35, y: 18, kind: 'story' },
   { id: 'schule', label: 'SCHULE', x: 48, y: 6, kind: 'court' },
   { id: 'tierpark', label: 'TIERPARK', x: 52, y: 23, kind: 'park' },
+  { id: 'tierpark-visitor', label: 'NATUR', x: 50, y: 23, kind: 'story' },
   { id: 'stadion', label: 'HALLE', x: 40, y: 43, kind: 'boss' },
   { id: 'industrie', label: 'INDUSTRIE', x: 50, y: 45, kind: 'hard' },
   { id: 'lingen', label: '→ LINGEN', x: 8, y: 55, kind: 'route' },
@@ -1113,6 +1130,52 @@ function drawTile(x, y, tileType, camX, camY) {
       if ((x + y) % 13 === 0) {
         ctx.fillStyle = '#d4c470';
         ctx.fillRect(sx + 4, sy + 4, 2, 2);
+      }
+      break;
+    case T.PARKCOURT:
+      // Tierpark/Park court: regular court lines with park-side nature details
+      // (small leaves, flower petals, paw prints) so the park court feels green.
+      ctx.fillStyle = C.DARK;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#5a5a3a';
+      ctx.fillRect(sx + 1, sy + 1, 14, 14);
+      ctx.fillStyle = C.DARK;
+      // Sidelines + boundary paint
+      ctx.fillRect(sx + 1, sy + 1, 14, 1);
+      ctx.fillRect(sx + 1, sy + 14, 14, 1);
+      ctx.fillRect(sx + 1, sy + 1, 1, 14);
+      ctx.fillRect(sx + 14, sy + 1, 1, 14);
+      // Center line
+      ctx.fillRect(sx + 7, sy + 2, 2, 12);
+      // Lane/key marks
+      ctx.fillRect(sx, sy + 7, TILE, 2);
+      ctx.fillRect(sx + 5, sy + 5, 1, 1);
+      ctx.fillRect(sx + 10, sy + 5, 1, 1);
+      ctx.fillRect(sx + 5, sy + 10, 1, 1);
+      ctx.fillRect(sx + 10, sy + 10, 1, 1);
+      ctx.fillRect(sx + 6, sy + 6, 4, 4);
+      // Hash marks
+      if ((x % 5) === 1) {
+        ctx.fillRect(sx + 3, sy + 4, 2, 1);
+        ctx.fillRect(sx + 3, sy + 11, 2, 1);
+      }
+      // Park-side details: scattered leaves and tiny paw prints
+      if ((x + y) % 7 === 0) {
+        ctx.fillStyle = '#4a6a2a';
+        ctx.fillRect(sx + 3, sy + 3, 3, 2);
+        ctx.fillRect(sx + 10, sy + 11, 3, 2);
+      }
+      if ((x + y) % 11 === 0) {
+        ctx.fillStyle = '#7a9a4a';
+        ctx.fillRect(sx + 12, sy + 4, 2, 2);
+        ctx.fillRect(sx + 4, sy + 12, 2, 2);
+      }
+      // Tiny paw prints: dark pads on lighter stones
+      if ((x + y) % 17 === 0) {
+        ctx.fillStyle = C.DARKEST;
+        ctx.fillRect(sx + 5, sy + 6, 2, 2);
+        ctx.fillRect(sx + 7, sy + 7, 1, 1);
+        ctx.fillRect(sx + 9, sy + 6, 2, 2);
       }
       break;
     case T.DOOR:
@@ -2995,6 +3058,9 @@ function drawOverworld() {
   // Draw Zentrum reporter NPC on the market square, below minimap/HUD.
   drawZentrumReporter(camX, camY);
 
+  // Draw Tierpark visitor NPC near the park pond, below minimap/HUD.
+  drawTierparkVisitor(camX, camY);
+
   // Draw minimap
   if (minimapVisible) drawMinimap();
 
@@ -3458,6 +3524,100 @@ function drawZentrumReporter(camX, camY) {
   if (typeof ZentrumReporter !== 'undefined') ZentrumReporter.render(camX, camY);
 }
 
+// ============================================================
+// TIERPARK VISITOR — progress-aware NPC near the park pond.
+// A local bird-and-ball watcher who comments on the Nordhorn rival run and
+// the Lingen road trip from the calm side of the park. Uses existing
+// drawHoopsterSprite and startDialog; placed on a walkable tile at x=50, y=23
+// so he is part of the Tierpark content, not a HUD overlay.
+// ============================================================
+const TierparkVisitor = {
+  x: 50,
+  y: 23,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Tierpark-Besucher', 'Acht Siege! Selbst die Enten am Teich scheinen im Takt zu wackeln. Nordhorn hat Lingen nicht ueberrannt — es hat gepasst, gepausst, Wurf um Wurf.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Tierpark-Besucher', 'Die Gold-Arena ist still. Nur noch Mihlers Halle hallt. Ich habe schon Brotkrumen fuer die Heimkehr gespart.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Tierpark-Besucher', 'Zwei Auswaerts-Courts! Der Hafenwind dreht sich. Naechster Halt: Maxim in der Arena. Ich bleibe hier und wickle.'];
+    }
+    if (beaten('Sven')) {
+      return ['Tierpark-Besucher', 'Der Bahnhof-Court ist unser. Der Teich war heute morgen so ruhig wie Svens Gesicht nach dem ersten Korb.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Tierpark-Besucher', 'Spielplatz geschafft. Die Voegel im Park zwitschern schon vom Bahnhof. Lingen liegt suedwaerts, folge der Vechte.'];
+    }
+    if (beaten('Markus')) {
+      return ['Tierpark-Besucher', 'Markus breite Defense geknackt. Sophie am Spielplatz wird nervoes. Ich sehe sie manchmal von hier aus ueben.'];
+    }
+    if (beaten('Anna')) {
+      return ['Tierpark-Besucher', 'Anna im Park-Court besiegt! Nun, der echte Park-Court liegt hier im Osten. Markus wartet am Schulhof.'];
+    }
+    return ['Tierpark-Besucher', 'Schoen, dass du im Tierpark vorbeischaust. Hier ueben die Nordhorn-Kids leise, damit sie Lingen nicht vorwarnen.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#4a6a3a',
+      trim: '#b8d898',
+      hair: '#5a4a3a',
+      pants: '#2a4030',
+      number: 'P',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: ''
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawTierparkVisitor(camX, camY) {
+  if (typeof TierparkVisitor !== 'undefined') TierparkVisitor.render(camX, camY);
+}
+
 function drawCleanOverworldHUD() {
   // Compact status strip: essentials + next target only, no coach/stat spam.
   ctx.fillStyle = C.DARKEST;
@@ -3504,6 +3664,7 @@ const MINIMAP_COLORS = {
   [T.FENCE]: '#6b6b6b',
   [T.COURT]: '#5a5a3a',
   [T.GOLDCOURT]: '#8a7a3a',
+  [T.PARKCOURT]: '#5a6a3a',
   [T.DOOR]: '#0f380f',
   [T.FLOWER]: '#9bbc0f',
   [T.BENCH]: '#6b5b3b',
@@ -3643,7 +3804,7 @@ function drawOverviewMap() {
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = worldMap[y][x];
-  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.GOLDCOURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
+  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.GOLDCOURT || t === T.PARKCOURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
 }
 
 function getAdjacentStorySign() {
@@ -3678,6 +3839,7 @@ function updateOverworld() {
     if (tryStorySignInteraction()) return;
     if (HomeCourtKid.tryInteract()) return;
     if (ZentrumReporter.tryInteract()) return;
+    if (TierparkVisitor.tryInteract()) return;
     if (HarborWorker.tryInteract()) return;
     if (LingenArenaFan.tryInteract()) return;
     if (SchoolYardStudent.tryInteract()) return;
