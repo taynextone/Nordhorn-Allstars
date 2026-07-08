@@ -677,6 +677,7 @@ const MAP_LANDMARKS = [
   { id: 'bridge-graffiti', label: 'BRUECKE', x: 52, y: 42, kind: 'story' },
   { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
   { id: 'final-light', label: 'LICHT', x: 46, y: 50, kind: 'story' },
+  { id: 'home-return', label: 'HEIM', x: 7, y: 8, kind: 'story' },
 ];
 
  // Add the missing Lingen guest-locker landmark so Overview/Credits stay synced
@@ -828,6 +829,19 @@ const StorySigns = [
     }
   },
   {
+    id: 'home-return-sign',
+    x: 7,
+    y: 8,
+    title: 'Bahnhof Nordhorn',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Der Zug steht bereit: Heimkehr als Acht-Siege-Champion. Lingen steigt aus, Nordhorn feiert am Bahnhof.';
+      if (hasTrainerWin('Maxim')) return 'Am Bahnhofsplatz haengt ein Plakat: Bus nach Lingen, letzter Halt Mihler. Die Heimfahrt wird die Siegesfahrt.';
+      if (hasTrainerWin('Rashta')) return 'Am Gleis steht ein Koffer mit Nordhorn-Aufdruck: Zwei Auswaerts-Courts geholt, die Gold-Arena war erst der Anfang.';
+      if (hasTrainerWin('Sven')) return 'Der Bahnhof ruft: Erste Auswaertsstation geschafft. Der Hafen und die Arena warten im Sueden.';
+      return 'Der Bahnhof Nordhorn ist still. Fahrplanaushang: Auswaerts nach Lingen, sobald die Heim-Courts durch sind.';
+    }
+  },
+  {
     id: 'arena-fankurve',
     x: 24,
     y: 54,
@@ -962,6 +976,8 @@ function drawTile(x, y, tileType, camX, camY) {
       // Center line (vertical court divider)
       ctx.fillRect(sx + 7, sy + 2, 2, 12);
       // Small center circle / key pixels
+      // Tiny court-paint pixels add the free-throw-line marks and lane key
+      ctx.fillRect(sx, sy + 7, TILE, 2);
       ctx.fillRect(sx + 5, sy + 5, 1, 1);
       ctx.fillRect(sx + 10, sy + 5, 1, 1);
       ctx.fillRect(sx + 5, sy + 10, 1, 1);
