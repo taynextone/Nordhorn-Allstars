@@ -621,6 +621,8 @@ function generateMap() {
   setRect(8, 1, 22, 1, T.TREE);
   setRect(8, 6, 22, 7, T.TREE);
   setRect(18, 8, 23, 10, T.FLOWER);
+  // Small monastery courtyard so the progress-aware monk NPC is reachable.
+  setRect(13, 6, 17, 7, T.PATH);
 
   // Industrie / Gravemeier-inspired south-east hard-court zone.
   setBuilding(43, 47, 58, 55, 50);
@@ -786,6 +788,8 @@ const MAP_LANDMARKS = [
  MAP_LANDMARKS.push({ id: 'zentrum-bridge', label: 'BRUECKE', x: 24, y: 28, kind: 'story' });
  // Lingen bridge guard marks the gateway checkpoint toward the away arc.
  MAP_LANDMARKS.push({ id: 'lingen-bridge-guard', label: 'POSTEN', x: 52, y: 42, kind: 'story' });
+ // Frenswegen monk landmark for the new progress-aware NPC in the monastery courtyard.
+ MAP_LANDMARKS.push({ id: 'kloster-monk', label: 'MÖNCH', x: 15, y: 7, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -1401,6 +1405,16 @@ function drawHoopsterSprite(x, y, opts = {}) {
     rect(2, 1, 12, 3);
     rect(1, 3, 4, 5);
     rect(11, 3, 4, 5);
+  } else if (accessory === 'robe') {
+    // Simple monastic hood/cowl for the Frenswegen monk NPC.
+    ctx.fillStyle = jersey;
+    rect(2, 0, 12, 10);
+    ctx.fillStyle = trim;
+    rect(4, 8, 8, 2);
+    ctx.fillStyle = skin;
+    rect(5, 3, 6, 5);
+    ctx.fillStyle = hair;
+    rect(6, 1, 4, 2);
   } else if (accessory === 'coach') {
     ctx.fillStyle = '#d8d8c8';
     rect(3, 1, 10, 3);
@@ -3115,6 +3129,9 @@ function drawOverworld() {
   // Draw the old home-court trainer who watches the Lingen route.
   drawHomeCourtOldTimer(camX, camY);
 
+  // Draw the quiet Frenswegen monk who adds northwest story flavor.
+  drawKlosterMonk(camX, camY);
+
   // Draw school-yard student NPC near the school/gym hub, below minimap/HUD.
   drawSchoolYardStudent(camX, camY);
 
@@ -3242,6 +3259,86 @@ const HomeCourtKid = {
 // Placed on the bridge path so players naturally meet him on the way to the
 // Lingen arc, without blocking the Vechte bridge crossing.
 // ============================================================
+const KlosterMonk = {
+  x: 15,
+  y: 7,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+    if (beaten('Coach Mihler')) {
+      return ['Frensweger Mönch', 'Acht Siege, kein Lärm. Der Ball ist zur Ruhe gekommen.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Frensweger Mönch', 'Die Goldene Arena schweigt. Noch ein Atemzug, dann ist Lingen ganz still.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Frensweger Mönch', 'Zwei auswärts gewonnen. Der Wind am Hafen legt sich, wenn man geduldig spielt.'];
+    }
+    if (beaten('Sven')) {
+      return ['Frensweger Mönch', 'Der Bahnhof-Court ist hinter dir. Der Hafenwind wird stärker.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Frensweger Mönch', 'Vier Heim-Courts gemeistert. Von hier aus sieht Lingen schon näher aus.'];
+    }
+    return ['Frensweger Mönch', 'Willkommen in der Stille. Trainiere deinen Atem, bevor du Lingen herausforderst.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#8a8a7a',
+      trim: '#d8d8c8',
+      hair: '#f0e0b0',
+      pants: '#6a6a5a',
+      number: 'F',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: 'robe'
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawKlosterMonk(camX, camY) {
+  if (typeof KlosterMonk !== 'undefined') KlosterMonk.render(camX, camY);
+}
+
 const LingenBridgeGuard = {
   x: 52,
   y: 42,
@@ -3333,6 +3430,7 @@ function tryNPCInteract() {
   if (typeof HarborWorker !== 'undefined' && HarborWorker.tryInteract()) return true;
   if (typeof LingenArenaFan !== 'undefined' && LingenArenaFan.tryInteract()) return true;
   if (typeof LingenBridgeGuard !== 'undefined' && LingenBridgeGuard.tryInteract()) return true;
+  if (typeof KlosterMonk !== 'undefined' && KlosterMonk.tryInteract()) return true;
   return false;
 }
 
