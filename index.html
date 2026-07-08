@@ -751,6 +751,13 @@ function generateMap() {
   } else if (worldMap[BlumengartenMutter.y] && worldMap[BlumengartenMutter.y][BlumengartenMutter.x] !== T.WATER) {
     worldMap[BlumengartenMutter.y][BlumengartenMutter.x] = T.PATH;
   }
+  // Industrie-Spotter stands on the main path south-east of the factory at x=46, y=45;
+  // keep the tile walkable so he is reachable and not embedded in the factory wall.
+  if (worldMap[IndustrieSpotter.y] && worldMap[IndustrieSpotter.y][IndustrieSpotter.x] === T.BUILD) {
+    worldMap[IndustrieSpotter.y][IndustrieSpotter.x] = T.PATH;
+  } else if (worldMap[IndustrieSpotter.y] && worldMap[IndustrieSpotter.y][IndustrieSpotter.x] !== T.WATER) {
+    worldMap[IndustrieSpotter.y][IndustrieSpotter.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
@@ -786,6 +793,7 @@ const MAP_LANDMARKS = [
   { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
   { id: 'final-light', label: 'LICHT', x: 46, y: 50, kind: 'story' },
   { id: 'home-return', label: 'HEIM', x: 7, y: 8, kind: 'story' },
+  { id: 'industrie-spotter', label: 'GRAVE', x: 46, y: 45, kind: 'story' },
 ];
 
  // Add the missing Lingen guest-locker landmark so Overview/Credits stay synced
@@ -3158,6 +3166,9 @@ function drawOverworld() {
   // Draw atmospheric world details (birds/balloons) on top of tiles, below actors/HUD.
   drawWorldAtmosphere(camX, camY);
 
+  // Draw Gravemeier/Industrie spotter NPC who watches the rival run from the factory gate.
+  drawIndustrieSpotter(camX, camY);
+
   // Draw Lingen bridge checkpoint NPC on the route toward Lingen, below minimap/HUD.
   drawLingenBridgeGuard(camX, camY);
 
@@ -3446,6 +3457,7 @@ function tryNPCInteract() {
   if (typeof LingenArenaFan !== 'undefined' && LingenArenaFan.tryInteract()) return true;
   if (typeof LingenBridgeGuard !== 'undefined' && LingenBridgeGuard.tryInteract()) return true;
   if (typeof KlosterMonk !== 'undefined' && KlosterMonk.tryInteract()) return true;
+  if (typeof IndustrieSpotter !== 'undefined' && IndustrieSpotter.tryInteract()) return true;
   return false;
 }
 
@@ -4140,6 +4152,103 @@ const BlumengartenMutter = {
 
 function drawBlumengartenMutter(camX, camY) {
   if (typeof BlumengartenMutter !== 'undefined') BlumengartenMutter.render(camX, camY);
+}
+
+// ============================================================
+// INDUSTRIE-SPOTTER — progress-aware NPC at the Gravemeier/Industrie factory
+// gate (x=46, y=45). He watches the Nordhorn-vs-Lingen arc from the south-east
+// hard-court zone, giving the industrial quarter its own voice in the story.
+// Uses drawHoopsterSprite and startDialog; placed on the main path so he is
+// reachable, without blocking the route toward the stadium or Lingen.
+// ============================================================
+const IndustrieSpotter = {
+  x: 46,
+  y: 45,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Industrie-Spotter', 'Acht Siege! Von hier aus hoert man die Sirene und die Halle. Lingen hat getobt, Nordhorn hat gepasst. So endet die Schicht.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Industrie-Spotter', 'Die Gold-Arena ist still. Maxim hat das ganze Stadion schreien lassen, aber du hast den Laerm abgedeckt. Jetzt kommt Mihler in unsere Halle.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Industrie-Spotter', 'Zwei Auswaerts-Courts. Der Hafenwind war heftig, aber Nordhorns Dampf hat ihn nach hinten gedrueckt. Maxim ist naechster Anlauf.'];
+    }
+    if (beaten('Sven')) {
+      return ['Industrie-Spotter', 'Bahnhof Lingen erobert! Svens Screens sind zaeh, aber du bist drum herum. Der Hafen und die Arena liegen noch im Sueden.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Industrie-Spotter', 'Spielplatz durch. Sophie prueft die Nerven. Jetzt zeigt die Vechte Richtung Lingen. Erst Bahnhof, dann Hafen.'];
+    }
+    if (beaten('Markus')) {
+      return ['Industrie-Spotter', 'Markus breite Defense geknackt. Sophie am Spielplatz ist der naechste Schichtwechsel. Danach hoert die Sirene nach Lingen.'];
+    }
+    if (beaten('Anna')) {
+      return ['Industrie-Spotter', 'Anna im Park besiegt. Ihr Dreier war schnell, aber der Wohnhof laesst sich nicht ueberraschen. Markus wartet am Schulhof.'];
+    }
+    if (beaten('Klaus')) {
+      return ['Industrie-Spotter', 'Klaus war dein erster Test. Von der Gravemeier-Strasse hoert man den Ball gegen die Wand. Anna als Naechste.'];
+    }
+    return ['Industrie-Spotter', 'Hier riecht es nach Harz und Stahl. Ich beobachte die Courts aus der Pause: Klaus beim Wohnhof ist der erste Gang, der zaehlt.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#6a4a3a',
+      trim: '#d8b890',
+      hair: '#3a2a1a',
+      pants: '#2a3030',
+      number: 'I',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: 'cap'
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawIndustrieSpotter(camX, camY) {
+  if (typeof IndustrieSpotter !== 'undefined') IndustrieSpotter.render(camX, camY);
 }
 
 function drawCleanOverworldHUD() {

@@ -179,6 +179,7 @@
 - [x] World-Tile Pixel-Polish — Grass-, Path-, Tree-Tiles mit feineren Pixel-Details, Wind-Shimmer und strukturierten Pflasterfugen; Vechte-Wasser bleibt frameCount-animiert; keine neuen HUDs/Overlays.
 - [x] Home-Court Veteran Story-Pass — neuer progress-aware alter Trainer am Home-Court (x=7, y=10) mit Nordhorn-vs-Lingen Dialogbogen, eigener Overview-/Credits-Landmarke und Intro-Hinweis; keine neuen HUDs/Overlays.
 - [x] World Atmosphere Grafik-Pass — zarte frameCount-synchrone Himmelsdetails (Vögel, Ballons) zwischen Kacheln und Actors/HUD, ohne neue Overlays.
+- [x] Gravemeier/Industrie-Spotter Story-Pass — neuer progress-aware Fabrik-Gate-NPC am Industrie-Quartier (x=46, y=45) mit Nordhorn-vs-Lingen Dialogbogen, eigener Overview-/Credits-Landmarke, begehbarem Tile und Einbindung in tryNPCInteract-/Render-Pipeline; keine neuen HUDs/Overlays.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
