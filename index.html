@@ -480,6 +480,7 @@ function drawCredits() {
     'Home-Court Veteran',
     'Blumengarten-Mutter',
     'Schulhof & Park',
+    'Stadtbücherei',
     'Stadionhalle',
     '',
     '',
@@ -758,6 +759,13 @@ function generateMap() {
   } else if (worldMap[IndustrieSpotter.y] && worldMap[IndustrieSpotter.y][IndustrieSpotter.x] !== T.WATER) {
     worldMap[IndustrieSpotter.y][IndustrieSpotter.x] = T.PATH;
   }
+  // Library Bookworm stands in front of the Nordhorn library at x=30, y=25; keep the
+  // tile walkable so she is reachable and not embedded in the Zentrum building.
+  if (worldMap[LibraryBookworm.y] && worldMap[LibraryBookworm.y][LibraryBookworm.x] === T.BUILD) {
+    worldMap[LibraryBookworm.y][LibraryBookworm.x] = T.PATH;
+  } else if (worldMap[LibraryBookworm.y] && worldMap[LibraryBookworm.y][LibraryBookworm.x] !== T.WATER) {
+    worldMap[LibraryBookworm.y][LibraryBookworm.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
@@ -813,6 +821,8 @@ const MAP_LANDMARKS = [
  MAP_LANDMARKS.push({ id: 'lingen-hafen-emblem', label: 'MOEWE', x: 13, y: 55, kind: 'story' });
  // Lingen training ground sign: story stop between Bahnhof and Hafen.
  MAP_LANDMARKS.push({ id: 'lingen-trainingsplatz', label: 'TRPLATZ', x: 13, y: 54, kind: 'story' });
+ // Nordhorn library: progress-aware bookworm NPC in the Zentrum hub.
+ MAP_LANDMARKS.push({ id: 'bibliothek', label: 'BIBLIO', x: 30, y: 25, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -3267,6 +3277,9 @@ function drawOverworld() {
   // Draw Zentrum reporter NPC on the market square, below minimap/HUD.
   drawZentrumReporter(camX, camY);
 
+  // Draw library bookworm NPC in front of the Zentrum library, below minimap/HUD.
+  drawLibraryBookworm(camX, camY);
+
   // Draw Tierpark visitor NPC near the park pond, below minimap/HUD.
   drawTierparkVisitor(camX, camY);
 
@@ -3559,6 +3572,7 @@ function tryNPCInteract() {
   if (typeof BlumengartenMutter !== 'undefined' && BlumengartenMutter.tryInteract()) return true;
   if (typeof SchoolYardStudent !== 'undefined' && SchoolYardStudent.tryInteract()) return true;
   if (typeof ZentrumReporter !== 'undefined' && ZentrumReporter.tryInteract()) return true;
+  if (typeof LibraryBookworm !== 'undefined' && LibraryBookworm.tryInteract()) return true;
   if (typeof TierparkVisitor !== 'undefined' && TierparkVisitor.tryInteract()) return true;
   if (typeof HarborWorker !== 'undefined' && HarborWorker.tryInteract()) return true;
   if (typeof LingenArenaFan !== 'undefined' && LingenArenaFan.tryInteract()) return true;
@@ -3922,6 +3936,105 @@ const ZentrumReporter = {
 
 function drawZentrumReporter(camX, camY) {
   if (typeof ZentrumReporter !== 'undefined') ZentrumReporter.render(camX, camY);
+}
+
+// ============================================================
+// LIBRARY BOOKWORM — progress-aware NPC in front of the Nordhorn library.
+// She reads about old Lingen away-games and gives the player bookish hints on
+// the rival order. Uses existing drawHoopsterSprite plus a tiny book overlay;
+// placed on a walkable tile at x=30, y=25 so she is part of the Zentrum hub
+// content, not a HUD overlay.
+// ============================================================
+const LibraryBookworm = {
+  x: 30,
+  y: 25,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Bücherwurm', 'Acht Siege! In meinem Heft steht jetzt: Nordhorn hat Lingen gelesen wie ein altes Buch. Passen, Pausen, Wurf um Wurf — das war die letzte Seite.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Bücherwurm', 'Die Arena fiel leise. Ich habe darauf gewettet, dass du Mihlers Halle als nächstes öffnest. Der Index zeigt nur noch einen fehlenden Eintrag.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Bücherwurm', 'Zwei Auswärts-Courts. Das Kapitel "Hafen" ist geschafft. Das nächste Kapitel heißt "Gold-Arena", und Maxim schreibt die Überschrift.'];
+    }
+    if (beaten('Sven')) {
+      return ['Bücherwurm', 'Der Bahnhof-Court ist erledigt. In der Lingen-Statistik steht: Rashta hält den Ball tief wie ein schweres Buch.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Bücherwurm', 'Alle Heim-Courts geschafft. Ab jetzt liest du in fremden Hallen: Sven am Bahnhof ist die erste fremde Seite.'];
+    }
+    if (beaten('Markus')) {
+      return ['Bücherwurm', 'Markus’ Defense hast du entziffert. Sophie am Spielplatz wird der nächste Absatz. Danach wechselt das Buch in die Lingen-Ausgabe.'];
+    }
+    if (beaten('Anna')) {
+      return ['Bücherwurm', 'Anna sagt, dein Dreier sitzt sauber. Ich habe Klaus’ Wohnhof-Spielzüge hier markiert: schneller erster Schritt, aber nervös im zweiten Viertel.'];
+    }
+    return ['Bücherwurm', 'Willkommen in der Stadtbücherei. Hier steht alles über Nordhorn gegen Lingen. Fang mit Klaus beim Wohnhof an — er ist das erste Kapitel.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#4a3a6a',
+      trim: '#c8b8e8',
+      hair: '#5a4a3a',
+      pants: '#2a2038',
+      number: 'B',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: 'hoodie'
+    });
+    // Tiny book in her hands — part of the sprite, not a HUD overlay.
+    ctx.fillStyle = C.DARKEST;
+    ctx.fillRect(px + 6, py + 8, 4, 5);
+    ctx.fillStyle = C.LIGHTEST;
+    ctx.fillRect(px + 7, py + 9, 2, 3);
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawLibraryBookworm(camX, camY) {
+  if (typeof LibraryBookworm !== 'undefined') LibraryBookworm.render(camX, camY);
 }
 
 // ============================================================
