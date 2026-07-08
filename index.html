@@ -370,7 +370,7 @@ const MAP_H = 60;
 
 // Tile types
 const T = {
-  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14, SIGN: 15
+  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, BUILD: 4, FENCE: 5, COURT: 6, DOOR: 7, ROOF: 8, GOLDCOURT: 9, FLOWER: 10, BENCH: 11, BRIDGE: 12, STADIUM: 13, WALL: 14, SIGN: 15
 };
 
 // ============================================================
@@ -532,6 +532,13 @@ function generateMap() {
     setLineV(midX, y1, y2, T.PATH);
     setLineH(x1, x2, midY, T.PATH);
   };
+  const setGoldCourt = (x1, y1, x2, y2) => {
+    setRect(x1, y1, x2, y2, T.GOLDCOURT);
+    const midX = Math.floor((x1 + x2) / 2);
+    const midY = Math.floor((y1 + y2) / 2);
+    setLineV(midX, y1, y2, T.PATH);
+    setLineH(x1, x2, midY, T.PATH);
+  };
 
   // Vechte/Kanal inspired water: east river plus curved inner canal and ponds.
   setRect(62, 0, 69, 59, T.WATER);
@@ -629,7 +636,7 @@ function generateMap() {
 
   // Arena Lingen mini-boss court: a hard-edged away-game stop before the final
   // Nordhorn coach. It is scenery/content, not another HUD or overlay layer.
-  setCourt(25, 53, 34, 58);
+  setGoldCourt(25, 53, 34, 58);
   setRect(28, 50, 31, 53, T.PATH);
   setBuilding(35, 53, 41, 58, 38);
 
@@ -1010,6 +1017,39 @@ function drawTile(x, y, tileType, camX, camY) {
         ctx.fillStyle = C.MID;
         ctx.fillRect(sx + 3, sy + 3, 2, 2);
         ctx.fillRect(sx + 11, sy + 11, 2, 2);
+      }
+      break;
+    case T.GOLDCOURT:
+      // Lingen Arena away-court: richer golden floor with dark boundary lines so the
+      // mini-boss court stands out from the regular Nordhorn courts without adding HUDs.
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#b8a040';
+      ctx.fillRect(sx + 1, sy + 1, 14, 14);
+      ctx.fillStyle = '#8a6a20';
+      // Sidelines
+      ctx.fillRect(sx + 1, sy + 1, 14, 1);
+      ctx.fillRect(sx + 1, sy + 14, 14, 1);
+      ctx.fillRect(sx + 1, sy + 1, 1, 14);
+      ctx.fillRect(sx + 14, sy + 1, 1, 14);
+      // Center line
+      ctx.fillRect(sx + 7, sy + 2, 2, 12);
+      // Lane/key marks
+      ctx.fillRect(sx, sy + 7, TILE, 2);
+      ctx.fillRect(sx + 5, sy + 5, 1, 1);
+      ctx.fillRect(sx + 10, sy + 5, 1, 1);
+      ctx.fillRect(sx + 5, sy + 10, 1, 1);
+      ctx.fillRect(sx + 10, sy + 10, 1, 1);
+      ctx.fillRect(sx + 6, sy + 6, 4, 4);
+      // Hash marks
+      if ((x % 5) === 1) {
+        ctx.fillRect(sx + 3, sy + 4, 2, 1);
+        ctx.fillRect(sx + 3, sy + 11, 2, 1);
+      }
+      // Sparkle texture for the gold arena feel
+      if ((x + y) % 13 === 0) {
+        ctx.fillStyle = '#d4c470';
+        ctx.fillRect(sx + 4, sy + 4, 2, 2);
       }
       break;
     case T.DOOR:
@@ -3175,6 +3215,7 @@ const MINIMAP_COLORS = {
   [T.ROOF]: '#2a2a2a',
   [T.FENCE]: '#6b6b6b',
   [T.COURT]: '#5a5a3a',
+  [T.GOLDCOURT]: '#8a7a3a',
   [T.DOOR]: '#0f380f',
   [T.FLOWER]: '#9bbc0f',
   [T.BENCH]: '#6b5b3b',
@@ -3314,7 +3355,7 @@ function drawOverviewMap() {
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = worldMap[y][x];
-  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
+  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.GOLDCOURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
 }
 
 function getAdjacentStorySign() {

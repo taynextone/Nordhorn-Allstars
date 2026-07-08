@@ -159,6 +159,7 @@
 - [x] Home-Route-Heimkehr-Story — Bahnhof Nordhorn-Schild mit dynamischen Lingen-/Sieg-Fortschrittsdialogen, eigener Overview-/Credits-Landmarke, ohne neue HUDs/Overlays.
 - [x] Lingen-Hafen-NPC Story-Pass — neuer Hafenarbeiter am Lingen-Hafenweg (x=17, y=52) mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Landmarke und begehbarem Tile, ohne neue HUDs/Overlays.
 - [x] Lingen-Arena-Fan Story-Pass — neuer nervöser Lingen-Fan vor der Arena (x=29, y=52) mit Maxim-/Mihler-Fortschrittsdialogen, Overview-Landmarke, begehbarem Tile und bestehender Sprite-Rendering-Pipeline, ohne neue HUDs/Overlays.
+- [x] Lingen-Arena-Gold-Court Grafik-Pass — neuer T.GOLDCOURT Tile mit goldenem Boden, dunklen Linien und Sparkle-Textur; Arena-Lingen-Court (25,53)-(34,58) wird visuell als Mini-Boss-Court hervorgehoben, Minimap und Walkability synchronisiert, ohne neue HUDs/Overlays.
 
 ## Weiterführende Ideen (Content/Grafik/Story)
 - [x] Nordhorn-Nachwuchs-Story — ein junger Spieler am Home-Court (x=6,y=7) kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt; interagiert mit A/B/ENTER via bestehende Dialogbox, ohne neue HUDs/Overlays.
