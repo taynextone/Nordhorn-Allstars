@@ -161,6 +161,7 @@
 - [x] Lingen-Arena-Fan Story-Pass — neuer nervöser Lingen-Fan vor der Arena (x=29, y=52) mit Maxim-/Mihler-Fortschrittsdialogen, Overview-Landmarke, begehbarem Tile und bestehender Sprite-Rendering-Pipeline, ohne neue HUDs/Overlays.
 - [x] Lingen-Arena-Gold-Court Grafik-Pass — neuer T.GOLDCOURT Tile mit goldenem Boden, dunklen Linien und Sparkle-Textur; Arena-Lingen-Court (25,53)-(34,58) wird visuell als Mini-Boss-Court hervorgehoben, Minimap und Walkability synchronisiert, ohne neue HUDs/Overlays.
 - [x] Lingen-Brücken-Checkpoint Story-Pass — neuer progress-aware Grenzposten am Vechte-Übergang (x=52, y=42) mit dynamischen Sven/Rashta/Maxim/Mihler-Dialogen; eigener Overview-/Credits-Landmarke, Brücken-Pfad begehbar, via zentraler `tryNPCInteract()`-Pfade eingebunden, ohne neue HUDs/Overlays.
+- [x] Lingen-Hafen-Story-Pass — neues Hafen-Emblem (x=13, y=55) und neuer Lingen-Trainingsplatz (x=13, y=54) mit progress-aware Sven/Rashta/Maxim/Mihler-Dialogen; eigene Overview-/Credits-Landmarken, Hafen-Schilder zeigen kleines Seagull-Emblem, ohne neue HUDs/Overlays.
 
 ## Weiterführende Ideen (Content/Grafik/Story)
 - [x] Nordhorn-Nachwuchs-Story — ein junger Spieler am Home-Court (x=6,y=7) kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt; interagiert mit A/B/ENTER via bestehende Dialogbox, ohne neue HUDs/Overlays.
