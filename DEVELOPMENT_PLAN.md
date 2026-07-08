@@ -167,6 +167,7 @@
 - [x] Boss-Build-Story-Pass — Mihlers Champion-Siegdialog und Credits betonen jetzt stärker, warum der Nordhorn-Spielstil Lingen schlägt: "Passen, Pausen, Wurf um Wurf" und "Der Home-Court-Stil hat auswärts gehalten" in Dialog und Credits, ohne neue HUDs/Overlays.
 - [x] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neue HUDs/Overlays. (Court-Boundaries + Centerline + Sideline-Hashes in drawTile)
 - [x] Kloster-Frenswegen-Monk Story-Pass — neuer progress-aware Mönch im Kloster-Vorhof (x=15, y=7) mit Nordhorn-vs-Lingen-Dialogbogen, eigener Kapuzen-Sprite (accessory: 'robe'), kleiner Kloster-Hof, Overview-/Credits-Landmarke, ohne neue HUDs/Overlays.
+- [x] Blumengarten-Mutter Story-Pass — neuer progress-aware NPC in der Blumensiedlung (x=18, y=32) mit Nordhorn-vs-Lingen-Dialogbogen, eigener MAP_LANDMARKS-Eintrag, Credits-Ort, begehbarem Tile, in tryNPCInteract-/Render-Pipeline eingebunden, ohne neue HUDs/Overlays.
 - [x] Battle-Timer State Guard — verzögerte Battle-Callbacks prüfen jetzt auch gameState, damit alte Timeouts nach Reset/Continue keinen Battle-State überschreiben.
 - [x] Battle-Buff Reset — playerBuffed/enemyBuffed werden beim Start jedes Kampfs zurückgesetzt, damit keine alten Buffs in den nächsten Rivalen übertragen.
 - [x] ObjectiveTracker Pulse Polish — Zielmarker pulsiert langsamer und hat einen kleinen Schatten, damit er auf allen Tiles lesbar bleibt.

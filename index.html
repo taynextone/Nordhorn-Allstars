@@ -478,6 +478,7 @@ function drawCredits() {
     'Tierpark-Besucher',
     'Park-Court Natur',
     'Home-Court Veteran',
+    'Blumengarten-Mutter',
     'Schulhof & Park',
     'Stadionhalle',
     '',
@@ -743,6 +744,13 @@ function generateMap() {
   } else if (worldMap[HomeCourtOldTimer.y] && worldMap[HomeCourtOldTimer.y][HomeCourtOldTimer.x] !== T.WATER) {
     worldMap[HomeCourtOldTimer.y][HomeCourtOldTimer.x] = T.PATH;
   }
+  // Blumengarten Mutter stands near the Blumensiedlung court at x=18, y=32; keep
+  // the tile walkable so players can talk to her without getting embedded.
+  if (worldMap[BlumengartenMutter.y] && worldMap[BlumengartenMutter.y][BlumengartenMutter.x] === T.BUILD) {
+    worldMap[BlumengartenMutter.y][BlumengartenMutter.x] = T.PATH;
+  } else if (worldMap[BlumengartenMutter.y] && worldMap[BlumengartenMutter.y][BlumengartenMutter.x] !== T.WATER) {
+    worldMap[BlumengartenMutter.y][BlumengartenMutter.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
@@ -752,6 +760,7 @@ const MAP_LANDMARKS = [
   { id: 'home-oldtimer', label: 'VETERAN', x: 7, y: 10, kind: 'story' },
   { id: 'kloster', label: 'KLOSTER', x: 15, y: 1, kind: 'quiet' },
   { id: 'blume', label: 'BLUMEN', x: 17, y: 30, kind: 'court' },
+  { id: 'blumen-mutter', label: 'MUTTER', x: 18, y: 32, kind: 'story' },
   { id: 'zentrum', label: 'ZENTRUM', x: 35, y: 17, kind: 'hub' },
   { id: 'reporter', label: 'REPORTER', x: 35, y: 18, kind: 'story' },
   { id: 'schule', label: 'SCHULE', x: 48, y: 6, kind: 'court' },
@@ -790,6 +799,8 @@ const MAP_LANDMARKS = [
  MAP_LANDMARKS.push({ id: 'lingen-bridge-guard', label: 'POSTEN', x: 52, y: 42, kind: 'story' });
  // Frenswegen monk landmark for the new progress-aware NPC in the monastery courtyard.
  MAP_LANDMARKS.push({ id: 'kloster-monk', label: 'MÖNCH', x: 15, y: 7, kind: 'story' });
+ // Blumengarten mother landmark for the new progress-aware NPC in the flower estate.
+ MAP_LANDMARKS.push({ id: 'blumen-mutter', label: 'MUTTER', x: 18, y: 32, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -3129,6 +3140,9 @@ function drawOverworld() {
   // Draw the old home-court trainer who watches the Lingen route.
   drawHomeCourtOldTimer(camX, camY);
 
+  // Draw the Blumensiedlung mother who cheers the rival run from her garden.
+  drawBlumengartenMutter(camX, camY);
+
   // Draw the quiet Frenswegen monk who adds northwest story flavor.
   drawKlosterMonk(camX, camY);
 
@@ -3424,6 +3438,7 @@ function tryNPCInteract() {
   // Try all progress-aware NPCs in a fixed order; first facing NPC wins.
   if (typeof HomeCourtKid !== 'undefined' && HomeCourtKid.tryInteract()) return true;
   if (typeof HomeCourtOldTimer !== 'undefined' && HomeCourtOldTimer.tryInteract()) return true;
+  if (typeof BlumengartenMutter !== 'undefined' && BlumengartenMutter.tryInteract()) return true;
   if (typeof SchoolYardStudent !== 'undefined' && SchoolYardStudent.tryInteract()) return true;
   if (typeof ZentrumReporter !== 'undefined' && ZentrumReporter.tryInteract()) return true;
   if (typeof TierparkVisitor !== 'undefined' && TierparkVisitor.tryInteract()) return true;
@@ -4029,6 +4044,102 @@ const HomeCourtOldTimer = {
 
 function drawHomeCourtOldTimer(camX, camY) {
   if (typeof HomeCourtOldTimer !== 'undefined') HomeCourtOldTimer.render(camX, camY);
+}
+
+// ============================================================
+// BLUMENGARTEN MUTTER — progress-aware NPC in the Blumensiedlung flower court.
+// She watches the Nordhorn rival run from her garden, offering motherly encouragement
+// and gently reminding the player of the next milestone. Uses drawHoopsterSprite and
+// startDialog; placed at x=18, y=32 on a walkable path tile so she is reachable.
+// ============================================================
+const BlumengartenMutter = {
+  x: 18,
+  y: 32,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Blumengarten-Mutter', 'Acht Siege! Ich habe aus dem Fenster gesehen, wie Lingen still wurde. Passen, Pausen, Wurf um Wurf — mein Sohn würde sagen, so spielt man Heim-Court-Stil auch auswärts.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Blumengarten-Mutter', 'Die Gold-Arena ist gefallen. Nur noch Mihlers Halle steht. Ich habe schon Blumen für den Bahnhof gepflückt, wenn du zurückkommst.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Blumengarten-Mutter', 'Zwei Auswärts-Courts gehören Nordhorn. Der Hafenwind war stark, aber du bist ruhiger geblieben. Maxim in der Arena wird laut.'];
+    }
+    if (beaten('Sven')) {
+      return ['Blumengarten-Mutter', 'Der Bahnhof-Court ist unser! Mein Nachbar wettete gegen dich. Ich habe ihm Rosen gegeben, damit er schweigt. Nächster Halt: der Hafen.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Blumengarten-Mutter', 'Sophie am Spielplatz besiegt. Ihre Nerven prüfen jeden. Jetzt zeigt die Grenzbrücke Richtung Lingen. Pflück dir erst den Bahnhof.'];
+    }
+    if (beaten('Markus')) {
+      return ['Blumengarten-Mutter', 'Markus breite Defense hast du durchbrochen. Sophie wird am Spielplatz nervös. Und danach? Lingen riecht schon nach Hafenwind.'];
+    }
+    if (beaten('Anna')) {
+      return ['Blumengarten-Mutter', 'Anna im Park besiegt. Ihr Dreier war schnell, aber deiner saß. Markus wartet am Schulhof mit seiner großen Wand.'];
+    }
+    if (beaten('Klaus')) {
+      return ['Blumengarten-Mutter', 'Klaus war dein erster Korb. Hier in der Blumensiedlung freut sich jemand für dich. Anna als Nächste — sie schießt scharf im Park.'];
+    }
+    return ['Blumengarten-Mutter', 'Hallo, Kleiner. In der Blumensiedlung duftet es nach Rosen. Coach Mihler sagt, erst die Heim-Courts, dann Lingen. Klaus beim Wohnhof ist der erste Schritt.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#8a4a6a',
+      trim: '#f8d8e8',
+      hair: '#8a6a4a',
+      pants: '#4a2a3a',
+      number: 'B',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: ''
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawBlumengartenMutter(camX, camY) {
+  if (typeof BlumengartenMutter !== 'undefined') BlumengartenMutter.render(camX, camY);
 }
 
 function drawCleanOverworldHUD() {
