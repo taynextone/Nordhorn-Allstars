@@ -2815,36 +2815,99 @@ function drawTitleScreen() {
     }
   }
 
+  // NORDHORN SKYLINE — small Gameboy-style city silhouette so the title screen
+  // immediately sells the home-town setting. The silhouette sits in the upper
+  // third and never covers the logo, menu or controls.
+  const skylineBase = 94;
+  const skylineColor = '#8bac0f';
+  const windowColor = '#0f380f';
+  const litWindowColor = '#9bbc0f';
+  ctx.fillStyle = skylineColor;
+  // Home-court house / town hall block
+  ctx.fillRect(26, skylineBase - 24, 22, 24);
+  // Roof peak
+  ctx.fillRect(24, skylineBase - 30, 26, 6);
+  // Church / Kloster tower
+  ctx.fillRect(56, skylineBase - 38, 12, 38);
+  ctx.fillRect(58, skylineBase - 46, 8, 8);
+  // Industrial chimney
+  ctx.fillRect(96, skylineBase - 34, 10, 34);
+  ctx.fillRect(98, skylineBase - 40, 6, 6);
+  // School/gym block
+  ctx.fillRect(120, skylineBase - 22, 28, 22);
+  // Lingen away-arena block (darker, right side) to frame the rivalry
+  ctx.fillStyle = '#6b7a3f';
+  ctx.fillRect(334, skylineBase - 28, 28, 28);
+  ctx.fillRect(352, skylineBase - 36, 12, 8);
+  // Trees under the skyline
+  ctx.fillStyle = '#306230';
+  ctx.fillRect(18, skylineBase - 6, 8, 6);
+  ctx.fillRect(150, skylineBase - 6, 10, 6);
+  ctx.fillRect(318, skylineBase - 6, 12, 6);
+  // Tiny Vechte hint
+  ctx.fillStyle = '#0f280f';
+  ctx.fillRect(0, skylineBase + 2, VIEW_W, 4);
+  ctx.fillStyle = '#306230';
+  ctx.fillRect(0, skylineBase + 4, VIEW_W, 2);
+
+  // Animated windows: different lights toggle every ~600 ms to make the town feel alive.
+  const windowTick = Math.floor(Date.now() / 600) % 4;
+  const windows = [
+    { x: 30, y: skylineBase - 18, on: 0 },
+    { x: 40, y: skylineBase - 18, on: 1 },
+    { x: 30, y: skylineBase - 10, on: 2 },
+    { x: 40, y: skylineBase - 10, on: 3 },
+    { x: 60, y: skylineBase - 26, on: 2 },
+    { x: 60, y: skylineBase - 18, on: 0 },
+    { x: 100, y: skylineBase - 28, on: 1 },
+    { x: 128, y: skylineBase - 14, on: 3 },
+    { x: 138, y: skylineBase - 14, on: 2 },
+    { x: 340, y: skylineBase - 18, on: 1 },
+  ];
+  windows.forEach(w => {
+    ctx.fillStyle = w.on === windowTick ? litWindowColor : windowColor;
+    ctx.fillRect(w.x, w.y, 4, 4);
+  });
+
   // Basketball icon
   const bx = VIEW_W / 2;
   const by = 120;
+  // Add a gentle bounce to the ball so the title feels alive.
+  const bounce = Math.abs(Math.sin(Date.now() / 400)) * 6;
+  const ballY = by - bounce;
+  const shadowW = 30 - bounce * 1.5;
+  // Ball shadow
+  ctx.fillStyle = 'rgba(15, 56, 15, 0.25)';
+  ctx.beginPath();
+  ctx.ellipse(bx, by + 26, shadowW, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#d4600a';
   ctx.beginPath();
-  ctx.arc(bx, by, 30, 0, Math.PI * 2);
+  ctx.arc(bx, ballY, 30, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#c0500a';
   ctx.beginPath();
-  ctx.arc(bx, by, 28, 0, Math.PI * 2);
+  ctx.arc(bx, ballY, 28, 0, Math.PI * 2);
   ctx.fill();
   // Basketball lines
   ctx.strokeStyle = '#2a1a0a';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.arc(bx, by, 28, 0, Math.PI * 2);
+  ctx.arc(bx, ballY, 28, 0, Math.PI * 2);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(bx - 28, by);
-  ctx.lineTo(bx + 28, by);
+  ctx.moveTo(bx - 28, ballY);
+  ctx.lineTo(bx + 28, ballY);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(bx, by - 28);
-  ctx.lineTo(bx, by + 28);
+  ctx.moveTo(bx, ballY - 28);
+  ctx.lineTo(bx, ballY + 28);
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(bx - 14, by, 20, -0.8, 0.8);
+  ctx.arc(bx - 14, ballY, 20, -0.8, 0.8);
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(bx + 14, by, 20, Math.PI - 0.8, Math.PI + 0.8);
+  ctx.arc(bx + 14, ballY, 20, Math.PI - 0.8, Math.PI + 0.8);
   ctx.stroke();
 
   // Title — keep the first screen clean and playable. The previous stacked system/coach
@@ -2860,6 +2923,12 @@ function drawTitleScreen() {
   ctx.font = '10px monospace';
   ctx.fillText('BASKETBALL RPG', bx, 242);
 
+  // Story motto — short, Gameboy-style, replaces the old subtitle blank.
+  const mottoBlink = Math.floor(Date.now() / 700) % 2;
+  ctx.fillStyle = mottoBlink ? C.DARKEST : C.DARK;
+  ctx.font = '8px monospace';
+  ctx.fillText('PASSEN. PAUSEN. WURF UM WURF.', bx, 258);
+
   // New/Continue menu
   const hasSave = SaveSystem.hasSave();
   if (!hasSave) titleSelection = 0;
@@ -2867,27 +2936,27 @@ function drawTitleScreen() {
   const blink = Math.floor(Date.now() / 500) % 2;
   ctx.font = '11px monospace';
   ctx.fillStyle = C.DARKEST;
-  ctx.fillText((titleSelection === 0 && blink ? '> ' : '  ') + 'NEW GAME', bx, 278);
+  ctx.fillText((titleSelection === 0 && blink ? '> ' : '  ') + 'NEW GAME', bx, 284);
   ctx.fillStyle = hasSave ? C.DARKEST : C.MID;
-  ctx.fillText((titleSelection === 1 && blink ? '> ' : '  ') + 'CONTINUE', bx, 298);
+  ctx.fillText((titleSelection === 1 && blink ? '> ' : '  ') + 'CONTINUE', bx, 304);
   if (saveInfo) {
     ctx.font = '7px monospace';
     ctx.fillStyle = C.DARK;
-    ctx.fillText('LV ' + saveInfo.level + ' · WINS ' + saveInfo.beaten + '/5 · ' + saveInfo.time, bx, 312);
+    ctx.fillText('LV ' + saveInfo.level + ' · WINS ' + saveInfo.beaten + '/5 · ' + saveInfo.time, bx, 318);
   }
 
   // Controls and compact smoke-test status
   ctx.fillStyle = C.DARK;
   ctx.font = '8px monospace';
-  ctx.fillText('UP/DOWN Select · ENTER/A/B Start · C Credits', bx, 344);
+  ctx.fillText('UP/DOWN Select · ENTER/A/B Start · C Credits', bx, 348);
 
   ctx.fillStyle = C.DARKEST;
-  ctx.fillRect(bx - 78, 370, 156, 28);
+  ctx.fillRect(bx - 78, 374, 156, 28);
   ctx.fillStyle = C.LIGHT;
   ctx.font = '7px monospace';
   // Keep title status calm after the HUD declutter: no coach/module counter spam.
-  ctx.fillText('GAMEBOY CLEAN · ' + BrowserCompat.summary(), bx, 382);
-  ctx.fillText('A/B/ENTER START · C CREDITS', bx, 394);
+  ctx.fillText('GAMEBOY CLEAN · ' + BrowserCompat.summary(), bx, 386);
+  ctx.fillText('A/B/ENTER START · C CREDITS', bx, 398);
   BrowserCompat.renderPanel();
   GameModules.renderPanel();
 
