@@ -1820,7 +1820,12 @@ function scheduleBattleCallback(callback, delay) {
   // loss, Continue, or New Game and corrupt the next clean dialog/state flow.
   const token = battle.runtimeToken;
   setTimeout(() => {
+    // Guard against state drift: the callback only runs if the battle is still
+    // active and we are still in a battle-related state. This prevents queued
+    // animations from closing dialogs or starting battles after the player has
+    // already reset, continued, or left the screen.
     if (!battle.active || battle.runtimeToken !== token) return;
+    if (gameState !== 'BATTLE' && gameState !== 'DIALOG') return;
     callback();
   }, delay);
 }
@@ -1936,6 +1941,8 @@ function startBattle(trainer) {
   battle.resultLocked = false;
   battle.playerBlockNext = false;
   battle.enemyBlockNext = false;
+  // Reset temporary buff flags from previous battles. Without this, a lingering
+  // playerBuffed/enemyBuffed from an earlier fight could apply to the first shot.
   battle.playerBuffed = false;
   battle.enemyBuffed = false;
   battle.playerMoves = getPlayerMoves();
@@ -2702,10 +2709,14 @@ const ObjectiveTracker = {
     const px = (next.x - camX) * TILE;
     const py = (next.y - camY) * TILE;
     if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
-    const pulse = Math.floor(Date.now() / 200) % 2;
-    ctx.fillStyle = pulse ? '#ffffff' : '#d4600a';
+    // Slower 700 ms pulse so the marker reads as a stable beacon rather than a
+    // flicker. The diamond shape plus small shadow keeps it visible on all tiles.
+    const pulse = Math.floor(Date.now() / 700) % 2;
     ctx.font = '10px monospace';
     ctx.textAlign = 'center';
+    ctx.fillStyle = '#d4600a';
+    ctx.fillText('◆', px + 9, py - 11);
+    ctx.fillStyle = pulse ? '#ffffff' : '#ffcc80';
     ctx.fillText('◆', px + 8, py - 12);
     ctx.textAlign = 'left';
   },
