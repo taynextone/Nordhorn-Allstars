@@ -470,6 +470,7 @@ function drawCredits() {
     'Grenzbruecken-Graffiti',
     'Mihler-Taktiktafel',
     'Nordhorn-Schlusslicht',
+    'Lingen-Grenzposten',
     'Schulhof-Schueler',
     'Zentrum-Reporter',
     'Vechteufer',
@@ -660,6 +661,13 @@ function generateMap() {
   setRect(57, 27, 61, 29, T.BRIDGE);
   setRect(54, 13, 57, 15, T.BRIDGE);
   setRect(52, 43, 57, 45, T.BRIDGE);
+  // Widen the bridge path at the Lingen checkpoint (52,42) so the guard stands on
+  // a clear walkable tile without blocking the Vechte bridge crossing.
+  worldMap[42][51] = T.PATH;
+  worldMap[42][52] = T.PATH;
+  worldMap[42][53] = T.PATH;
+  worldMap[41][52] = T.PATH;
+  worldMap[43][52] = T.PATH;
 
   // Arena Lingen mini-boss court: a hard-edged away-game stop before the final
   // Nordhorn coach. It is scenery/content, not another HUD or overlay layer.
@@ -697,6 +705,13 @@ function generateMap() {
     worldMap[LingenArenaFan.y][LingenArenaFan.x] = T.PATH;
   } else if (worldMap[LingenArenaFan.y] && worldMap[LingenArenaFan.y][LingenArenaFan.x] !== T.WATER) {
     worldMap[LingenArenaFan.y][LingenArenaFan.x] = T.PATH;
+  }
+  // Lingen bridge guard stands on the bridge path at x=52, y=42; keep the tile
+  // walkable so he is reachable and not embedded in water or bridge railings.
+  if (worldMap[LingenBridgeGuard.y] && worldMap[LingenBridgeGuard.y][LingenBridgeGuard.x] === T.BUILD) {
+    worldMap[LingenBridgeGuard.y][LingenBridgeGuard.x] = T.PATH;
+  } else if (worldMap[LingenBridgeGuard.y] && worldMap[LingenBridgeGuard.y][LingenBridgeGuard.x] !== T.WATER) {
+    worldMap[LingenBridgeGuard.y][LingenBridgeGuard.x] = T.PATH;
   }
   // Tierpark Visitor stands at the park pond edge at x=50, y=23; keep the tile
   // walkable so he is reachable and not embedded in the pond or trees.
@@ -769,6 +784,8 @@ const MAP_LANDMARKS = [
  MAP_LANDMARKS.push({ id: 'school-student', label: 'SCHULHOF', x: 44, y: 16, kind: 'story' });
  // Central Vechte bridge pillar connects the Zentrum hub to the Lingen route.
  MAP_LANDMARKS.push({ id: 'zentrum-bridge', label: 'BRUECKE', x: 24, y: 28, kind: 'story' });
+ // Lingen bridge guard marks the gateway checkpoint toward the away arc.
+ MAP_LANDMARKS.push({ id: 'lingen-bridge-guard', label: 'POSTEN', x: 52, y: 42, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -3110,6 +3127,9 @@ function drawOverworld() {
   // Draw atmospheric world details (birds/balloons) on top of tiles, below actors/HUD.
   drawWorldAtmosphere(camX, camY);
 
+  // Draw Lingen bridge checkpoint NPC on the route toward Lingen, below minimap/HUD.
+  drawLingenBridgeGuard(camX, camY);
+
   // Draw minimap
   if (minimapVisible) drawMinimap();
 
@@ -3213,8 +3233,107 @@ const HomeCourtKid = {
   }
 };
 
+// ============================================================
+// LINGEN BRIDGE GUARD — progress-aware checkpoint NPC at the main bridge
+// toward Lingen (x=52, y=42, where the bridge graffiti sign sits). He acts
+// as a Nordhorn-vs-Lingen story gatekeeper: early on he warns the player that
+// the Lingen route is rough; after Sven/Rashta he reacts to the away-run; after
+// Maxim/Mihler he celebrates the return. He is a Map object, not a HUD overlay.
+// Placed on the bridge path so players naturally meet him on the way to the
+// Lingen arc, without blocking the Vechte bridge crossing.
+// ============================================================
+const LingenBridgeGuard = {
+  x: 52,
+  y: 42,
+  facing: 'left',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+    if (beaten('Coach Mihler')) {
+      return ['Grenzposten', 'Die Bruecke nach Lingen ist heute ruhig. Nordhorn hat auswaerts gehalten. Passen, Pausen, Wurf um Wurf.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Grenzposten', 'Die Arena ist gefallen. Noch eine Halle, dann ist Lingen Geschichte. Trampeln Sie leise, der Hafen schlaeft.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Grenzposten', 'Zwei Auswaertssiege. Die Gold-Arena zittert schon. Halten Sie den Nordhorn-Rhythmus.'];
+    }
+    if (beaten('Sven')) {
+      return ['Grenzposten', 'Bahnhof-Court erobert. Der Hafenwind wird hart. Aber Sie haben ja schon den ersten Schritt ueber die Grenze gemacht.'];
+    }
+    return ['Grenzposten', 'Halt! Vor Lingen muss Nordhorn die Heim-Courts sauber machen. Klaus, Anna, Markus, Sophie - erst dann wird die Bruecke frei.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#4a4a5a',
+      trim: '#c8c8d8',
+      hair: '#4a3a1a',
+      pants: '#2a2a3a',
+      number: 'G',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: 'cap'
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawLingenBridgeGuard(camX, camY) {
+  LingenBridgeGuard.render(camX, camY);
+}
+
 function drawHomeCourtKid(camX, camY) {
   if (typeof HomeCourtKid !== 'undefined') HomeCourtKid.render(camX, camY);
+}
+
+function tryNPCInteract() {
+  // Try all progress-aware NPCs in a fixed order; first facing NPC wins.
+  if (typeof HomeCourtKid !== 'undefined' && HomeCourtKid.tryInteract()) return true;
+  if (typeof HomeCourtOldTimer !== 'undefined' && HomeCourtOldTimer.tryInteract()) return true;
+  if (typeof SchoolYardStudent !== 'undefined' && SchoolYardStudent.tryInteract()) return true;
+  if (typeof ZentrumReporter !== 'undefined' && ZentrumReporter.tryInteract()) return true;
+  if (typeof TierparkVisitor !== 'undefined' && TierparkVisitor.tryInteract()) return true;
+  if (typeof HarborWorker !== 'undefined' && HarborWorker.tryInteract()) return true;
+  if (typeof LingenArenaFan !== 'undefined' && LingenArenaFan.tryInteract()) return true;
+  if (typeof LingenBridgeGuard !== 'undefined' && LingenBridgeGuard.tryInteract()) return true;
+  return false;
 }
 
 // ============================================================
@@ -4033,13 +4152,7 @@ function updateOverworld() {
   if (wasPressed('o') || wasPressed('O')) { gameState = 'OVERVIEW'; clearPressedInput(); return; }
   if (wasConfirmPressed()) {
     if (tryStorySignInteraction()) return;
-    if (HomeCourtOldTimer.tryInteract()) return;
-    if (HomeCourtKid.tryInteract()) return;
-    if (ZentrumReporter.tryInteract()) return;
-    if (TierparkVisitor.tryInteract()) return;
-    if (HarborWorker.tryInteract()) return;
-    if (LingenArenaFan.tryInteract()) return;
-    if (SchoolYardStudent.tryInteract()) return;
+    if (tryNPCInteract()) return;
   }
   if (wasPressed('r') || wasPressed('R')) {
     if (HomeRest.rest()) {
