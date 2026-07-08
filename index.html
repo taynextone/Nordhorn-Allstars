@@ -471,6 +471,7 @@ function drawCredits() {
     'Mihler-Taktiktafel',
     'Nordhorn-Schlusslicht',
     'Schulhof-Schueler',
+    'Zentrum-Reporter',
     'Vechteufer',
     'Schulhof & Park',
     'Stadionhalle',
@@ -693,6 +694,13 @@ function generateMap() {
   } else if (worldMap[SchoolYardStudent.y] && worldMap[SchoolYardStudent.y][SchoolYardStudent.x] !== T.WATER) {
     worldMap[SchoolYardStudent.y][SchoolYardStudent.x] = T.PATH;
   }
+  // Zentrum Reporter stands on the market square at x=35, y=18; keep the tile
+  // walkable so he is reachable and not embedded in a building/fence.
+  if (worldMap[ZentrumReporter.y] && worldMap[ZentrumReporter.y][ZentrumReporter.x] === T.BUILD) {
+    worldMap[ZentrumReporter.y][ZentrumReporter.x] = T.PATH;
+  } else if (worldMap[ZentrumReporter.y] && worldMap[ZentrumReporter.y][ZentrumReporter.x] !== T.WATER) {
+    worldMap[ZentrumReporter.y][ZentrumReporter.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
@@ -702,6 +710,7 @@ const MAP_LANDMARKS = [
   { id: 'kloster', label: 'KLOSTER', x: 15, y: 1, kind: 'quiet' },
   { id: 'blume', label: 'BLUMEN', x: 17, y: 30, kind: 'court' },
   { id: 'zentrum', label: 'ZENTRUM', x: 35, y: 17, kind: 'hub' },
+  { id: 'reporter', label: 'REPORTER', x: 35, y: 18, kind: 'story' },
   { id: 'schule', label: 'SCHULE', x: 48, y: 6, kind: 'court' },
   { id: 'tierpark', label: 'TIERPARK', x: 52, y: 23, kind: 'park' },
   { id: 'stadion', label: 'HALLE', x: 40, y: 43, kind: 'boss' },
@@ -2953,6 +2962,9 @@ function drawOverworld() {
   // Draw school-yard student NPC near the school/gym hub, below minimap/HUD.
   drawSchoolYardStudent(camX, camY);
 
+  // Draw Zentrum reporter NPC on the market square, below minimap/HUD.
+  drawZentrumReporter(camX, camY);
+
   // Draw minimap
   if (minimapVisible) drawMinimap();
 
@@ -3322,6 +3334,100 @@ function drawSchoolYardStudent(camX, camY) {
   if (typeof SchoolYardStudent !== 'undefined') SchoolYardStudent.render(camX, camY);
 }
 
+// ============================================================
+// ZENTRUM REPORTER — progress-aware NPC on the Nordhorn market square.
+// A local reporter who covers the Nordhorn-vs-Lingen arc, giving the player
+// a sense that the whole town is following the road-trip. Uses existing
+// drawHoopsterSprite and startDialog; placed on a walkable tile at x=35, y=18
+// so he is part of the central hub content, not a HUD overlay.
+// ============================================================
+const ZentrumReporter = {
+  x: 35,
+  y: 18,
+  facing: 'down',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Zentrum-Reporter', 'Acht Siege! Meine Schlagzeile steht: Nordhorn spielt Lingen still. Passen, Pausen, Wurf um Wurf — das ist der Artikel, den ich morgen in die Stadtzeitung setze.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Zentrum-Reporter', 'Arena Lingen ist gefallen. Die Gold-Tribuene schwieg, als du Maxim trafst. Nur noch die Halle trennt dich vom Titel.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Zentrum-Reporter', 'Der Hafenwind hat Nordhorn gebliesen. Zwei Auswaerts-Courts gehören uns. Der Reporter aus Lingen grübelt schon.'];
+    }
+    if (beaten('Sven')) {
+      return ['Zentrum-Reporter', 'Bahnhof Lingen erobert. Mein erster Absatz: Der Nordhorn-Kid schiebt die Grenze zurück. Rashta am Hafen ist dran.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Zentrum-Reporter', 'Spielplatz durch, Nerven bewiesen. Das Zentrum rät: Die Lingen-Route beginnt am Bahnhof. Ich werde dort am Zaun stehen.'];
+    }
+    if (beaten('Markus')) {
+      return ['Zentrum-Reporter', 'Markus’ Defense geknackt. Sophie am Spielplatz wird der naechste Artikel. Danach schreibt Lingen über dich.'];
+    }
+    if (beaten('Anna')) {
+      return ['Zentrum-Reporter', 'Park-Court gewonnen! Anna bestätigt: dein Wurf sitzt. Ich tippe schon die Markus-Schulhof-Überschrift.'];
+    }
+    return ['Zentrum-Reporter', 'Hier ist das Zentrum. Ich berichte, sobald der erste Heim-Court fällt. Klaus beim Wohnhof ist dein erster Satz.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#5a4a3a',
+      trim: '#e8d8a8',
+      hair: '#c8b898',
+      pants: '#2a3030',
+      number: 'R',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: 'coach'
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawZentrumReporter(camX, camY) {
+  if (typeof ZentrumReporter !== 'undefined') ZentrumReporter.render(camX, camY);
+}
+
 function drawCleanOverworldHUD() {
   // Compact status strip: essentials + next target only, no coach/stat spam.
   ctx.fillStyle = C.DARKEST;
@@ -3541,6 +3647,7 @@ function updateOverworld() {
   if (wasConfirmPressed()) {
     if (tryStorySignInteraction()) return;
     if (HomeCourtKid.tryInteract()) return;
+    if (ZentrumReporter.tryInteract()) return;
     if (HarborWorker.tryInteract()) return;
     if (LingenArenaFan.tryInteract()) return;
     if (SchoolYardStudent.tryInteract()) return;

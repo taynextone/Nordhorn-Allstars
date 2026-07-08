@@ -170,6 +170,7 @@
 - [x] ObjectiveTracker Pulse Polish — Zielmarker pulsiert langsamer und hat einen kleinen Schatten, damit er auf allen Tiles lesbar bleibt.
 - [x] Title-Screen-Animation + Sprite-Shorts Grafik-Pass — kleiner hüpfender Basketball auf dem Titelbild, Hoopster-Sprites bekommen Shorts für klarere Basketball-Silhouette, blinkender Motto-Text statt neuer HUDs.
 - [x] Schulhof-NPC Story-Pass — neuer progress-aware Schüler am Schulhof (x=44, y=16) mit dynamischen Dialogen über Klaus/Anna/Markus/Sophie und die Lingen-Route; Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
+- [x] Zentrum-Reporter Story-Pass — neuer progress-aware Reporter am Marktplatz (x=35, y=18) mit dynamischen Dialogen zur Nordhorn-vs-Lingen Story, Overview-/Credits-Landmark ergänzt, begehbares Tile, ohne neue HUDs/Overlays.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
