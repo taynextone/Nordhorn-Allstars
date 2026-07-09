@@ -832,6 +832,8 @@ const MAP_LANDMARKS = [
  MAP_LANDMARKS.push({ id: 'lingen-trainingsplatz', label: 'TRPLATZ', x: 13, y: 54, kind: 'story' });
  // Nordhorn library: progress-aware bookworm NPC in the Zentrum hub.
  MAP_LANDMARKS.push({ id: 'bibliothek', label: 'BIBLIO', x: 30, y: 25, kind: 'story' });
+ // New Lingen Gold Court Abschied story sign: closes the away-arc story after the Lingen rivals.
+ MAP_LANDMARKS.push({ id: 'lingen-gold-abschied', label: 'ABSCHIED', x: 33, y: 51, kind: 'story' });
 
 function hasTrainerWin(name) {
   const trainer = trainers.find(t => t.name === name);
@@ -1027,6 +1029,19 @@ const StorySigns = [
       if (hasTrainerWin('Rashta')) return 'Hafen abgehakt. Arena-Captain wartet.';
       if (hasTrainerWin('Sven')) return 'Bahnhof gepfiffen. Weiter Richtung Hafen.';
       return 'Schiri prueft Ball: Fair Play. Erst Courts, dann Halle.';
+    }
+  },
+  {
+    id: 'lingen-gold-abschied',
+    x: 33,
+    y: 51,
+    title: 'Lingen-Abschied',
+    getBody: function() {
+      if (hasTrainerWin('Coach Mihler')) return 'Goldboden glänzt noch. Nordhorn hat hier Geschichte geschrieben — und ist heimwärts gegangen.';
+      if (hasTrainerWin('Maxim')) return 'Maxim liegt. Der Gold-Court ist still. Nur Mihlers Halle ruft noch.';
+      if (hasTrainerWin('Rashta')) return 'Rashta am Hafen. Hier in der Arena bleibt nur noch Maxim zwischen uns und der Heimfahrt.';
+      if (hasTrainerWin('Sven')) return 'Bahnhof geschafft. Der Weg durch Lingen führt jetzt über den Hafen zum Gold.';
+      return 'Der Gold-Court. Hier entscheidet sich, ob Lingen Nordhorn fürchten muss.';
     }
   },
   {
@@ -1232,41 +1247,52 @@ function drawTile(x, y, tileType, camX, camY) {
       }
       break;
     case T.GOLDCOURT:
-      // Lingen Arena away-court: richer golden floor with dark boundary lines so the
-      // mini-boss court stands out from the regular Nordhorn courts without adding HUDs.
+      // Lingen Arena away-court (Mini-Boss): richer golden floor + arena wear.
+      // Pure pixel-art: stronger key, sideline hashes, oil spots, subtle rim detail.
+      // No new HUDs/overlays, keeps Gameboy clean; enemy faces left in battle.
       ctx.fillStyle = C.DARKEST;
       ctx.fillRect(sx, sy, TILE, TILE);
       ctx.fillStyle = '#b8a040';
       ctx.fillRect(sx + 1, sy + 1, 14, 14);
       ctx.fillStyle = '#8a6a20';
-      // Sidelines
+      // Sidelines + boundary
       ctx.fillRect(sx + 1, sy + 1, 14, 1);
       ctx.fillRect(sx + 1, sy + 14, 14, 1);
       ctx.fillRect(sx + 1, sy + 1, 1, 14);
       ctx.fillRect(sx + 14, sy + 1, 1, 14);
       // Center line
       ctx.fillRect(sx + 7, sy + 2, 2, 12);
-      // Lane/key marks
-      ctx.fillRect(sx, sy + 7, TILE, 2);
-      ctx.fillRect(sx + 5, sy + 5, 1, 1);
-      ctx.fillRect(sx + 10, sy + 5, 1, 1);
-      ctx.fillRect(sx + 5, sy + 10, 1, 1);
-      ctx.fillRect(sx + 10, sy + 10, 1, 1);
+      // Stronger key/lane area (arena free-throw emphasis)
+      ctx.fillRect(sx, sy + 6, TILE, 4);
+      ctx.fillRect(sx + 4, sy + 4, 1, 1);
+      ctx.fillRect(sx + 11, sy + 4, 1, 1);
+      ctx.fillRect(sx + 4, sy + 11, 1, 1);
+      ctx.fillRect(sx + 11, sy + 11, 1, 1);
       ctx.fillRect(sx + 6, sy + 6, 4, 4);
-      // Small stylized "L" emblem (Lingen) in the key — pure pixel-art detail for away-court identity
+      // Stylized "L" emblem (Lingen identity) in key
       ctx.fillStyle = '#6a4a10';
       ctx.fillRect(sx + 7, sy + 6, 1, 3);
       ctx.fillRect(sx + 7, sy + 8, 2, 1);
-      // Hash marks
-      if ((x % 5) === 1) {
-        ctx.fillRect(sx + 3, sy + 4, 2, 1);
-        ctx.fillRect(sx + 3, sy + 11, 2, 1);
+      // Extra arena hashes (more visible than regular court)
+      if ((x % 3) === 0) {
+        ctx.fillRect(sx + 3, sy + 3, 2, 1);
+        ctx.fillRect(sx + 3, sy + 12, 2, 1);
       }
-      // Sparkle texture for the gold arena feel
+      // Oil/wear flecks for used away-court feel
+      if ((x + y) % 7 === 0) {
+        ctx.fillStyle = '#6a5a28';
+        ctx.fillRect(sx + 2, sy + 5, 2, 2);
+        ctx.fillRect(sx + 10, sy + 9, 1, 1);
+      }
+      // Sparkle + tiny rim detail (hoop echo in corner)
       if ((x + y) % 13 === 0) {
         ctx.fillStyle = '#d4c470';
         ctx.fillRect(sx + 4, sy + 4, 2, 2);
       }
+      // Small stylized backboard/rim dot in upper right of tile
+      ctx.fillStyle = '#a07030';
+      ctx.fillRect(sx + 12, sy + 2, 2, 1);
+      ctx.fillRect(sx + 13, sy + 3, 1, 1);
       break;
     case T.PARKCOURT:
       // Tierpark/Park court: regular court lines with park-side nature details

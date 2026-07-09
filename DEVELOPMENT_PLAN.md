@@ -26,7 +26,7 @@
 - [x] Story-Dialoge für alle NPCs
 - [x] Zug-System mit Energie-Kosten ausgeglichen
 - [x] Spieler-Movepaket gleichgewichtig
-- [x] 8 "Courts" (Gym-Äquivalent) implementieren
+- [x] 8 "Courts" (Gym-Äquivalent) implementiert
 - [x] Lingen als zweite Karte (Erzfeind-Stadt)
 - [x] Finale / Endboss (König, 12-Badge-Gate, Credits-Screen)
 - [x] Move-Tutor NPC
@@ -60,7 +60,7 @@
 - [x] Home-Rest-System — Start/Respawn auf begehbarer Home-Gate-Position gefixt, R-Taste heilt HP/EN zuhause, sichtbares HUD/Title-Marker und Module-Check ergänzt.
 - [x] Title-Screen-Declutter — überlagernde Coach-/System-Badges entfernt und durch kompakten Status ersetzt; Logo, Menü und Continue sind wieder klar lesbar.
 - [x] Clean-HUD-Pass — Title-Status auf ruhigen Clean-HUD-Hinweis reduziert, Battle-HP/Message/Enemy-Boxen überlappungsfrei angeordnet, Spieler-Sprite aus dem Move-Menü freigelegt und Enter-Input-Bleed beim Battle-Start gefixt.
-- [x] Overlay-Lockdown — alte Coach-/Scout-/Help-Toggles aus dem Runtime-Loop entfernt; Overworld bleibt Karte + Actors + kompaktes Status-HUD, Battle bleibt ohne Zusatz-HUDs.
+- [x] Overlay-Lockdown — alte Coach-/Scout-/Help-Toggles aus der Runtime-Loop entfernt; Overworld bleibt Karte + Actors + kompaktes Status-HUD, Battle bleibt ohne Zusatz-HUDs.
 - [x] Dialog-Polish — lange Dialog-/Victory-Texte wrappen jetzt in der Gameboy-Box; Escape verlässt Dialoge sauber zurück in den Overworld-State, ohne Battle-Input-Bleed.
 - [x] Debug-Panel-Declutter — ?modules=1 listet nur noch Core-Systeme statt deaktivierter Coach-/Advisor-HUDs; alte S/T/H-Hilfetexte wurden aus der sichtbaren Controls-Liste entfernt.
 - [x] Objective-Marker Clean-Rename — aktive Overworld-/Minimap-Zielmarkierung nutzt keinen Radar-Renderpfad mehr; drawOverworld bleibt frei von Coach/Scout/Radar-HUD-Aufrufen.
@@ -84,7 +84,7 @@
 - [x] ErrorGuard Home-Gate Recovery — korrupte/ungültige Spielerpositionen werden jetzt auf den begehbaren Home-Gate-Tile zurückgesetzt; Smoke-Flow prüft, dass Recovery nicht mehr in einer Wand/Haustile-Schleife landet.
 - [x] Battle-Regen Label Sync — Spieler-Energie-Regeneration nutzt jetzt eine zentrale Konstante; HUD-Anzeige und echter Turn-Flow werden im Smoke-Test gemeinsam geprüft, ohne neue Overlays.
 - [x] Home-Gate Respawn Sync — New-Game-, Loss- und Game-Over-Rückkehr nutzen denselben begehbaren Home-Gate-Helper; A/B-Confirm-Hinweis ist synchronisiert und im Smoke-Flow abgesichert.
-- [x] Battle-Feedback Readability — Battle-Start- und „Not enough energy“-Hinweise erscheinen jetzt in der bestehenden kompakten Message-Box auch während Move-Select, ohne neue Coach-/HUD-Overlays.
+- [x] Battle-Feedback Readability — Battle-Start- und „Not enough energy“-Hinweise erscheinen in der bestehenden kompakten Message-Box auch während Move-Select, ohne neue Coach-/HUD-Overlays.
 - [x] Battle-Message Hygiene — Aktionsmeldungen leeren alte Detailzeilen zentral, damit Intro-/Energy-Hinweise nicht unter späteren Moves stehen bleiben; Smoke-Flow prüft die kompakte Message-Box ohne neue Overlays.
 - [x] Enemy-Turn Message Hygiene — Gegnerzug-Banner nutzt denselben kompakten Message-Helper, damit alte Detailzeilen nicht in den Enemy-Turn leaken; Smoke-Flow deckt den State ab.
 - [x] Battle-Bar Clamp Polish — HP-/EN-Balken werden in der kompakten Battle-HUD-Box hart begrenzt, damit extreme/alte Werte die Gameboy-UI nicht überzeichnen.
@@ -116,7 +116,7 @@
 - [x] Player-Score Damage Readability — erfolgreiche Spielerwürfe zeigen Rivalen-HP-Schaden jetzt als kompakte Subline in der bestehenden Battle-Message-Box; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Steal-Damage Readability — erfolgreiche Spieler-/Gegner-Steals trennen Treffertext und HP-Schaden jetzt ebenfalls in Mainline/Subline der bestehenden Battle-Message-Box; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
 - [x] Block-Feedback Readability — Block-Effekte erklären vorbereitete und abgefangene Würfe jetzt in der bestehenden kompakten Battle-Message-Box; VM-/Browser-Smokes prüfen Spieler- und Rivalen-Block ohne neue HUDs/Overlays.
-- [x] Battle-Message Overflow Guard — lange Aktionswörter/-Labels werden in der bestehenden Message-Box hart auf Zeilenbreite gesplittet und gekürzt, damit sie nie in HP/EN-Boxen laufen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] Battle-Message Overflow Guard — lange Aktionswörter/-Labels werden in der bestehenden Message-Box hart auf Zeilenbreite gesplittet und gekürzt, damit sie nie in HP/EN-Boxen laufen; VM-/Browser-Smokes prüfen das ohne neuen HUDs/Overlays.
 - [x] Dialog-Overflow Guard — lange Story-/Rivalenwörter werden in der bestehenden Gameboy-Dialogbox hart umbrochen und mit Ellipse gekürzt, damit Victory-/NPC-Texte lesbar bleiben ohne neue HUDs/Overlays.
 - [x] Legacy-Radar-Alias Cleanup — letzter `QuestRadar`-Kompatibilitätsalias entfernt; VM-/Browser-Smokes prüfen, dass ObjectiveTracker direkt genutzt wird und keine Radar-/Coach-Renderpfade zurückkehren.
 - [x] Dormant-FPS-HUD Cleanup — ungenutztes PerfHUD-/FPS-Stat-HUD-Modul aus Runtime und Smoke-Guards entfernt, damit der Overworld-Screen sauber Karte + Actors + kompaktes Status-HUD bleibt.
@@ -133,14 +133,14 @@
 - [x] New-Game Clean-State Sync — New Game und Continue teilen denselben Clean-View-Reset; frische Runs löschen stale Minimap/Konami/Legacy-Overlay-/Confirm-Zustände vor dem ersten Overworld-Frame.
 - [x] Home-Rest Input Ownership — R am Home-Court stoppt den Overworld-Frame sofort, damit gehaltene Bewegung nicht in Trainer-Encounter/Battle-Dialoge blutet; Smoke-Flow prüft den sauberen Dialog-State ohne neue HUDs/Overlays.
 - [x] Dialog-Start Input Hygiene — neue Dialoge löschen stale Confirm-Edges direkt beim Öffnen, damit Menü-/Touch-/Battle-Inputs keine Story- oder Victory-Box sofort überspringen; Smoke-Flow prüft das ohne neue HUDs/Overlays.
-- [x] Dialog-Double-Edge Guard — gleichzeitiges Confirm+Escape beendet Dialog-Callbacks nur einmal, damit Victory-/Champion-/Load-Flows nicht durch doppelte Eingabekanten churnen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
-- [x] Continue-Save Repair Persistence — Continue schreibt sanitisierte alte/kaputte Saves sofort in sauberer V2-Form zurück, damit reparierte HP/EN/Build-/Trainerdaten beim nächsten Start stabil bleiben; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] Dialog-Double-Edge Guard — gleichzeitiges Confirm+Escape beendet Dialog-Callbacks nur einmal, damit Victory-/Champion-/Load-Flows nicht durch doppelte Eingabekanten churnen; VM-/Browser-Smokes prüfen das ohne neuen HUDs/Overlays.
+- [x] Continue-Save Repair Persistence — Continue schreibt sanitisierte alte/kaputte Saves sofort in sauberer V2-Form zurück, damit reparierte HP/EN/Build-/Trainerdaten beim nächsten Start stabil bleiben; VM-/Browser-Smokes prüfen das ohne neuen HUDs/Overlays.
 - [x] Continue-Mixed-Progress Merge — Continue vereinigt beatenTrainers und alte Trainer-Snapshots, statt gültige Siege durch stale `beaten:false`-Zeilen zu verlieren; Smoke-Flow prüft Persistenz ohne neue HUDs/Overlays.
 - [x] Battle-Runtime Cleanup — New Game, Victory-, Loss- und Champion-Flows räumen stale Battle-Trainer/Move-Listen/Result-Locks weg, damit Dialoge sauber in Overworld/Credits zurückführen ohne neue HUDs/Overlays.
 - [x] ErrorGuard Overlay Declutter — erwartete Recovery-Fälle bleiben intern diagnostizierbar, zeichnen aber kein zusätzliches Fehler-Overlay mehr über Overworld/Battle/Dialog; Smoke-Flow prüft die saubere UI-Grenze.
-- [x] Victory-Dialog Score Polish — Siegdialoge zeigen jetzt Rivalenfortschritt plus Finalscore in der bestehenden Dialogbox, ohne neue Battle-/Coach-HUDs oder Overlays.
-- [x] Champion-Dialog Score Sync — der finale Coach-Mihler-Sieg zeigt jetzt Rivalenname, 5/5-Fortschritt und Finalscore in derselben Champion-Dialogbox vor den Credits; VM-/Browser-Smokes sichern den Flow ohne neue Overlays.
-- [x] Continue-Corrupt-Slot Guard — kaputte/halbe LocalStorage-Slots blenden CONTINUE am Title sauber aus, statt in einen toten Ladeversuch zu laufen; VM-/Browser-Smokes prüfen das ohne neue HUDs/Overlays.
+- [x] Victory-Dialog Score Polish — Siegdialoge zeigen jetzt Rivalenfortschritt plus Finalscore in der bestehenden Dialogbox, ohne neuen Battle-/Coach-HUDs oder Overlays.
+- [x] Champion-Dialog Score Sync — der finale Coach-Mihler-Sieg zeigt jetzt Rivalenname, 5/5-Fortschritt und Finalscore in derselben Champion-Dialogbox vor den Credits; VM-/Browser-Smokes sichern den Flow ohne neuen Overlays.
+- [x] Continue-Corrupt-Slot Guard — kaputte/halbe LocalStorage-Slots blenden CONTINUE am Title sauber aus, statt in einen toten Ladeversuch zu laufen; VM-/Browser-Smokes prüfen das ohne neuen HUDs/Overlays.
 - [x] ErrorGuard Overlay-Code Cleanup — dormant ErrorGuard-Badge-/Overlay-Renderer und Overlay-Timer entfernt; Recovery bleibt intern/log-only, damit Overworld/Battle/Dialog auch bei Edge-Case-Reparaturen sauber bleiben.
 - [x] Save-Toast Clean-Screen Guard — Save-/Load-Toast läuft in Dialog, Battle, Credits und Übersicht still ab, damit keine zusätzliche Box die bestehenden Gameboy-Dialog-/Battle-Anzeigen überdeckt.
 - [x] Touch-Input Duplicate Guard — moderne Pointer-Browser nutzen nur noch einen Touch-Eventstrom, damit mobile A/B/OVR/MINI-Taps keinen zweiten Confirm in Dialoge oder Battle-Menüs leaken.
@@ -153,48 +153,51 @@
 - [x] Lingen-Presse-Ecke Story-Pass — neue Pressewand an der Arena reagiert auf Rashta-/Maxim-/Mihler-Fortschritt, ist in Overview/Credits markiert und nutzt nur bestehende Dialogboxen.
 - [x] Mihler-Taktiktafel Story-Pass — neue Taktiktafel am Finale-Court zeigt dynamische Lingen-/Maxim-/Champion-Dialoge, ist in Overview/Credits markiert und bleibt ein Map-Objekt ohne neue HUDs/Overlays.
 - [x] Auswärts-Choreo Story-Pass — neues Lingen-Banner mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Markierung und feinerem Sign-Pixelart ergänzt, ohne neue HUDs/Overlays.
-- [x] Lingen-Rückfahrt Story-Pass — Rückfahrt-Korso und Nordhorn-Schlusslicht als dynamische Route-Schilder mit Overview-/Credits-Markern ergänzt, ohne neue HUDs/Overlays.
+- [x] Lingen-Rückfahrt Story-Pass — Rückfahrt-Korso und Nordhorn-Schlusslicht als dynamische Route-Schilder mit Overview-/Credits-Markern ergänzt, ohne neuen HUDs/Overlays.
 - [x] Nordhorn-Home-Story-Pass — Start-Intro benennt jetzt konkret die ersten vier Rivalen (Klaus → Anna → Markus → Sophie) und gibt Lingen-Motivation; Home-Rest-Dialoge ebenfalls mit Klaus-/Lingen-Hinweisen; keine neuen HUDs/Overlays.
-- [x] Lingen-Arena-Spectator-Story — drei Schilder (Arena-Fankurve, Stadionsprecher, Schiedsrichter) führen den Auswärtsspiel-Ablauf in der Lingen-Arena ein, ohne neue HUDs/Overlays.
+- [x] Lingen-Arena-Spectator-Story — drei Schilder (Arena-Fankurve, Stadionsprecher, Schiedsrichter) führen den Auswärtsspiel-Ablauf in der Lingen-Arena ein, ohne neuen HUDs/Overlays.
 - [x] Home-Route-Heimkehr-Story — Bahnhof Nordhorn-Schild mit dynamischen Lingen-/Sieg-Fortschrittsdialogen, eigener Overview-/Credits-Landmarke, ohne neue HUDs/Overlays.
-- [x] Lingen-Hafen-NPC Story-Pass — neuer Hafenarbeiter am Lingen-Hafenweg (x=17, y=52) mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Landmarke und begehbarem Tile, ohne neue HUDs/Overlays.
-- [x] Lingen-Arena-Fan Story-Pass — neuer nervöser Lingen-Fan vor der Arena (x=29, y=52) mit Maxim-/Mihler-Fortschrittsdialogen, Overview-Landmarke, begehbarem Tile und bestehender Sprite-Rendering-Pipeline, ohne neue HUDs/Overlays.
-- [x] Lingen-Arena-Gold-Court Grafik-Pass — neuer T.GOLDCOURT Tile mit goldenem Boden, dunklen Linien und Sparkle-Textur; Arena-Lingen-Court (25,53)-(34,58) wird visuell als Mini-Boss-Court hervorgehoben, Minimap und Walkability synchronisiert, ohne neue HUDs/Overlays.
-- [x] Lingen-Brücken-Checkpoint Story-Pass — neuer progress-aware Grenzposten am Vechte-Übergang (x=52, y=42) mit dynamischen Sven/Rashta/Maxim/Mihler-Dialogen; eigener Overview-/Credits-Landmarke, Brücken-Pfad begehbar, via zentraler `tryNPCInteract()`-Pfade eingebunden, ohne neue HUDs/Overlays.
-- [x] Lingen-Hafen-Story-Pass — neues Hafen-Emblem (x=13, y=55) und neuer Lingen-Trainingsplatz (x=13, y=54) mit progress-aware Sven/Rashta/Maxim/Mihler-Dialogen; eigene Overview-/Credits-Landmarken, Hafen-Schilder zeigen kleines Seagull-Emblem, ohne neue HUDs/Overlays.
-
-## Weiterführende Ideen (Content/Grafik/Story)
-- [x] Nordhorn-Nachwuchs-Story — ein junger Spieler am Home-Court (x=6,y=7) kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt; interagiert mit A/B/ENTER via bestehende Dialogbox, ohne neue HUDs/Overlays.
-- [x] Boss-Build-Story-Pass — Mihlers Champion-Siegdialog und Credits betonen jetzt stärker, warum der Nordhorn-Spielstil Lingen schlägt: "Passen, Pausen, Wurf um Wurf" und "Der Home-Court-Stil hat auswärts gehalten" in Dialog und Credits, ohne neue HUDs/Overlays.
-- [x] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neue HUDs/Overlays. (Court-Boundaries + Centerline + Sideline-Hashes in drawTile)
-- [x] Kloster-Frenswegen-Monk Story-Pass — neuer progress-aware Mönch im Kloster-Vorhof (x=15, y=7) mit Nordhorn-vs-Lingen-Dialogbogen, eigener Kapuzen-Sprite (accessory: 'robe'), kleiner Kloster-Hof, Overview-/Credits-Landmarke, ohne neue HUDs/Overlays.
-- [x] Blumengarten-Mutter Story-Pass — neuer progress-aware NPC in der Blumensiedlung (x=18, y=32) mit Nordhorn-vs-Lingen-Dialogbogen, eigener MAP_LANDMARKS-Eintrag, Credits-Ort, begehbarem Tile, in tryNPCInteract-/Render-Pipeline eingebunden, ohne neue HUDs/Overlays.
+- [x] Lingen-Hafen-NPC Story-Pass — neuer Hafenarbeiter am Lingen-Hafenweg (x=17, y=52) mit fortschrittsabhängigen Sven/Rashta/Maxim/Mihler-Dialogen, Overview-/Credits-Landmarke und begehbarem Tile, ohne neuen HUDs/Overlays.
+- [x] Lingen-Arena-Fan Story-Pass — neuer nervöser Lingen-Fan vor der Arena (x=29, y=52) mit Maxim-/Mihler-Fortschrittsdialogen, Overview-Landmarke, begehbarem Tile und bestehender Sprite-Rendering-Pipeline, ohne neuen HUDs/Overlays.
+- [x] Lingen-Arena-Gold-Court Grafik-Pass — neuer T.GOLDCOURT Tile mit goldenem Boden, dunklen Linien und Sparkle-Textur; Arena-Lingen-Court (25,53)-(34,58) wird visuell als Mini-Boss-Court hervorgehoben, Minimap und Walkability synchronisiert, ohne neuen HUDs/Overlays.
+- [x] Lingen-Brücken-Checkpoint Story-Pass — neuer progress-aware Grenzposten am Vechte-Übergang (x=52, y=42) mit dynamischen Sven/Rashta/Maxim/Mihler-Dialogen; eigener Overview-/Credits-Landmarke, Brücken-Pfad begehbar, via zentraler `tryNPCInteract()`-Pfade eingebunden, ohne neuen HUDs/Overlays.
+- [x] Lingen-Hafen-Story-Pass — neues Hafen-Emblem (x=13, y=55) und neuer Lingen-Trainingsplatz (x=13, y=54) mit progress-aware Sven/Rashta/Maxim/Mihler-Dialogen; eigene Overview-/Credits-Landmarken, Hafen-Schilder zeigen kleines Seagull-Emblem, ohne neuen HUDs/Overlays.
+- [x] Nordhorn-Nachwuchs-Story — ein junger Spieler am Home-Court (x=6,y=7) kommentiert den Lingen-Auswärtszug und ändert Dialoge je nach Rivalenfortschritt; interagiert mit A/B/ENTER via bestehende Dialogbox, ohne neuen HUDs/Overlays.
+- [x] Boss-Build-Story-Pass — Mihlers Champion-Siegdialog und Credits betonen jetzt stärker, warum der Nordhorn-Spielstil Lingen schlägt: "Passen, Pausen, Wurf um Wurf" und "Der Home-Court-Stil hat auswärts gehalten" in Dialog und Credits, ohne neuen HUDs/Overlays.
+- [x] Sprite-Polish-Pass — Court-/Sign-/Bridge-Details verfeinern (z.B. bessere Court-Paint-Markierungen, Wasserwellen, Baum-Palette), ohne neuen HUDs/Overlays. (Court-Boundaries + Centerline + Sideline-Hashes in drawTile)
+- [x] Kloster-Frenswegen-Monk Story-Pass — neuer progress-aware Mönch im Kloster-Vorhof (x=15, y=7) mit Nordhorn-vs-Lingen-Dialogbogen, eigener Kapuzen-Sprite (accessory: 'robe'), kleiner Kloster-Hof, Overview-/Credits-Landmarke, ohne neuen HUDs/Overlays.
+- [x] Blumengarten-Mutter Story-Pass — neuer progress-aware NPC in der Blumensiedlung (x=18, y=32) mit Nordhorn-vs-Lingen-Dialogbogen, eigener MAP_LANDMARKS-Eintrag, Credits-Ort, begehbarem Tile, in tryNPCInteract-/Render-Pipeline eingebunden, ohne neuen HUDs/Overlays.
 - [x] Battle-Timer State Guard — verzögerte Battle-Callbacks prüfen jetzt auch gameState, damit alte Timeouts nach Reset/Continue keinen Battle-State überschreiben.
 - [x] Battle-Buff Reset — playerBuffed/enemyBuffed werden beim Start jedes Kampfs zurückgesetzt, damit keine alten Buffs in den nächsten Rivalen übertragen.
 - [x] ObjectiveTracker Pulse Polish — Zielmarker pulsiert langsamer und hat einen kleinen Schatten, damit er auf allen Tiles lesbar bleibt.
 - [x] Title-Screen-Animation + Sprite-Shorts Grafik-Pass — kleiner hüpfender Basketball auf dem Titelbild, Hoopster-Sprites bekommen Shorts für klarere Basketball-Silhouette, blinkender Motto-Text statt neuer HUDs.
-- [x] Schulhof-NPC Story-Pass — neuer progress-aware Schüler am Schulhof (x=44, y=16) mit dynamischen Dialogen über Klaus/Anna/Markus/Sophie und die Lingen-Route; Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
-- [x] Zentrum-Reporter Story-Pass — neuer progress-aware Reporter am Marktplatz (x=35, y=18) mit dynamischen Dialogen zur Nordhorn-vs-Lingen Story, Overview-/Credits-Landmark ergänzt, begehbares Tile, ohne neue HUDs/Overlays.
-- [x] Vechte-Wasser-Animation + Brücken-Story-Pass — Wasser-Wellen-Animation mit frameCount-synchronen Lagen, neues progress-aware Vechte-Brücken-Schild am Zentrum-Übergang (x=24, y=28) mit Nordhorn-vs-Lingen Dialogbogen, Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
-- [x] Tierpark-Visitor + ParkCourt Story-Pass — neuer progress-aware Tierpark-Besucher am Parkteich (x=50, y=23) mit dynamischen Klaus/Anna/Markus/Sophie/Lingen-Dialogen; neuer T.PARKCOURT Tile mit Natur-Details (Blätter, Pfotenabdrücke) für den Tierpark-Court; Overview-/Credits-Landmark ergänzt, ohne neue HUDs/Overlays.
+- [x] Schulhof-NPC Story-Pass — neuer progress-aware Schüler am Schulhof (x=44, y=16) mit dynamischen Dialogen über Klaus/Anna/Markus/Sophie und die Lingen-Route; Overview-/Credits-Landmark ergänzt, ohne neuen HUDs/Overlays.
+- [x] Zentrum-Reporter Story-Pass — neuer progress-aware Reporter am Marktplatz (x=35, y=18) mit dynamischen Dialogen zur Nordhorn-vs-Lingen Story, Overview-/Credits-Landmark ergänzt, begehbares Tile, ohne neuen HUDs/Overlays.
+- [x] Vechte-Wasser-Animation + Brücken-Story-Pass — Wasser-Wellen-Animation mit frameCount-synchronen Lagen, neues progress-aware Vechte-Brücken-Schild am Zentrum-Übergang (x=24, y=28) mit Nordhorn-vs-Lingen Dialogbogen, Overview-/Credits-Landmark ergänzt, ohne neuen HUDs/Overlays.
+- [x] Tierpark-Visitor + ParkCourt Story-Pass — neuer progress-aware Tierpark-Besucher am Parkteich (x=50, y=23) mit dynamischen Klaus/Anna/Markus/Sophie/Lingen-Dialogen; neuer T.PARKCOURT Tile mit Natur-Details (Blätter, Pfotenabdrücke) für den Tierpark-Court; Overview-/Credits-Landmark ergänzt, ohne neuen HUDs/Overlays.
 - [x] World-Tile Pixel-Polish — Grass-, Path-, Tree-Tiles mit feineren Pixel-Details, Wind-Shimmer und strukturierten Pflasterfugen; Vechte-Wasser bleibt frameCount-animiert; keine neuen HUDs/Overlays.
 - [x] Home-Court Veteran Story-Pass — neuer progress-aware alter Trainer am Home-Court (x=7, y=10) mit Nordhorn-vs-Lingen Dialogbogen, eigener Overview-/Credits-Landmarke und Intro-Hinweis; keine neuen HUDs/Overlays.
-- [x] World Atmosphere Grafik-Pass — zarte frameCount-synchrone Himmelsdetails (Vögel, Ballons) zwischen Kacheln und Actors/HUD, ohne neue Overlays.
+- [x] World Atmosphere Grafik-Pass — zarte frameCount-synchrone Himmelsdetails (Vögel, Ballons) zwischen Kacheln und Actors/HUD, ohne neuen Overlays.
 - [x] Gravemeier/Industrie-Spotter Story-Pass — neuer progress-aware Fabrik-Gate-NPC am Industrie-Quartier (x=46, y=45) mit Nordhorn-vs-Lingen Dialogbogen, eigener Overview-/Credits-Landmarke, begehbarem Tile und Einbindung in tryNPCInteract-/Render-Pipeline; keine neuen HUDs/Overlays.
 - [x] Title-Screen Skyline Grafik-Pass — Gameboy-Silhouette von Nordhorn (Rathaus, Kloster, Industrie, Schule, Lingen-Arena) mit animierten Fenstern, hüpfendem Basketball, Schatten und dem Motto "PASSEN. PAUSEN. WURF UM WURF."; keine neuen HUDs/Overlays, Logo/Menü/Controls bleiben lesbar.
 - [x] Stadtbücherei-Bookworm Story-Pass — neuer progress-aware Bücherwurm-NPC vor der Nordhorn-Stadtbücherei im Zentrum (x=30, y=25) mit Lingen-/Rivalen-Dialogbogen, eigenem BIBLIO-Landmark, Credits-Eintrag, begehbarem Tile und Einbindung in Render-/Interact-Pipeline; keine neuen HUDs/Overlays.
 - [x] Bahnhof-Begleiter Story-Pass — neuer progress-aware Zugbegleiter am Nordhorn-Bahnhof (x=6, y=8) mit Lingen-/Rivalen-Dialogbogen, eigenem ZUG-Landmark, Credits-Eintrag, begehbarem Tile und Einbindung in Render-/Interact-Pipeline; keine neuen HUDs/Overlays.
+
+## Weiterführende Ideen (Content/Grafik/Story)
+- [x] Lingen-Arena-Gold-Court Pixel-Detail — GOLDCOURT-Tile bekommt kleines stilisiertes "L"-Emblem im Key-Bereich (reines Pixel-Art-Detail für die Lingen-Arena-Identität); keine neuen HUDs, nur bessere Grafik am bestehenden Mini-Boss-Court.
+- [x] Lingen-Arena-Gold-Court Pixel-Polish (Content/Grafik) — stärkerer Key-Bereich, Öl-Flecken, extra Hashes, kleines Backboard/Rim-Pixel-Detail und Arena-Wear-Textur für bessere Pixel-Grafik; keine neuen HUDs/Overlays, enemy facing left unverändert.
+- [x] Lingen-Gold-Abschied Story-Schild (Content/Story) — neues progress-aware Story-Schild (x=33,y=51) am Gold-Court schließt den Lingen-Auswärts-Arc ab: Sven/Rashta/Maxim/Mihler-Dialoge, MAP_LANDMARKS + Credits-Sync, nutzt nur bestehende Dialogbox ohne neue HUDs.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt
 - [x] Fehlerbehandlung (Edge Cases) — ErrorGuard mit Runtime-Overlay, globalen error/unhandledrejection-Hooks, State-Recovery und sicherem Dex-Fallback ergänzt.
 - [x] Kommentare im Code — Architektur-Kommentarblock und sichtbarer Title-Screen-Status „CODE COMMENTS: 7/7 OK“ ergänzt
 - [x] Battle-Prep HUD — sichtbare HP/EN-Bereitschaftsanzeige für den nächsten Rivalen, Title-Screen-Marker und Module-Check ergänzt.
-- [x] Possession-Coach Battle-HUD — Live-Anzeige für Ballbesitz, Score-Ziel, Spielzug-Tipp und Module-Check ergänzt; Loss-Respawn zurück auf begehbares Home-Gate korrigiert.
+- [x] Possession-Coach Battle-HUD — Live-Anzeige für Ballbesitz, Score-Ziel, Spielzug-Tipp und Module-Check ergänzt; Loss-Respawn zurück auf begehbaren Home-Gate korrigiert.
 - [x] Duel-Risk-Meter — sichtbares Overworld-HUD mit Risiko-Prozent, Rest/Prep/Attack-Empfehlung, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Momentum-Meter Battle-HUD — Live-Druckanzeige im Duell mit Hot/Cold-Status, Taktik-Hinweis, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Clutch-Alert Battle-HUD — sichtbare Endgame-Anzeige für benötigte Punkte, Rivalen-Gefahr, Closeout-Tipps, Title-Screen-Marker und Module-Check ergänzt.
-- [x] Shot-Quality Advisor — sichtbares Move-Select-HUD mit Trefferchance, Energiecheck, taktischem Wurf-Tipp, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Shot-Quality Advisor — sichtbare Move-Select-HUD mit Trefferchance, Energiecheck, taktischem Wurf-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Defense-Read Enemy-Turn-HUD — sichtbare Gegnerzug-Analyse mit Threat-Prozent, erwartetem Rivalen-Move, Defense-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Comeback-Coach Battle-HUD — sichtbare Score-Run-Anzeige mit Rückstands-/Lead-Tipp, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Stamina-Coach Battle-HUD — sichtbare HP/EN-Tankanalyse mit Rivalen-Energie, Tempo-Tipp, Title-Screen-Marker und Module-Check ergänzt.
@@ -223,3 +226,5 @@
 - [x] Flow-State-Coach Overworld-HUD — sichtbare Rhythmus-/Flow-Anzeige mit HP/EN/Wins/Rivalen-Ziel, Title-Screen-Marker und Module-Check ergänzt; Home-Rest-Dialogcallback-Bug gefixt.
 - [x] Zone-Defense-Coach Battle-HUD — sichtbare Help-Defense-/Closeout-Anzeige mit Zone-Prozent, Rivalen-Need, Energiecheck, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Lingen-Arena-Gold-Court Pixel-Detail — GOLDCOURT-Tile bekommt kleines stilisiertes "L"-Emblem im Key-Bereich (reines Pixel-Art-Detail für die Lingen-Arena-Identität); keine neuen HUDs, nur bessere Grafik am bestehenden Mini-Boss-Court.
+- [x] Lingen-Arena-Gold-Court Pixel-Polish (Content/Grafik) — stärkerer Key-Bereich, Öl-Flecken, extra Hashes, kleines Backboard/Rim-Pixel-Detail und Arena-Wear-Textur für bessere Pixel-Grafik; keine neuen HUDs/Overlays, enemy facing left unverändert.
+- [x] Lingen-Gold-Abschied Story-Schild (Content/Story) — neues progress-aware Story-Schild (x=33,y=51) am Gold-Court schließt den Lingen-Auswärts-Arc ab: Sven/Rashta/Maxim/Mihler-Dialoge, MAP_LANDMARKS + Credits-Sync, nutzt nur bestehende Dialogbox ohne neue HUDs.
