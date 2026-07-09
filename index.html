@@ -1364,6 +1364,12 @@ function drawTile(x, y, tileType, camX, camY) {
       // Tiny corner bolts so the plaque feels attached to the post.
       ctx.fillRect(sx + 2, sy + 2, 1, 1);
       ctx.fillRect(sx + 13, sy + 2, 1, 1);
+      // Small stylized basketball on plaque (Gameboy pixel) for story signs — better graphics, no HUD.
+      ctx.fillStyle = '#cc6600';
+      ctx.fillRect(sx + 4, sy + 3, 3, 3);
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(sx + 4, sy + 4, 1, 1);
+      ctx.fillRect(sx + 6, sy + 5, 1, 1);
       // Lingen harbor signs get a tiny seagull emblem so the away coast feels distinct.
       if (y >= 54) {
         ctx.fillStyle = '#ffffff';
