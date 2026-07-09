@@ -183,6 +183,7 @@
 - [x] Gravemeier/Industrie-Spotter Story-Pass — neuer progress-aware Fabrik-Gate-NPC am Industrie-Quartier (x=46, y=45) mit Nordhorn-vs-Lingen Dialogbogen, eigener Overview-/Credits-Landmarke, begehbarem Tile und Einbindung in tryNPCInteract-/Render-Pipeline; keine neuen HUDs/Overlays.
 - [x] Title-Screen Skyline Grafik-Pass — Gameboy-Silhouette von Nordhorn (Rathaus, Kloster, Industrie, Schule, Lingen-Arena) mit animierten Fenstern, hüpfendem Basketball, Schatten und dem Motto "PASSEN. PAUSEN. WURF UM WURF."; keine neuen HUDs/Overlays, Logo/Menü/Controls bleiben lesbar.
 - [x] Stadtbücherei-Bookworm Story-Pass — neuer progress-aware Bücherwurm-NPC vor der Nordhorn-Stadtbücherei im Zentrum (x=30, y=25) mit Lingen-/Rivalen-Dialogbogen, eigenem BIBLIO-Landmark, Credits-Eintrag, begehbarem Tile und Einbindung in Render-/Interact-Pipeline; keine neuen HUDs/Overlays.
+- [x] Bahnhof-Begleiter Story-Pass — neuer progress-aware Zugbegleiter am Nordhorn-Bahnhof (x=6, y=8) mit Lingen-/Rivalen-Dialogbogen, eigenem ZUG-Landmark, Credits-Eintrag, begehbarem Tile und Einbindung in Render-/Interact-Pipeline; keine neuen HUDs/Overlays.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

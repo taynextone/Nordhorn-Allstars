@@ -478,6 +478,7 @@ function drawCredits() {
     'Tierpark-Besucher',
     'Park-Court Natur',
     'Home-Court Veteran',
+    'Bahnhof-Begleiter',
     'Blumengarten-Mutter',
     'Schulhof & Park',
     'Stadtbücherei',
@@ -766,6 +767,13 @@ function generateMap() {
   } else if (worldMap[LibraryBookworm.y] && worldMap[LibraryBookworm.y][LibraryBookworm.x] !== T.WATER) {
     worldMap[LibraryBookworm.y][LibraryBookworm.x] = T.PATH;
   }
+  // Bahnhof Begleiter stands next to the home-return path at x=6, y=8; keep the tile
+  // walkable so players can talk to him without getting stuck on the station path.
+  if (worldMap[BahnhofBegleiter.y] && worldMap[BahnhofBegleiter.y][BahnhofBegleiter.x] === T.BUILD) {
+    worldMap[BahnhofBegleiter.y][BahnhofBegleiter.x] = T.PATH;
+  } else if (worldMap[BahnhofBegleiter.y] && worldMap[BahnhofBegleiter.y][BahnhofBegleiter.x] !== T.WATER) {
+    worldMap[BahnhofBegleiter.y][BahnhofBegleiter.x] = T.PATH;
+  }
   worldMap[HomeRest.homeY][HomeRest.homeX] = T.PATH;
   MinimapCache.dirty = true;
 }
@@ -801,6 +809,7 @@ const MAP_LANDMARKS = [
   { id: 'mihler-board', label: 'TAKTIK', x: 42, y: 50, kind: 'story' },
   { id: 'final-light', label: 'LICHT', x: 46, y: 50, kind: 'story' },
   { id: 'home-return', label: 'HEIM', x: 7, y: 8, kind: 'story' },
+  { id: 'bahnhof-begleiter', label: 'ZUG', x: 6, y: 8, kind: 'story' },
   { id: 'industrie-spotter', label: 'GRAVE', x: 46, y: 45, kind: 'story' },
 ];
 
@@ -3265,6 +3274,9 @@ function drawOverworld() {
   // Draw the old home-court trainer who watches the Lingen route.
   drawHomeCourtOldTimer(camX, camY);
 
+  // Draw the Nordhorn station companion who tells the Lingen-route story.
+  drawBahnhofBegleiter(camX, camY);
+
   // Draw the Blumensiedlung mother who cheers the rival run from her garden.
   drawBlumengartenMutter(camX, camY);
 
@@ -3569,6 +3581,7 @@ function tryNPCInteract() {
   // Try all progress-aware NPCs in a fixed order; first facing NPC wins.
   if (typeof HomeCourtKid !== 'undefined' && HomeCourtKid.tryInteract()) return true;
   if (typeof HomeCourtOldTimer !== 'undefined' && HomeCourtOldTimer.tryInteract()) return true;
+  if (typeof BahnhofBegleiter !== 'undefined' && BahnhofBegleiter.tryInteract()) return true;
   if (typeof BlumengartenMutter !== 'undefined' && BlumengartenMutter.tryInteract()) return true;
   if (typeof SchoolYardStudent !== 'undefined' && SchoolYardStudent.tryInteract()) return true;
   if (typeof ZentrumReporter !== 'undefined' && ZentrumReporter.tryInteract()) return true;
@@ -4276,6 +4289,102 @@ const HomeCourtOldTimer = {
 
 function drawHomeCourtOldTimer(camX, camY) {
   if (typeof HomeCourtOldTimer !== 'undefined') HomeCourtOldTimer.render(camX, camY);
+}
+
+// ============================================================
+// BAHNHOF-BEGLEITER — progress-aware NPC at the Nordhorn station (x=6, y=8).
+// He sells no tickets, but tells the Lingen-route story while the train waits.
+// Uses drawHoopsterSprite and startDialog; placed on the path beside the home
+// gate so new players learn the rival order and Lingen motivation early.
+// ============================================================
+const BahnhofBegleiter = {
+  x: 6,
+  y: 8,
+  facing: 'right',
+
+  isPlayerAdjacent() {
+    if (!player) return false;
+    return Math.abs(player.x - this.x) + Math.abs(player.y - this.y) === 1;
+  },
+
+  isFacingPlayer() {
+    if (!player || !this.isPlayerAdjacent()) return false;
+    if (player.facing === 'left' && this.x === player.x - 1 && this.y === player.y) return true;
+    if (player.facing === 'right' && this.x === player.x + 1 && this.y === player.y) return true;
+    if (player.facing === 'up' && this.y === player.y - 1 && this.x === player.x) return true;
+    if (player.facing === 'down' && this.y === player.y + 1 && this.x === player.x) return true;
+    return false;
+  },
+
+  getDialog() {
+    const beaten = name => {
+      const t = trainers.find(tr => tr.name === name);
+      return !!(t && t.beaten);
+    };
+
+    if (beaten('Coach Mihler')) {
+      return ['Zugbegleiter', 'Der Zug nach Lingen fährt heute leer. Nordhorn hat auswärts gehalten. Passen, Pausen, Wurf um Wurf — das hätte ich am Bahnhofsdurchsage gesagt.'];
+    }
+    if (beaten('Maxim')) {
+      return ['Zugbegleiter', 'Arena Lingen ist still. Der nächste Zug geht direkt zur Mihler-Halle. Letzte Fahrt, letzte Prüfung.'];
+    }
+    if (beaten('Rashta')) {
+      return ['Zugbegleiter', 'Hafen durch, zwei Auswärts-Siege. Die Fahrt zur Gold-Arena ist die kürzeste der ganzen Route. Bleib ruhig, auch wenn es laut wird.'];
+    }
+    if (beaten('Sven')) {
+      return ['Zugbegleiter', 'Bahnhof-Court genommen. Viele Nordhorn-Spieler scheitern schon hier. Du steigst einfach weiter um in Richtung Hafen.'];
+    }
+    if (beaten('Sophie')) {
+      return ['Zugbegleiter', 'Vier Heim-Courts geschafft. Der Zug nach Lingen steht bereit. Erster Halt: Grenzbrücke, dann Bahnhof.'];
+    }
+    if (beaten('Markus')) {
+      return ['Zugbegleiter', 'Schulhof-Wall geknackt. Sophie am Spielplatz prüft die Nerven. Und dann geht die Reise über die Vechte nach Lingen.'];
+    }
+    if (beaten('Anna')) {
+      return ['Zugbegleiter', 'Park-Court gewonnen. Markus wartet am Schulhof. Danach fährt der Zug Richtung Lingen — aber erst, wenn Nordhorn zuhause sauber ist.'];
+    }
+    if (beaten('Klaus')) {
+      return ['Zugbegleiter', 'Klaus besiegt. Gute Fahrt, kleiner Schritt. Noch drei Heim-Courts, dann geht es mit dem Zug Richtung Lingen.'];
+    }
+    return ['Zugbegleiter', 'Willkommen am Bahnhof Nordhorn. Der Zug nach Lingen fährt später, aber du musst erst die Heim-Courts abarbeiten. Klaus beim Wohnhof ist die erste Station.'];
+  },
+
+  tryInteract() {
+    if (this.isFacingPlayer()) {
+      startDialog(...this.getDialog());
+      return true;
+    }
+    return false;
+  },
+
+  render(camX, camY) {
+    const px = (this.x - camX) * TILE;
+    const py = (this.y - camY) * TILE;
+    if (px < -TILE || px > VIEW_W || py < -TILE || py > VIEW_H) return;
+    drawHoopsterSprite(px, py - 2, {
+      scale: 1,
+      facing: this.facing,
+      jersey: '#3a4a5a',
+      trim: '#d8e0e8',
+      hair: '#4a3a2a',
+      pants: '#2a3038',
+      number: 'Z',
+      ball: false,
+      pose: 'idle',
+      headband: null,
+      accessory: 'cap'
+    });
+    if (this.isPlayerAdjacent()) {
+      const bob = Math.sin(Date.now() / 250) * 1;
+      ctx.fillStyle = C.DARKEST;
+      ctx.fillRect(px + 8, py - 10 + bob, 4, 4);
+      ctx.fillRect(px + 6, py - 12 + bob, 8, 2);
+    }
+  }
+};
+
+function drawBahnhofBegleiter(camX, camY) {
+  if (typeof BahnhofBegleiter !== 'undefined') BahnhofBegleiter.render(camX, camY);
 }
 
 // ============================================================
