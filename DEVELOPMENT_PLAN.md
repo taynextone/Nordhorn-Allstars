@@ -222,3 +222,4 @@
 - [x] Crowd-Energy-Coach Overworld-HUD — sichtbare Hype-/Chant-Anzeige mit Tipoff-Bereitschaft, Title-Screen-Marker und Module-Check ergänzt.
 - [x] Flow-State-Coach Overworld-HUD — sichtbare Rhythmus-/Flow-Anzeige mit HP/EN/Wins/Rivalen-Ziel, Title-Screen-Marker und Module-Check ergänzt; Home-Rest-Dialogcallback-Bug gefixt.
 - [x] Zone-Defense-Coach Battle-HUD — sichtbare Help-Defense-/Closeout-Anzeige mit Zone-Prozent, Rivalen-Need, Energiecheck, Title-Screen-Marker und Module-Check ergänzt.
+- [x] Lingen-Arena-Gold-Court Pixel-Detail — GOLDCOURT-Tile bekommt kleines stilisiertes "L"-Emblem im Key-Bereich (reines Pixel-Art-Detail für die Lingen-Arena-Identität); keine neuen HUDs, nur bessere Grafik am bestehenden Mini-Boss-Court.
