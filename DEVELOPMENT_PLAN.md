@@ -187,6 +187,7 @@
 - [x] Lingen-Arena-Gold-Court Pixel-Detail — GOLDCOURT-Tile bekommt kleines stilisiertes "L"-Emblem im Key-Bereich (reines Pixel-Art-Detail für die Lingen-Arena-Identität); keine neuen HUDs, nur bessere Grafik am bestehenden Mini-Boss-Court.
 - [x] Lingen-Arena-Gold-Court Pixel-Polish (Content/Grafik) — stärkerer Key-Bereich, Öl-Flecken, extra Hashes, kleines Backboard/Rim-Pixel-Detail und Arena-Wear-Textur für bessere Pixel-Grafik; keine neuen HUDs/Overlays, enemy facing left unverändert.
 - [x] Lingen-Gold-Abschied Story-Schild (Content/Story) — neues progress-aware Story-Schild (x=33,y=51) am Gold-Court schließt den Lingen-Auswärts-Arc ab: Sven/Rashta/Maxim/Mihler-Dialoge, MAP_LANDMARKS + Credits-Sync, nutzt nur bestehende Dialogbox ohne neue HUDs.
+- [x] Mihler-Finale-Court Grafik (Bessere Grafik) — STADIUM-Tile mit Tribünen-Silhouette, Dach-Hinweis und stilisiertem "M"-Emblem für Coach Mihler-Halle; setRect(31,47,40,54,T.STADIUM), isWalkable + Minimap aktualisiert; keine neuen HUDs, enemy facing left unverändert.
 
 ## Technische Schulden (historisch abgeschlossen)
 - [x] Code-Refactoring (saubere Module) — Debug-Module-Registry mit Core-Boot-Checks und sauberem Title-Screen-Status ergänzt

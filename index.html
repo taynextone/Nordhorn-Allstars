@@ -632,7 +632,8 @@ function generateMap() {
   setRect(43, 46, 58, 46, T.WALL);
   setLineV(43, 47, 55, T.WALL);
   setLineV(58, 47, 55, T.WALL);
-  setCourt(31, 47, 40, 54);
+  // Mihler Final Hall - use dedicated STADIUM tile for stronger boss-court graphics (bessere Grafik, no HUDs).
+  setRect(31, 47, 40, 54, T.STADIUM);
   setBuilding(6, 46, 13, 50, 9);
 
   // Lingen route extension: border-court, harbor approach and arena stop make
@@ -1293,6 +1294,44 @@ function drawTile(x, y, tileType, camX, camY) {
       ctx.fillStyle = '#a07030';
       ctx.fillRect(sx + 12, sy + 2, 2, 1);
       ctx.fillRect(sx + 13, sy + 3, 1, 1);
+      break;
+    case T.STADIUM:
+      // Final boss court for Coach Mihler — stärkere Halle (bessere Grafik / Story).
+      // Gameboy-Pixel: dunkler Hallenboden, Tribünen-Silhouette, Markierungen, Dach-Hinweis.
+      // Keine neuen HUDs, enemy facing left bleibt.
+      ctx.fillStyle = '#2a2a3a';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#4a4a5a';
+      ctx.fillRect(sx + 1, sy + 1, 14, 14);
+      ctx.fillStyle = C.DARKEST;
+      // Sidelines + boundary
+      ctx.fillRect(sx + 1, sy + 1, 14, 1);
+      ctx.fillRect(sx + 1, sy + 14, 14, 1);
+      ctx.fillRect(sx + 1, sy + 1, 1, 14);
+      ctx.fillRect(sx + 14, sy + 1, 1, 14);
+      // Center line + Hallen-Längsmarkierungen
+      ctx.fillRect(sx + 7, sy + 2, 2, 12);
+      ctx.fillRect(sx + 3, sy + 4, 1, 8);
+      ctx.fillRect(sx + 12, sy + 4, 1, 8);
+      // Tribünen-Hinweis (dunkle Blöcke oben/unten)
+      ctx.fillRect(sx + 2, sy + 2, 4, 2);
+      ctx.fillRect(sx + 10, sy + 2, 4, 2);
+      ctx.fillRect(sx + 2, sy + 12, 4, 2);
+      ctx.fillRect(sx + 10, sy + 12, 4, 2);
+      // Key/Lane + feine Hallen-Details
+      ctx.fillRect(sx, sy + 6, TILE, 4);
+      ctx.fillRect(sx + 5, sy + 5, 1, 1);
+      ctx.fillRect(sx + 10, sy + 5, 1, 1);
+      ctx.fillRect(sx + 5, sy + 10, 1, 1);
+      ctx.fillRect(sx + 10, sy + 10, 1, 1);
+      // Kleines stilisiertes "M" (Mihler) im Key
+      ctx.fillStyle = '#6a6a7a';
+      ctx.fillRect(sx + 6, sy + 6, 4, 1);
+      ctx.fillRect(sx + 7, sy + 7, 2, 2);
+      ctx.fillRect(sx + 6, sy + 9, 4, 1);
+      // Dach-Hinweis (dunkler Streifen oben)
+      ctx.fillStyle = '#1a1a2a';
+      ctx.fillRect(sx + 1, sy + 1, 14, 1);
       break;
     case T.PARKCOURT:
       // Tierpark/Park court: regular court lines with park-side nature details
@@ -4802,7 +4841,7 @@ function drawOverviewMap() {
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = worldMap[y][x];
-  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.GOLDCOURT || t === T.PARKCOURT || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
+  return t === T.GRASS || t === T.PATH || t === T.COURT || t === T.GOLDCOURT || t === T.PARKCOURT || t === T.STADIUM || t === T.FLOWER || t === T.BRIDGE || t === T.DOOR;
 }
 
 function getAdjacentStorySign() {
